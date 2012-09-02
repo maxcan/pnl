@@ -37,5 +37,9 @@ class TestSuite extends FunSuite {
         assert(ExecutionDAO.find(MongoDBObject()).length == 2
             , "Should have inserted 2 executions")
     }
-
+    test("calculating principle for AAPL trades") { 
+        val p = ExecutionDAO.find(MongoDBObject("symbol" -> "AAPL")).map(_.principle).sum
+        println(p)
+        assert(p > 302.3 && p < 303, "prin = " + p)
+    }
 }

@@ -2,6 +2,7 @@ package com.pnltracker
 
 import java.io.File
 import java.util.Date
+import java.text.SimpleDateFormat
 import com.novus.salat._
 import com.novus.salat.annotations._
 import com.novus.salat.global._
@@ -11,6 +12,17 @@ import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.MongoConnection
 
 object Model {
+    def parseDate(s:String):Option[Date] = {
+        try { 
+            // val date = new SimpleDateFormat("yyy-MM-dd HH:mm").parse("2008-05-06 13:29")
+            val fmt = "yyyy-MM-dd, HH:mm:ss"
+            val date = new SimpleDateFormat(fmt).parse(s)
+            Some(date)
+        } catch {
+            case ex => None
+        }
+
+    }
     def clearAll() {
         UserDAO.remove(MongoDBObject())
         TradeDAO.remove(MongoDBObject())
@@ -72,7 +84,13 @@ case class Execution
     , symbol:           String
     , price:            Double
     , quantity:         Long
-)
+    , comms:            Double
+    , tradeDate:        Date
+) {
+    def principle():Double = {
+        -1 * quantity * price - scala.math.abs(comms)
+    }
+}
 
 object ExecutionDAO extends SalatDAO[Execution, ObjectId](
     collection = MongoConnection()("pnltracker")("execution")) 

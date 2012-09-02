@@ -36,6 +36,7 @@ object Ib {
         val hdrIter = List() ++ headerRow.children().iterator()
         val hdrs = hdrIter.map((e) => e.ownText())
 
+        
         def findIdx(k : String) : Option[Int] = {
           val i = hdrs.indexWhere(_ == k)
           println ("found string: " + k + " at idx: " + i)
@@ -46,6 +47,7 @@ object Ib {
             idxSym <- findIdx(hdrSym)
             idxPrice <- findIdx(hdrPrice)
             idxComms <- findIdx(hdrComms)
+            idxDateTime <- findIdx(hdrDateTime)
             idxQty <- findIdx(hdrQty)
             expCols = hdrs.length
             val fxn = (ele: Element) => 
@@ -55,13 +57,17 @@ object Ib {
                     None
                 else for {
                     px <-  ele.children().get(idxPrice).ownText().parseDouble.toOption
+                    cms <-  ele.children().get(idxComms).ownText().parseDouble.toOption
                     qty <- ele.children().get(idxQty).ownText().parseInt.toOption
+                    dt  <-  ele.children().get(idxDateTime).ownText() |> Model.parseDate
                     sym = ele.children().get(idxSym).ownText()
                     exec = Execution ( owner = userId
                         , security = SecurityDAO.lookupSymbolExp(sym)
                         , symbol = sym
                         , price = px
+                        , tradeDate = dt
                         , quantity = qty
+                        , comms = cms
                         )
                 } yield exec
         } yield fxn
