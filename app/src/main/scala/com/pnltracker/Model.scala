@@ -16,19 +16,35 @@ import com.mongodb.casbah.MongoConnection
 sealed abstract class SecurityType
 
 case class Stock() extends SecurityType
-case class Dummy(s: String) extends SecurityType
-case class Option
+case class Opt
     ( isCall: Boolean
     , strike: Double
     , expDate: Date
+    , underlying: Security
     ) 
 
 case class Security
-    ( _id: ObjectId = new ObjectId
+    ( @Key("_id") _id: ObjectId = new ObjectId
     , symbol: String
     , securityType: SecurityType
     )
 
-
 object SecurityDAO extends SalatDAO[Security, ObjectId](
-    collection = MongoConnection()("quick-salat")("security"))
+    collection = MongoConnection()("pnltracker")("security")) 
+
+case class Trade
+    ( @Key("_id") _id:  ObjectId = new ObjectId
+    , security:         Option[Security]
+    , symbol:           String
+    )
+
+object TradeDAO extends SalatDAO[Trade, ObjectId](
+    collection = MongoConnection()("pnltracker")("trade")) 
+
+case class Execution
+    ( @Key("_id") _id:  ObjectId = new ObjectId
+    , security:         Option[Security]
+    , symbol:           String
+    , price:            Double
+    , quantity:         Long
+    )
