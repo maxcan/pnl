@@ -16,6 +16,7 @@ object AppBuild extends Build {
         ( "org.jsoup" % "jsoup" % "1.6.3"
         , "org.scalaz" %% "scalaz-core" % "6.0.4"
         , "com.novus" %% "salat" % "1.9.1"
+        , "org.scalatest" %% "scalatest" % "1.8" % "test"
         , "org.mongodb" %% "casbah" % "2.4.1" )
 
     )

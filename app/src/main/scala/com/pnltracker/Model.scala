@@ -10,6 +10,16 @@ import com.novus.salat.dao._
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.MongoConnection
 
+case class User
+    ( @Key("_id") _id: ObjectId = new ObjectId
+    , email: String
+    , famName: String
+    , givName: String
+    )
+
+object UserDAO extends SalatDAO[User, ObjectId](
+    collection = MongoConnection()("pnltracker")("user"))
+
 
 
 @Salat
@@ -30,21 +40,27 @@ case class Security
     )
 
 object SecurityDAO extends SalatDAO[Security, ObjectId](
-    collection = MongoConnection()("pnltracker")("security")) 
+    collection = MongoConnection()("pnltracker")("security") ) {
+    def lookupSymbolExp(sym: String): Option[Security] = {
+        SecurityDAO.findOne(MongoDBObject("symbol" -> sym))
+    }
+} 
 
 case class Trade
     ( @Key("_id") _id:  ObjectId = new ObjectId
+    , owner:            ObjectId
     , security:         Option[Security]
     , symbol:           String
-    )
+)
 
 object TradeDAO extends SalatDAO[Trade, ObjectId](
     collection = MongoConnection()("pnltracker")("trade")) 
 
 case class Execution
     ( @Key("_id") _id:  ObjectId = new ObjectId
+    , owner:            ObjectId
     , security:         Option[Security]
     , symbol:           String
     , price:            Double
     , quantity:         Long
-    )
+)
