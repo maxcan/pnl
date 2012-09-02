@@ -12,9 +12,11 @@ import com.mongodb.casbah.MongoConnection
 
 
 
-
+@Salat
 sealed abstract class SecurityType
+
 case class Stock() extends SecurityType
+case class Dummy(s: String) extends SecurityType
 case class Option
     ( isCall: Boolean
     , strike: Double
