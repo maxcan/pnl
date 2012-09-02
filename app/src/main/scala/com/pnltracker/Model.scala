@@ -10,6 +10,15 @@ import com.novus.salat.dao._
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.MongoConnection
 
+object Model {
+    def clearAll() {
+        UserDAO.remove(MongoDBObject())
+        TradeDAO.remove(MongoDBObject())
+        SecurityDAO.remove(MongoDBObject())
+        ExecutionDAO.remove(MongoDBObject())
+    }
+}
+
 case class User
     ( @Key("_id") _id: ObjectId = new ObjectId
     , email: String
@@ -64,3 +73,7 @@ case class Execution
     , price:            Double
     , quantity:         Long
 )
+
+object ExecutionDAO extends SalatDAO[Execution, ObjectId](
+    collection = MongoConnection()("pnltracker")("execution")) 
+

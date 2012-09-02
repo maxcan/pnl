@@ -19,7 +19,7 @@ object Ib {
         val a = (mkExtractor(tradeTable.first(), userId)) match {
             case Some(fxn) =>
                 val trades = (List() ++ tradeTable.iterator()).map(fxn).flatten
-                trades.foreach(println(_))
+                trades.foreach(ExecutionDAO insert _)
                 println("boo")
             case None => println("failed to find the right columns")
         }
