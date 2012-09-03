@@ -1,4 +1,4 @@
-package com.pnltracker
+package models
 
 import java.io.File
 import java.util.Date

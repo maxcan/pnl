@@ -1,5 +1,5 @@
-import com.pnltracker._
-import com.pnltracker.parsers._
+import models.parsers._
+import models._
 import java.io.File
 import org.jsoup.nodes._
 import scala.collection.JavaConversions._
@@ -43,3 +43,25 @@ class TestSuite extends FunSuite {
         assert(p > 302.3 && p < 303, "prin = " + p)
     }
 }
+
+
+// import org.specs2.mutable._
+// 
+// import play.api._
+// import play.api.test._
+// import play.api.test.Helpers._
+// 
+// class HelloWorldSpec extends Specification {
+// 
+//     "The 'Hello world' string" should {
+//         "contain 11 characters" in {
+//             "Hello world" must have size(11)
+//         }
+//         "start with 'Hello'" in {
+//             "Hello world" must startWith("Hello")
+//         }
+//         "end with 'world'" in {
+//             "Hello world" must endWith("world")
+//         }
+//     }
+// }

@@ -1,4 +1,4 @@
-package com.pnltracker.parsers
+package models.parsers
 
 import java.io.File
 import org.jsoup.nodes._
@@ -6,7 +6,7 @@ import scala.collection.JavaConversions._
 import scalaz._
 import Scalaz._
 import org.jsoup.Jsoup
-import com.pnltracker._
+import models._
 import com.mongodb.casbah.Imports._
 
 object Ib {
