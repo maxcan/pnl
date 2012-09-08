@@ -33,12 +33,6 @@ exports.parseString = function(ibHtmlData, owner) {
           var idxQty = cols.indexOf(hdrQty);
           var idxPrice = cols.indexOf(hdrPrice);
           var idxComms = cols.indexOf(hdrComms);
-          console.log('cols = ' + cols);
-          console.log('idxcount = ' + colCount);
-          console.log('type = ' + typeof(cols));
-          console.log(JSON.stringify([idxSym
-                                    , idxDateTime,  idxExchange, idxQty
-                                    , idxPrice, idxComms]));
           if ([idxSym, idxDateTime, idxExchange, idxQty, idxPrice, idxComms].indexOf(-1) != -1) {
             // we couldn't find one of the headers.  bail out
             throw new Error("coudln't find the column headings");
@@ -46,7 +40,6 @@ exports.parseString = function(ibHtmlData, owner) {
 
           allRows.each(function rowIterator(_, rowElement) {
             if ($(rowElement).children().length != colCount) {
-              console.log('not a trade row..  row html = ' + $(rowElement).html());  // _DEBUG
             } else { 
 
               var elements = $(rowElement).children().map(function (i,e) { return $(e).text(); });
@@ -70,7 +63,6 @@ exports.parseString = function(ibHtmlData, owner) {
       }
     }
   });
-  console.log('tradeS: ' + JSON.stringify(allTrades));  // _DEBUG
   return allTrades;
   // return
   // var acct;
