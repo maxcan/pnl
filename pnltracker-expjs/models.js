@@ -16,6 +16,7 @@ var fillSchema = new mongoose.Schema(
     , fees    : 'Number'
     , symbol  : 'String'
     , isOpen  : 'Boolean'
+    , acctId  : 'String'
     });
 
 var tradeSchema = new mongoose.Schema(
@@ -24,6 +25,7 @@ var tradeSchema = new mongoose.Schema(
     , openDate  : 'Date'
     , fills     : [fillSchema]
     , isOpen    : 'Boolean'
+    , acctId    : 'String'
     // , isLong    : 'Boolean'
     });
 

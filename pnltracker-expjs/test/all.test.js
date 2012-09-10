@@ -7,24 +7,7 @@ var fs = require('fs');
 var exec = require('child_process').exec;
 var watch = require('watch');
 
-// var lastRun = null;
-// watch.watchTree('.', {ignoreDotFiles: true, filter: function(s) {s.indexOf('.js') != -1 }}, function() {
-//   var d = new Date();
-//   if (lastRun == null || (d - lastRun) > 5000) {
-//     console.log('gonna run expresso');  // _DEBUG
-//     try { 
-//       exec('expresso', function (error, stdout, stderr) {
-//         console.log('stdout: ' + stdout);
-//         console.log('stderr: ' + stderr);
-//         if (error !== null) {
-//           console.log('exec error: ' + error);
-//         }
-//       });
-//       lastRun = d;
-//     } catch (e) {console.log('ex : '+e);}
-//     }
-//   });
-// 
+var ParseFixtures = require('./fixtures/parse_trade_output.js');
 
 exports["Ib Should Exist"] = function() {
   assert.isNotNull(Ib);
@@ -35,14 +18,24 @@ exports["Util Functions unit testing"] = function() {
   var s = Util.sum([1,2,2]);
   assert.eql(5,s ,"sum should be 5 but equals: "+  s);
 }
-exports["Ib should read file"] = function() {
-  return ; 
+
+exports["Ib should read generated file"] = function() {
   fs.readFile("../assets/ib_sample.html", "utf8", function(fsErr,data) {
     if (fsErr) assert.fail(fsErr);
     assert.eql(data.substring(0,6), "<HTML>");
     assert.isNotNull(data);
-    var acct = Ib.parseGeneratedReportString(data);
-    assert.eql(acct, "U764128");
+    var trades = Ib.parseGeneratedReportString(data);
+    assert.eql(trades, ParseFixtures.ibGeneratedSampleTrades);
+    
+  });
+}
+
+exports["Ib should read emailed file"] = function() {
+  fs.readFile("../assets/ib_email_sample.html", "utf8", function(fsErr,data) {
+    if (fsErr) assert.fail(fsErr);
+    assert.isNotNull(data);
+    var trades = Ib.parseEmailedReportString(data);
+    assert.eql(trades, ParseFixtures.ibEmailedSampleTrades);
     
   });
 }
