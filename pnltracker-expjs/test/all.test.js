@@ -1,6 +1,7 @@
 var Ib = require("../lib/parsers/ib.js");
 var Models = require("../models.js");
 var Util = require('../util.js');
+var _ = require('underscore');
 var assert = require('assert');
 var fs = require('fs');
 var exec = require('child_process').exec;
@@ -73,9 +74,7 @@ exports['Model Utility Sort works'] = function() {
 }
 exports['Fill splitting works'] = function() {
   var fill = {symbol:'a', date: new Date(2012,09,10), avgPx: 9, qty: 10, fees: 0.4};
-  var split = Models.splitFill(fill, -7);
-  var splitCash = 0;
-  for (var i in split) { splitCash += Models.netCashForFill(split[i]); }
+  var splitCash = Util.sum(_.map(Models.splitFill(fill, -7), Models.netCashForFill));
   assert.eql(Models.netCashForFill(fill), splitCash);
 }
 exports['Fill grouping works'] = function() {
@@ -83,30 +82,30 @@ exports['Fill grouping works'] = function() {
   var t1 = new Date(2012,09,11);
   var t2 = new Date(2012,09,12);
   var ungrouped = 
-    [ { symbol: 'a', date: t1, qty: 3}
-    , { symbol: 'a', date: t2, qty: -2} 
-    , { symbol: 'b', date: t1, qty: 2} 
-    , { symbol: 'a', date: t0, qty: -1} 
-    , { symbol: 'b', date: t2, qty: -2} ]
+    [ { symbol: 'a', avgPx: 1.4, fees: 0.001, date: t1, qty: 3}
+    , { symbol: 'a', avgPx: 1.3, fees: 0.001, date: t2, qty: -2} 
+    , { symbol: 'b', avgPx: 1.5, fees: 0.001, date: t1, qty: 2} 
+    , { symbol: 'a', avgPx: 1.7, fees: 0.001, date: t0, qty: -1} 
+    , { symbol: 'b', avgPx: 1.9, fees: 0.001, date: t2, qty: -2} ]
   var control = 
-    { a: [ { symbol: 'a', date: t0, qty: -1}
-         , { symbol: 'a', date: t1, qty: 3} 
-         , { symbol: 'a', date: t2, qty: -2} ]
-    , b: [ { symbol: 'b', date: t1, qty: 2} 
-         , { symbol: 'b', date: t2, qty: -2} ]
+    { a: [ { symbol: 'a', avgPx: 1.7, fees: 0.001, date: t0, qty: -1}
+         , { symbol: 'a', avgPx: 1.4, fees: 0.001, date: t1, qty: 3} 
+         , { symbol: 'a', avgPx: 1.3, fees: 0.001, date: t2, qty: -2} ]
+    , b: [ { symbol: 'b', avgPx: 1.5, fees: 0.001, date: t1, qty: 2} 
+         , { symbol: 'b', avgPx: 1.9, fees: 0.001, date: t2, qty: -2} ]
     }
   var grouped = Models.groupFills(ungrouped) ;
   assert.eql(control, grouped,'Fill Grouping');
   // Create a user for the rest of the tests
-  var mu = Models.User;
   var asyncTests = function () {
     var createCB = function(err, usr) {
       if (err) throw err;
       for (i in ungrouped) {ungrouped[i].owner = usr;}
       Models.groupTrades(usr, ungrouped, console.log);
     };
-    var remCB = function() { mu.create({name:'n',email:'b@b.com'}, createCB) ; }
-    Models.User.remove({}, remCB);
+    var remUserCB = function() { Models.User.create({name:'n',email:'b@b.com'}, createCB) ; } ;
+    var remTradeCB = function() { Models.User.remove({}, remUserCB);};
+    Models.Trade.remove({},remTradeCB);
   };
 
   setTimeout(asyncTests, 1000); // need to wait for user test

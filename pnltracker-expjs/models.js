@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+var Util = require('./util.js');
+var _ = require('underscore');
 var db = mongoose.createConnection('localhost', 'test');
 exports.closeConnection = function() {db.close();}
 var userSchema = new mongoose.Schema(
@@ -35,7 +37,6 @@ exports.Trade = Trade;
 ////////////////////////////////////////////////////////////////////////////////
 
 function openTradeForUserSymbol(owner, symbol, callback) {
-  console.log('open tusi sym = ' +  symbol);  // _DEBUG
   Trade.findOne({isOpen: true, symbol:symbol, owner:owner})
        .sort('-date')
        .exec(callback);
@@ -65,18 +66,21 @@ function groupFills(unsortedFills) {
 
 // add a single fill to a trade.  
 // this will mutate the trade and possibly create another trade. 
-function addFillToTrade(trade, fills, symbol, callback) {
+function addFillsToTrade(trade, fills, symbol, callback) {
   // this can definitely be sped up a bit..
-  if (fills === null || fills.length === 0) { return trade.save(callback); }
+  if (fills === null || fills.length === 0) { 
+    if (trade.fills.length > 0) return trade.save(callback); 
+    return callback();
+  }
   for (var idx in fills) {
     if (fills[idx].symbol != symbol) 
-      throw new Error ("mismatched symbol in addFillToTrade"); 
+      throw new Error ("mismatched symbol in addFillsToTrade"); 
   }
   if (trade.symbol != symbol) 
-    throw new Error ("mismatched symbol in addFillToTrade"); 
-  var curQty = 0;
-  for (var idx in curTrade.fills) {curQty += curTrade.fills[idx].qty; }
-  var curFill = curFills.shift();
+    throw new Error ("mismatched symbol in addFillsToTrade"); 
+  var curQty = Util.sum(_.pluck(trade.fills,'qty'));
+  console.log('TRADE sym = ' + symbol + ' qty = ' + curQty);  // _DEBUG
+  var curFill = fills.shift();
   if (curQty + curFill.qty === 0) {
     // clean close
     console.log('clean close');  // _DEBUG
@@ -84,25 +88,23 @@ function addFillToTrade(trade, fills, symbol, callback) {
     trade.isOpen = false;
     trade.save(function cleanSave(err) {
       if (err) throw err;
-      newTrade(trade.owner, symbol).save(function cleanSaveNewTrade(err, nextTrade) {
-        console.log('clean close inner inner callback');  // _DEBUG
-        addFillToTrade(nextTrade, fills, symbol, callback);
-      });
+      console.log('clean close inner inner callback');  // _DEBUG
+      addFillsToTrade(newTrade(trade.owner, symbol), fills, symbol, callback);
     });
 
   } else if (curQty > 0 && (curFill.qty + curQty < 0)) {
     // dirty close from the long side
     // just break the fill  in two and re run
     var newFills = splitFill(curFill, curQty).concat(fills);
-    addFillToTrade(trade, newFills, symbol, callback);
+    addFillsToTrade(trade, newFills, symbol, callback);
   } else if (curQty < 0 && (curFill.qty + curQty > 0)) {
     // dirty close from the short side
     var newFills = splitFill(curFill, curQty).concat(fills);
-    addFillToTrade(trade, newFills, symbol, callback);
+    addFillsToTrade(trade, newFills, symbol, callback);
   } else {
     // now were just adding to a position
     trade.fills.push(curFill);
-    addFillToTrade(trade, fills, symbol, callback);
+    addFillsToTrade(trade, fills, symbol, callback);
   }
 
 }
@@ -142,26 +144,23 @@ function newTrade(o, s) { return new Trade({owner:o, symbol:s, fills:[], isOpen:
 function groupTrades(owner, fills, callback) {
   // 1) group trades by symbol..
   var groupedFills = groupFills(fills);
-  var groupSymbol = function(curSym) {
-    openTradeForUserSymbol(owner, mutSym, function openTradeCb(err, curTrade) {
-      var curFills = groupedFills[curSym];
+  var groupSymbol = function(curFills, curSym) {
+    openTradeForUserSymbol(owner, curSym, function openTradeCb(err, curTrade) {
       if (curFills.length === 0) return; 
       if (err) throw err;
       if (curTrade === null) {
-        curTrade = newTrade();
-        // curTrade.isLong = isLong;
+        curTrade = newTrade(owner, curSym);
         curFills[0].qty > 0 ;
       }
-      var curQty = 0;
-      for (var idx in curTrade.fills) {curQty += curTrade.fills[idx].qty; }
-      for (var fillIdx in groupedFills[curSym]) {
-        var curFill = curFills[fillIdx];
-        // check if this fill is closing the trade
-
-      }
-    });
-  };
-  for (var mutSym in groupedFills) { groupSymbol(mutSym); }
+      // var curQty = 0;
+      // for (var idx in curTrade.fills) {curQty += curTrade.fills[idx].qty; }
+      // for (var fillIdx in groupedFills[curSym]) {
+      addFillsToTrade(curTrade, curFills, curSym, function() {} );
+      });
+    
+    };
+  _.each(groupedFills, groupSymbol);
+  // for (var mutSym in groupedFills) { groupSymbol(mutSym); }
   // 2) sort each group
   // 3) add to any existing trades or create a new one.  
   //   a) each time we add, check to see if we are opening a new position
