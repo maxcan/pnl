@@ -41,7 +41,7 @@ exports["Ib should read file"] = function() {
     if (fsErr) assert.fail(fsErr);
     assert.eql(data.substring(0,6), "<HTML>");
     assert.isNotNull(data);
-    var acct = Ib.parseString(data);
+    var acct = Ib.parseGeneratedReportString(data);
     assert.eql(acct, "U764128");
     
   });

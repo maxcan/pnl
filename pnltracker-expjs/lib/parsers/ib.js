@@ -2,7 +2,7 @@
 
 var cheerio = require('cheerio');
 
-exports.parseString = function(ibHtmlData, owner) {
+exports.parseGeneratedReportString = function(ibHtmlData, owner) {
   var hdrSym      = "Symbol"
   var hdrDateTime = "Date/Time"
   var hdrExchange = "Exchange"
