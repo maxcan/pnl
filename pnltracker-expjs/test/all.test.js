@@ -1,5 +1,6 @@
 var Ib = require("../lib/parsers/ib.js");
 var Models = require("../models.js");
+var Util = require('../util.js');
 var assert = require('assert');
 var fs = require('fs');
 var exec = require('child_process').exec;
@@ -29,6 +30,10 @@ exports["Ib Should Exist"] = function() {
   assert.isNotNull(Models);
 } 
 
+exports["Util Functions unit testing"] = function() {
+  var s = Util.sum([1,2,2]);
+  assert.eql(5,s ,"sum should be 5 but equals: "+  s);
+}
 exports["Ib should read file"] = function() {
   return ; 
   fs.readFile("../assets/ib_sample.html", "utf8", function(fsErr,data) {
