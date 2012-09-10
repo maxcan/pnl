@@ -79,16 +79,13 @@ function addFillsToTrade(trade, fills, symbol, callback) {
   if (trade.symbol != symbol) 
     throw new Error ("mismatched symbol in addFillsToTrade"); 
   var curQty = Util.sum(_.pluck(trade.fills,'qty'));
-  console.log('TRADE sym = ' + symbol + ' qty = ' + curQty);  // _DEBUG
   var curFill = fills.shift();
   if (curQty + curFill.qty === 0) {
     // clean close
-    console.log('clean close');  // _DEBUG
     trade.fills.push(curFill);
     trade.isOpen = false;
     trade.save(function cleanSave(err) {
       if (err) throw err;
-      console.log('clean close inner inner callback');  // _DEBUG
       addFillsToTrade(newTrade(trade.owner, symbol), fills, symbol, callback);
     });
 
@@ -144,6 +141,7 @@ function newTrade(o, s) { return new Trade({owner:o, symbol:s, fills:[], isOpen:
 function groupTrades(owner, fills, callback) {
   // 1) group trades by symbol..
   var groupedFills = groupFills(fills);
+  var remainingTrades = _.keys(groupedFills).length;
   var groupSymbol = function(curFills, curSym) {
     openTradeForUserSymbol(owner, curSym, function openTradeCb(err, curTrade) {
       if (curFills.length === 0) return; 
@@ -155,7 +153,10 @@ function groupTrades(owner, fills, callback) {
       // var curQty = 0;
       // for (var idx in curTrade.fills) {curQty += curTrade.fills[idx].qty; }
       // for (var fillIdx in groupedFills[curSym]) {
-      addFillsToTrade(curTrade, curFills, curSym, function() {} );
+      addFillsToTrade(curTrade, curFills, curSym, function() {
+        remainingTrades--;
+        if (remainingTrades === 0 && callback) callback();
+      } );
       });
     
     };
