@@ -6,6 +6,8 @@ exports.closeConnection = function() {db.close();}
 var userSchema = new mongoose.Schema(
     { name: 'string' 
     , email: 'string'
+    , openId: 'string'
+    , openIdProfile: 'string'
     });
 
 var fillSchema = new mongoose.Schema(
