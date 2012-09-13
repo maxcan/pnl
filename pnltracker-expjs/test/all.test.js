@@ -1,4 +1,5 @@
 var Ib = require("../lib/parsers/ib.js");
+var Fetcher = require("../lib/statement_fetcher");
 var Models = require("../models.js");
 var Util = require('../util.js');
 var _ = require('underscore');
@@ -14,6 +15,10 @@ exports["Ib Should Exist"] = function() {
   assert.isNotNull(Models);
 } 
 
+exports["Mail"] = function() {
+  Fetcher.testInbox(console.log);
+  assert.fail("test");
+}
 exports["Util Functions unit testing"] = function() {
   var s = Util.sum([1,2,2]);
   assert.eql(5,s ,"sum should be 5 but equals: "+  s);

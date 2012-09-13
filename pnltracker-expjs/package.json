@@ -13,7 +13,7 @@
     , "mongoose"  : "*"
     , "jade"      : "*"
     , "stylus"    : "*"
-    , "imap"      : "*"
+    , "imap"      : "0.5.1"
     , "underscore": "*"
     }
   }

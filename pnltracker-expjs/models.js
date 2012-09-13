@@ -4,10 +4,11 @@ var _ = require('underscore');
 var db = mongoose.createConnection('localhost', 'test');
 exports.closeConnection = function() {db.close();}
 var userSchema = new mongoose.Schema(
-    { name: 'string' 
-    , email: 'string'
-    , openId: 'string'
-    , openIdProfile: 'string'
+    { name              : 'String' 
+    , email             : 'String'
+    , openId            : 'String'
+    , openIdProfile     : 'String'
+    , assignedAddress   : 'String'
     });
 
 var fillSchema = new mongoose.Schema(
