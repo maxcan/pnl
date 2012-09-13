@@ -8,7 +8,7 @@ var userSchema = new mongoose.Schema(
     , email             : 'String'
     , openId            : 'String'
     , openIdProfile     : 'String'
-    , assignedAddress   : 'String'
+    , reportDumpAddress : 'String'
     });
 
 var fillSchema = new mongoose.Schema(
@@ -32,8 +32,28 @@ var tradeSchema = new mongoose.Schema(
     // , isLong    : 'Boolean'
     });
 
+var mailAttachmentSchema = new mongoose.Schema(
+    { name      : 'String'
+    , mimeType  : 'String'
+    , content   : 'String'
+    });
+
+var mailArchiveSchema = new mongoose.Schema(
+    { owner         : 'ObjectId'
+    , to            : 'String'
+    , from          : 'String'
+    , subject       : 'String'
+    , raw           : 'String'
+    , receivedDate  : 'Date'
+    , msgId         : 'String'
+    , attachments   : [mailAttachmentSchema]
+    });
+
+
 var User  = db.model('User', userSchema);
 exports.User = User;
+var MailArchive  = db.model('User', mailArchiveSchema);
+exports.MailArchive = MailArchive;
 var Trade = db.model('Trade', tradeSchema);
 exports.Trade = Trade;
 
