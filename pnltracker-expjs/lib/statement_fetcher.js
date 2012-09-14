@@ -3,6 +3,16 @@ var mailparser = require("mailparser");
 var Models = require("../models.js");
 var util = require('util');
 
+/*******************************************************************************
+ * Statement Fetcher Specs:
+ *  1) should download messages one XXX mail account
+ *  2) determine who "owns" the statement or 
+ *  3) pass it through to one of the statement parsers to extract trading data.
+ *  4)
+ *
+ *******************************************************************************/
+
+
 var imap = new ImapConnection(
   { username: 'pnltracker@cantor.mx'
   , password: 'thxseiko'
