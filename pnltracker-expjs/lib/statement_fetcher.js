@@ -3,7 +3,6 @@ var mailparser = require("mailparser");
 var Models = require("../models.js");
 var util = require('util');
 
-console.log(' about to build the imap connection');  // _DEBUG
 var imap = new ImapConnection(
   { username: 'pnltracker@cantor.mx'
   , password: 'thxseiko'
@@ -12,8 +11,6 @@ var imap = new ImapConnection(
   , secure: true
   });
 
-
-console.log('built the imap object');  // _DEBUG
 
 function show(obj) {
   return util.inspect(obj, false, Infinity);
@@ -25,10 +22,8 @@ function die(err) {
 }
 
 function openInbox(cb) {
-  console.log('about to connect');  // _DEBUG
   imap.connect(function(err) {
     if (err) die(err);
-    console.log(' about to open the obx');  // _DEBUG
     imap.openBox('INBOX', true, cb);
   });
 }
@@ -50,13 +45,11 @@ function mostRecentMessage(cb) {
 
 openInbox(function(err, mailbox) {
   if (err) die(err);
-  console.log('about to open the inbox');  // _DEBUG
   imap.search([ 'ALL', ['SINCE', 'May 20, 2010'] ], function(err, results) {
-    console.log(' searching..');  // _DEBUG
     if (err) die(err);
     var fetch = imap.fetch(results, {
       // request: { headers: ['from', 'to', 'subject', 'date'], body: 'full' }
-      request: { headers: true, body: true}
+      request: { headers: true, body: 'full'}
     });
     fetch.on('message', function(msg) {
       console.log('Got a message with sequence number ' + msg.seqno);
@@ -67,10 +60,11 @@ openInbox(function(err, mailbox) {
       var parser = new mailparser.MailParser() ; 
 
       console.log('-------------------- creating parser ');  // _DEBUG
-      parser.on("headers", function(headers) { console.log("Message: " + headers.subject);});
+      // parser.on("headers", function(headers) { console.log("Message: " + headers.subject);});
 
 
       parser.on("astart", function(id, headers) {
+        console.log('opening a file stream');  // _DEBUG
         filenames[id] = headers.filename; 
         fds[id] = fs.openSync("/tmp/" + headers.filename, 'w');
       });
@@ -86,9 +80,15 @@ openInbox(function(err, mailbox) {
           console.log("Writing " + filenames[id] + " completed");
         });
       });
+
+      parser.on("end", function(mail){
+        console.log('parser end');  // _DEBUG
+        console.log('attachments: ' + mail.attachments);  // _DEBUG
+      });
+
       msg.on("data", function(data) { 
         console.log('data handler');  // _DEBUG
-        console.log('data: ' + data.toString());  // _DEBUG
+        // console.log('data: ' + data.toString());  // _DEBUG
         return parser.write(data.toString()); });
       msg.on("end", function() { return parser.end(); });
 
