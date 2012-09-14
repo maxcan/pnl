@@ -1,4 +1,5 @@
 var ImapConnection = require('imap').ImapConnection;
+var fs = require('fs');
 var mailparser = require("mailparser");
 var Models = require("../models.js");
 var util = require('util');
@@ -12,7 +13,6 @@ var util = require('util');
  *
  *******************************************************************************/
 
-
 var imap = new ImapConnection(
   { username: 'pnltracker@cantor.mx'
   , password: 'thxseiko'
@@ -20,7 +20,6 @@ var imap = new ImapConnection(
   , port: 993
   , secure: true
   });
-
 
 function show(obj) {
   return util.inspect(obj, false, Infinity);
@@ -58,59 +57,33 @@ openInbox(function(err, mailbox) {
   imap.search([ 'ALL', ['SINCE', 'May 20, 2010'] ], function(err, results) {
     if (err) die(err);
     var fetch = imap.fetch(results, {
-      // request: { headers: ['from', 'to', 'subject', 'date'], body: 'full' }
-      request: { headers: true, body: 'full'}
+      request: { headers: false, body: 'full'}
     });
     fetch.on('message', function(msg) {
-      console.log('Got a message with sequence number ' + msg.seqno);
-
 
       var fds = {} ; 
       var filenames = {} ; 
-      var parser = new mailparser.MailParser() ; 
+      var parser = new mailparser.MailParser({streamAttachments: true}) ; 
 
-      console.log('-------------------- creating parser ');  // _DEBUG
-      // parser.on("headers", function(headers) { console.log("Message: " + headers.subject);});
-
-
-      parser.on("astart", function(id, headers) {
-        console.log('opening a file stream');  // _DEBUG
-        filenames[id] = headers.filename; 
-        fds[id] = fs.openSync("/tmp/" + headers.filename, 'w');
-      });
-
-      parser.on("astream", function(id, buffer) { 
-        fs.writeSync(fds[id], buffer, 0, buffer.length, null);
-      });
-
-      parser.on("aend", function(id) {
-        if (! fds[is] ) return;
-        fs.close(fds[id], function(err) {
-          if (err) return console.error(err);
-          console.log("Writing " + filenames[id] + " completed");
-        });
+      parser.on("attachment", function(attachment){
+        console.log('-1-1-1-1-1-  attachedment');  // _DEBUG
+            var output = fs.createWriteStream("/tmp/" + attachment.generatedFileName);
+                attachment.stream.pipe(output);
       });
 
       parser.on("end", function(mail){
         console.log('parser end');  // _DEBUG
-        console.log('attachments: ' + mail.attachments);  // _DEBUG
+        if (mail.attachments) console.log('attachments: ' + JSON.stringify(mail.attachments));  // _DEBUG
+        console.log('to: ' + mail.to);  // _DEBUG
+        console.log('subject: ' + JSON.stringify(mail.subject));  // _DEBUG
+        console.log('from: ' + JSON.stringify(mail.from));  // _DEBUG
       });
 
       msg.on("data", function(data) { 
-        console.log('data handler');  // _DEBUG
-        // console.log('data: ' + data.toString());  // _DEBUG
         return parser.write(data.toString()); });
       msg.on("end", function() { return parser.end(); });
 
-        // msg.on('end', function() {
-
-
       console.log('Finished message. Headers ' + show(msg));
-
-
-
-
-        // msg.headers is now an object containing the requested headers ...
     });
     fetch.on('end', function() {
       console.log('Done fetching all messages!');
