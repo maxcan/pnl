@@ -4,9 +4,10 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
+  var loggedIn = req.user;
+  res.render('index', { user: req.user, title: 'Express' });
 };
 
 exports.secure = function(req, res) {
     console.log('user: ' +  req.user);  // _DEBUG
-  res.render('index', {title: 'hi there'}); } ;
+  res.render('index', { user: req.user,title: 'hi there'}); } ;

@@ -3,3 +3,12 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
+  a(href="/app/") go to the app
+  if user
+    p #{user}
+    p
+      a(href="/logout") logout
+  else
+    p not logged in
+    p
+      a(href="/auth/google") authenticate with google

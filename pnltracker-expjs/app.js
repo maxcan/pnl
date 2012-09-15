@@ -60,7 +60,7 @@ app.configure(function(){
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.cookieParser('sdfklsdlkflfjdslfthis is my secret.  dodsdsdfksjdkm'));
+  app.use(express.cookieParser('ghrtiughdifuvsghuit4578ye'));
   app.use(express.session());
   app.use(everyauth.middleware());
   app.use(app.router);
@@ -72,9 +72,8 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-app.get('/', routes.index);
+// app.get('/', routes.index);
 app.get('/users', user.list);
-app.get('/secure', routes.secure);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
