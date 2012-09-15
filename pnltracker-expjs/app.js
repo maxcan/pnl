@@ -45,7 +45,7 @@ everyauth.google
   // Promises are created via
   //     var promise = this.Promise();
 })
-.redirectPath('/secure');
+.redirectPath('/');
 
 everyauth.everymodule.userPkey('_id');
 everyauth.everymodule.findUserById( function (userId, callback) {
@@ -72,8 +72,20 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-// app.get('/', routes.index);
+app.get('/', routes.index);
 app.get('/users', user.list);
+
+var secureStatic = express.static(__dirname+'/private');
+
+app.get('/secure/*', function(req, res) {
+  req.url = req.url.replace(/^\/secure/,'');
+  if (!req.user) {
+    console.log('authenticated user required for secure routes');  // _DEBUG
+    res.redirect('/');
+  } else {
+    secureStatic(req, res, function(){res.send(404);});
+  }
+  });
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
