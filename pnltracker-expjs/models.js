@@ -2,50 +2,52 @@ var mongoose = require('mongoose');
 var Util = require('./util.js');
 var _ = require('underscore');
 var db = mongoose.createConnection('localhost', 'test');
+var Types = mongoose.Schema.Types;
+
 exports.closeConnection = function() {db.close();}
 var userSchema = new mongoose.Schema(
-    { name              : 'String' 
-    , email             : 'String'
-    , openId            : 'String'
-    , openIdProfile     : 'String'
-    , reportDumpAddress : 'String'
+    { name              : String 
+    , email             : String
+    , openId            : String
+    , openIdProfile     : String
+    , reportDumpAddress : String
     });
 
 var fillSchema = new mongoose.Schema(
-    { owner   : 'ObjectId'
-    , date    : 'Date'
-    , qty     : 'Number'
-    , avgPx   : 'Number'
-    , fees    : 'Number'
-    , symbol  : 'String'
-    , isOpen  : 'Boolean'
-    , acctId  : 'String'
+    { owner   : {type: Types.ObjectId, ref: 'User'}
+    , date    : Date
+    , qty     : Number
+    , avgPx   : Number
+    , fees    : Number
+    , symbol  : String
+    , isOpen  : Boolean
+    , acctId  : String
     });
 
 var tradeSchema = new mongoose.Schema(
-    { owner     : 'ObjectId'
-    , symbol    : 'String'
-    , openDate  : 'Date'
+    { owner     : {type Types.ObjectId, ref: 'User'}
+    , symbol    : String
+    , openDate  : Date
     , fills     : [fillSchema]
-    , isOpen    : 'Boolean'
-    , acctId    : 'String'
+    , isOpen    : Boolean
+    , acctId    : String
     // , isLong    : 'Boolean'
     });
 
 var mailAttachmentSchema = new mongoose.Schema(
-    { name      : 'String'
-    , mimeType  : 'String'
-    , content   : 'String'
+    { name      : String
+    , mimeType  : String
+    , content   : String
     });
 
 var mailArchiveSchema = new mongoose.Schema(
-    { owner         : 'ObjectId'
-    , to            : 'String'
-    , from          : 'String'
-    , subject       : 'String'
-    , raw           : 'String'
-    , receivedDate  : 'Date'
-    , msgId         : 'String'
+    { owner         : {type: Types.ObjectId, ref: 'User'}
+    , to            : String
+    , from          : String
+    , subject       : String
+    , raw           : String
+    , receivedDate  : Date
+    , msgId         : String
     , attachments   : [mailAttachmentSchema]
     });
 
