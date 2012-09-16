@@ -28,16 +28,14 @@ everyauth.google
 .findOrCreateUser( function (session, accessToken, accessTokenExtra, googleUserMetadata) {
   var promise = this.Promise();
   var newUserCb = function(err,newUsr) {
-          if (err) throw err;
-          // console.log('fulfilling with new user : ' + newUsr);  // _DEBUG
-          promise.fulfill(newUsr);
+    if (err) throw err;
+    promise.fulfill(newUsr);
   };
   Models.User.findOne({email:googleUserMetadata.email}, function(err,usr) {
     if (err) throw err;
     if (usr) {
       newUserCb(null, usr);
     } else { 
-      // promise.fulfill(usr) ; 
       console.log('new user, will create');  // _DEBUG
       Models.User.create( { email: googleUserMetadata.email}, newUserCb);
     } 
@@ -72,17 +70,17 @@ app.configure(function(){
   app.use(express.session({secret: 'blalblsdfsdf'}));
   app.use(express.bodyParser());
   app.use(everyauth.middleware());
-  app.use(function(req,res,next) {
-    console.log('about to print debug stuff');  // _DEBUG
-    try {
-      console.log('cookies:  ' + JSON.stringify(req.cookies));  // _DEBUG
-      console.log('session:  ' + JSON.stringify(req.session));  // _DEBUG
-      console.log('signed cookies:  ' + JSON.stringify(req.signedCookies));  // _DEBUG
-    } catch (e) {
-      console.log('excepitn: ' + e);  // _DEBUG
-    }
-    next();
-  });
+  // app.use(function(req,res,next) {
+  //   console.log('about to print debug stuff');  // _DEBUG
+  //   try {
+  //     console.log('cookies:  ' + JSON.stringify(req.cookies));  // _DEBUG
+  //     console.log('session:  ' + JSON.stringify(req.session));  // _DEBUG
+  //     console.log('signed cookies:  ' + JSON.stringify(req.signedCookies));  // _DEBUG
+  //   } catch (e) {
+  //     console.log('excepitn: ' + e);  // _DEBUG
+  //   }
+  //   next();
+  // });
 
   app.use(app.router);
   app.use(require('stylus').middleware(__dirname + '/public'));

@@ -10,8 +10,28 @@ var userSchema = new mongoose.Schema(
     , email             : String
     , openId            : String
     , openIdProfile     : String
-    , reportDumpAddress : String
+    , reportDroboxAddr  : [String]
     });
+
+exports.randomString = function(len) {
+  var chars = "0123456789bcdfghklmnpqrstvwxyz";
+  var randomString = '';
+  for (var i=0; i < len; i++) {
+    var rnum = Math.floor(Math.random() * chars.length);
+    randomString += chars.substring(rnum,rnum+1);
+  }
+  return randomString;
+}; 
+
+exports.newUser = function(obj) {
+  var ret = {};
+  if (obj) {
+    ret.email = obj.email;
+    ret.name = obj.name;
+  }
+  ret.reportDroboxAddr = 'pnltracker+' + exports.randomString(8) + '@cantor.mx';
+  return ret;
+}; 
 
 var fillSchema = new mongoose.Schema(
     { owner   : {type: Types.ObjectId, ref: 'User'}
@@ -24,8 +44,12 @@ var fillSchema = new mongoose.Schema(
     , acctId  : String
     });
 
+fillSchema.virtual('netCash').get(function() {
+  return ((-1 * this.qty * this.avgPx) - this.fees)
+});
+
 var tradeSchema = new mongoose.Schema(
-    { owner     : {type Types.ObjectId, ref: 'User'}
+    { owner     : {type: Types.ObjectId, ref: 'User'}
     , symbol    : String
     , openDate  : Date
     , fills     : [fillSchema]
@@ -33,6 +57,16 @@ var tradeSchema = new mongoose.Schema(
     , acctId    : String
     // , isLong    : 'Boolean'
     });
+
+tradeSchema.virtual('netCash').get(function() {
+  var fillArr = this.fills;
+  return _.reduce(this.fills,function(sm,fl) {return sm + fl.netCash;},0);
+});
+
+tradeSchema.virtual('netQty').get(function() {
+  var fillArr = this.fills;
+  return _.reduce(this.fills,function(sm,fl) {return sm + fl.qty;},0);
+});
 
 var mailAttachmentSchema = new mongoose.Schema(
     { name      : String
@@ -56,6 +90,8 @@ var User  = db.model('User', userSchema);
 exports.User = User;
 var MailArchive  = db.model('User', mailArchiveSchema);
 exports.MailArchive = MailArchive;
+var Fill = db.model('Fill', fillSchema);
+exports.Fill = Fill;
 var Trade = db.model('Trade', tradeSchema);
 exports.Trade = Trade;
 
