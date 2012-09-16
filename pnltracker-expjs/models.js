@@ -10,7 +10,7 @@ var userSchema = new mongoose.Schema(
     , email             : String
     , openId            : String
     , openIdProfile     : String
-    , reportDroboxAddr  : [String]
+    , reportDropboxAddr  : [String]
     });
 
 exports.randomString = function(len) {
@@ -29,7 +29,7 @@ exports.newUser = function(obj) {
     ret.email = obj.email;
     ret.name = obj.name;
   }
-  ret.reportDroboxAddr = 'pnltracker+' + exports.randomString(8) + '@cantor.mx';
+  ret.reportDropboxAddr = 'pnltracker+' + exports.randomString(8) + '@cantor.mx';
   return ret;
 }; 
 

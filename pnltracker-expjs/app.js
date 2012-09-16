@@ -35,10 +35,10 @@ everyauth.google
     if (err) throw err;
     if (usr) {
       newUserCb(null, usr);
-    } else { 
+    } else {
       console.log('new user, will create');  // _DEBUG
-      Models.User.create( { email: googleUserMetadata.email}, newUserCb);
-    } 
+      Models.User.create(Models.newUser( { email: googleUserMetadata.email}), newUserCb);
+    }
   });
   return promise;
   // find or create user logic goes here
@@ -47,6 +47,45 @@ everyauth.google
   //     var promise = this.Promise();
 })
 .redirectPath('/');
+
+
+everyauth.facebook
+.appId('426843550684294')
+.appSecret('15c7515203b6536d932187ff9949470d')
+.scope('email')                        // Defaults to undefined
+.fields('id,name,email,picture')       // Controls the returned fields. Defaults to undefined
+
+// .handleAuthCallbackError( function (req, res) {
+  // If a user denies your app, Facebook will redirect the user to
+  // /auth/facebook/callback?error_reason=user_denied&error=access_denied&error_description=The+user+denied+your+request.
+  // This configurable route handler defines how you want to respond to
+  // that.
+  // If you do not configure this, everyauth renders a default fallback
+  // view notifying the user that their authentication failed and why.
+// })
+.findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
+  console.log('fb meta: ' +  JSON.stringify(fbUserMetadata));  // _DEBUG
+  var promise = this.Promise();
+  var newUserCb = function(err,newUsr) {
+    if (err) throw err;
+    promise.fulfill(newUsr);
+  };
+  Models.User.findOne({email:fbUserMetadata.email}, function(err,usr) {
+    if (err) throw err;
+    if (usr) {
+      newUserCb(null, usr);
+    } else {
+      console.log('new user, will create');  // _DEBUG
+      Models.User.create(Models.newUser({ email: fbUserMetadata.email}), newUserCb);
+    }
+  });
+  return promise;
+  // find or create user logic goes here
+})
+.redirectPath('/');
+
+
+
 
 everyauth.everymodule.userPkey('_id');
 everyauth.everymodule.findUserById( function (userId, callback) {
@@ -60,6 +99,7 @@ everyauth.everymodule.findUserById( function (userId, callback) {
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
+  app.set('host','dev.pnltracker.com');
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
 
@@ -94,6 +134,9 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.get('/users', user.list);
+
+app.get('/api/user', user.show);
+
 
 var secureStatic = express.static(__dirname+'/private');
 
