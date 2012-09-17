@@ -124,6 +124,11 @@ app.configure(function(){
 
   app.use(app.router);
   app.use(require('stylus').middleware(__dirname + '/public'));
+  app.use(require('less-middleware')({
+            dest: __dirname + '/public/gen',
+            src: __dirname + '/assets/less',
+            compress: true
+        }));
   app.use(express.static(path.join(__dirname, 'public')));
 
 });
