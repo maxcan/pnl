@@ -4,7 +4,8 @@
 
 var express = require('express')
 , routes = require('./routes')
-, user = require('./routes/user')
+, userRoutes = require('./routes/user')
+, tradeRoutes = require('./routes/trade')
 , http = require('http')
 , everyauth = require('everyauth')
 , path = require('path')
@@ -89,10 +90,8 @@ everyauth.facebook
 
 everyauth.everymodule.userPkey('_id');
 everyauth.everymodule.findUserById( function (userId, callback) {
-  console.log('everyauth find by id: ' + userId);  // _DEBUG
   Models.User.findById(userId, function(err,u) {
     if (err) throw err;
-    console.log('everyauth found u: ' + u);  // _DEBUG
     callback(err,u);
   });
 });
@@ -138,9 +137,11 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
-app.get('/users', user.list);
+app.get('/users', userRoutes.list);
+app.get('/users/ld', userRoutes.loadDummyTrades);
+app.get('/api/user', userRoutes.show);
+app.get('/api/trades', tradeRoutes.list);
 
-app.get('/api/user', user.show);
 
 
 var secureStatic = express.static(__dirname+'/private');

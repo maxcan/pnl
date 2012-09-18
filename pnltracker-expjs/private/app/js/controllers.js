@@ -11,9 +11,7 @@ function MyCtrl2() {
 }
 MyCtrl2.$inject = [];
 
-function HomeCtrl() {
-
-}
-function UserCtrl($scope, User) {
+function HomeCtrl($scope, User, Trades) {
   $scope.user = User.get();
+  $scope.trades = Trades.get();
 }

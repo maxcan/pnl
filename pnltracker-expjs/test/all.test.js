@@ -110,7 +110,7 @@ exports['Fill grouping works'] = function() {
     var createCB = function(err, usr) {
       if (err) throw err;
       for (i in ungrouped) {ungrouped[i].owner = usr;}
-      Models.groupTrades(usr, ungrouped);
+      Models.mkTradesAndSave(usr, ungrouped);
     };
     var remUserCB = function() { Models.User.create(Models.newUser({name:'n',email:'b@b.com'}), createCB) ; } ;
     var remTradeCB = function() { Models.User.remove({}, remUserCB);};

@@ -93,11 +93,11 @@ exports.parseEmailedReportString = function(ibHtmlData, owner) {
           if (elements[idxSym] != hdrSym) { 
             var newTrade = 
               { date    : new Date(elements[idxDateTime])
-              , qty     : elements[idxQty]
+              , qty     : Number(elements[idxQty])
               , symbol  : "ib:" + elements[idxSym]
               , exchnge : elements[idxExchange]
-              , avgPx   : elements[idxPrice]
-              , fees    : elements[idxComms] + elements[idxTax]
+              , avgPx   : Number(elements[idxPrice])
+              , fees    : Number(elements[idxComms]) + Number(elements[idxTax])
               , acctId  : elements[idxAcctId]
               };
             allTrades.push(newTrade);
@@ -191,11 +191,11 @@ exports.parseGeneratedReportString = function(ibHtmlData, owner) {
               if (elements[idxSym] != hdrSym) { 
                 var newTrade = 
                   { date    : new Date(elements[idxDateTime])
-                  , qty     : elements[idxQty]
+                  , qty     : Number(elements[idxQty])
                   , symbol  : "ib:" + elements[idxSym]
                   , exchnge : elements[idxExchange]
-                  , avgPx   : elements[idxPrice]
-                  , fees    : elements[idxComms]
+                  , avgPx   : Number(elements[idxPrice])
+                  , fees    : Number(elements[idxComms])
                   };
                 allTrades.push(newTrade);
               }

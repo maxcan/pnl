@@ -1,5 +1,14 @@
 <p>partial for pnl home</p>
-<div ng-controller="UserCtrl">
+<div ng-controller="HomeCtrl">
   <p> email = {{user.email}} </p>
   <p> name = {{user.name}} </p>
+  <p> tades = {{trades}} </p>
+  <p> tades len = {{trades.length}} </p>
+  <table class="table table-bordered">
+    <tr ng-repeat="trade in trades[0].fills">
+      <td>{{trade.sym}}</td>
+      <td>{{trade.qty}}</td>
+      <td>{{trade.avgPx}}</td>
+    </tr>
+  </table>
 </div>

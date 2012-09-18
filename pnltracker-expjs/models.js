@@ -201,7 +201,7 @@ function splitFill(fill, qty) {
 }
 function newTrade(o, s) { return new Trade({owner:o, symbol:s, fills:[], isOpen: true}); }
 
-function groupTrades(owner, fills, callback) {
+function mkTradesAndSave(owner, fills, callback) {
   // 1) group trades by symbol..
   var groupedFills = groupFills(fills);
   var remainingTrades = _.keys(groupedFills).length;
@@ -233,7 +233,7 @@ function groupTrades(owner, fills, callback) {
   // check if the user already has an open position in this symbol
 }
 exports.groupFills = groupFills;
-exports.groupTrades = groupTrades ;
+exports.mkTradesAndSave = mkTradesAndSave ;
 exports.sortByField = sortByField ; 
 exports.netCashForFill = netCashForFill;
 exports.splitFill = splitFill;
