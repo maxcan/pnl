@@ -15,6 +15,11 @@ exports.show = function(req, res) {
   res.send(req.user);
 };
 
+exports.setDummyUser = function(req,res) {
+  if (req.user && req.user._id) { res.redirect('/');}
+  req.session.auth = { loggedIn: true, userId: '50565d101c41d90000000003'};
+  res.redirect('/');
+}
 exports.loadDummyTrades = function(req,res) {
   if (!req.user || !req.user._id) { res.redirect('/auth/facebook');}
   fs.readFile("../assets/ib_email_sample.html", "utf8", function(fsErr,data) {

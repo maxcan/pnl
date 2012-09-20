@@ -7,6 +7,7 @@ var express = require('express')
 , userRoutes = require('./routes/user')
 , tradeRoutes = require('./routes/trade')
 , http = require('http')
+, util = require('util')
 , everyauth = require('everyauth')
 , path = require('path')
 , Models = require('./models')
@@ -112,9 +113,9 @@ app.configure(function(){
   // app.use(function(req,res,next) {
   //   console.log('about to print debug stuff');  // _DEBUG
   //   try {
-  //     console.log('cookies:  ' + JSON.stringify(req.cookies));  // _DEBUG
-  //     console.log('session:  ' + JSON.stringify(req.session));  // _DEBUG
-  //     console.log('signed cookies:  ' + JSON.stringify(req.signedCookies));  // _DEBUG
+  //     //console.log('cookies:  ' + JSON.stringify(req.cookies));  // _DEBUG
+  //     console.log('session:  ' + util.inspect(req.session, false, null, true));  // _DEBUG
+  //     //console.log('signed cookies:  ' + JSON.stringify(req.signedCookies));  // _DEBUG
   //   } catch (e) {
   //     console.log('excepitn: ' + e);  // _DEBUG
   //   }
@@ -138,7 +139,8 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.get('/users', userRoutes.list);
-app.get('/users/ld', userRoutes.loadDummyTrades);
+app.get('/test/users/ld', userRoutes.loadDummyTrades);
+app.get('/test/users/set', userRoutes.setDummyUser);
 app.get('/api/user', userRoutes.show);
 app.get('/api/trades', tradeRoutes.list);
 
