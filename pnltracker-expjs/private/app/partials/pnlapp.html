@@ -1,14 +1,37 @@
 <p>partial for pnl home</p>
 <div ng-controller="HomeCtrl">
-  <p> email = {{user.email}} </p>
-  <p> name = {{user.name}} </p>
-  <p> tades = {{trades}} </p>
-  <p> tades len = {{trades.length}} </p>
+  <h1> name = {{user.name}} </h1>
+  <h2> email = {{user.email}} </h2>
+  <h2> 
+    dropbox = 
+    <a href="mailto://{{user.reportDropboxAddr[0]}}">
+      {{user.reportDropboxAddr[0]}}
+    </a>
+  </h2>
+
   <table class="table table-bordered">
-    <tr ng-repeat="trade in trades[0].fills">
-      <td>{{trade.sym}}</td>
-      <td>{{trade.qty}}</td>
-      <td>{{trade.avgPx}}</td>
-    </tr>
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Net Cash</th>
+        <th>Bot</th>
+        <th>Sold</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="trade in trades">
+        <td>{{trade.symbol}}</td>
+        <td>{{trade.netCash}}</td>
+        <td>{{trade.totalBuy}}</td>
+        <td>{{trade.totalSell}}</td>
+        <td>
+          <ul>
+            <li ng-repeat="fill in trade.fills">
+              Qty: {{fill.qty}} Price: {{fill.avgPx}} Date: {{fill.date}}
+            </li>
+          </ul>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </div>

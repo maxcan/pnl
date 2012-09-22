@@ -2,6 +2,8 @@ var Models = require('../models') ;
 var Ib = require("../lib/parsers/ib.js");
 var fs = require('fs');
 
+var tradeFixtures = require('../test/fixtures/parse_trade_output.js');
+
 /*
  * GET users listing.
  */
@@ -22,14 +24,18 @@ exports.setDummyUser = function(req,res) {
 }
 exports.loadDummyTrades = function(req,res) {
   if (!req.user || !req.user._id) { res.redirect('/auth/facebook');}
-  fs.readFile("../assets/ib_email_sample.html", "utf8", function(fsErr,data) {
-    if (fsErr) res.send(500, fsErr);
-    var fills = Ib.parseEmailedReportString(data);
-    Models.mkTradesAndSave(req.user._id, fills, function(err) {
-      if (err) {res.send(500,'error: ' + err);}
-      res.redirect('/');
+  Models.Trade.find({owner: req.user._id}).remove(function(err, prevTrade) {
+    fs.readFile("../assets/ib_email_sample.html", "utf8", function(fsErr,data) {
+      if (fsErr) res.send(500, fsErr);
+      var fills = tradeFixtures.ibGeneratedSampleTrades;
+      // var fills = Ib.parseEmailedReportString(data);
+      Models.mkTradesAndSave(req.user._id, fills, function(err) {
+        if (err) {res.send(500,'error: ' + err);}
+        res.redirect('/');
 
+      });
     });
+
   });
 
 }; 

@@ -4,15 +4,17 @@ var _ = require('underscore');
 
 var  mkApiFill = function(fill) {
   var ret = {};
-  var flds = ['_id', 'owner', 'avgPx', 'fees','date'];
+  var flds = ['_id', 'owner', 'qty', 'avgPx', 'fees','date'];
   _.each(flds, function(k) { ret[k] = fill[k];} );
   return ret;
 } ;
+
 var mkApiTrade = function (t) { 
   var ret = {};
   console.log(ret);  // _DEBUG
   ret.netCash = t.netCash;
-  ret.netQty = t.netQty;
+  ret.totalBuy = t.totalBuy;
+  ret.totalSell = t.totalSell;
   _.each(['_id', 'owner', 'symbol','isOpen'], function(k) { ret[k] = t[k];} );
   ret.fills  = _.map(t.fills, mkApiFill);
   return ret;

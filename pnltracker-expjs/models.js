@@ -38,14 +38,14 @@ var fillSchema = new mongoose.Schema(
     , date    : Date
     , qty     : Number
     , avgPx   : Number
-    , fees    : Number
+    , fees    : Number // should generally be a negative number so we can add everything
     , symbol  : String
     , isOpen  : Boolean
     , acctId  : String
     });
 
 fillSchema.virtual('netCash').get(function() {
-  return ((-1 * this.qty * this.avgPx) - this.fees)
+  return ((-1 * this.qty * this.avgPx) + this.fees)
 });
 
 var tradeSchema = new mongoose.Schema(
@@ -59,13 +59,19 @@ var tradeSchema = new mongoose.Schema(
     });
 
 tradeSchema.virtual('netCash').get(function() {
-  var fillArr = this.fills;
   return _.reduce(this.fills,function(sm,fl) {return sm + fl.netCash;},0);
 });
 
 tradeSchema.virtual('netQty').get(function() {
-  var fillArr = this.fills;
   return _.reduce(this.fills,function(sm,fl) {return sm + fl.qty;},0);
+});
+
+tradeSchema.virtual('totalBuy').get(function() {
+  return _.reduce(this.fills,function(sm,fl) {return sm + (fl.qty > 0 ? fl.qty : 0);},0);
+});
+
+tradeSchema.virtual('totalSell').get(function() {
+  return _.reduce(this.fills,function(sm,fl) {return sm + (fl.qty < 0 ? fl.qty : 0);},0);
 });
 
 var mailAttachmentSchema = new mongoose.Schema(
