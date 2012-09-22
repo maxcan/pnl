@@ -1,4 +1,5 @@
 var ImapConnection = require('imap').ImapConnection;
+var _ = require('underscore');
 var fs = require('fs');
 var mailparser = require("mailparser");
 var Models = require("../models.js");
@@ -21,6 +22,7 @@ var imap = new ImapConnection(
   , secure: true
   });
 
+var imapIsConnected = false; 
 function show(obj) {
   return util.inspect(obj, false, Infinity);
 }
@@ -31,10 +33,16 @@ function die(err) {
 }
 
 function openInbox(cb) {
-  imap.connect(function(err) {
-    if (err) die(err);
-    imap.openBox('INBOX', true, cb);
-  });
+  if (imapIsConnected) {
+    imap.openBox('INBOX', false, cb);
+  } else { 
+    console.log('connecting to imap..');  // _DEBUG
+    imap.connect(function(err) {
+      imapIsConnected = true;
+      if (err) die(err);
+      imap.openBox('INBOX', false, cb);
+    });
+  }
 }
 
 function mostRecentMessage(cb) {
@@ -50,44 +58,59 @@ function mostRecentMessage(cb) {
                    .sort('-receivedDate')
                    .limit(1)
                    .exec(mostRecentMessageCallback);
-}
+};
 
-openInbox(function(err, mailbox) {
-  if (err) die(err);
-  imap.search([ 'ALL', ['SINCE', 'May 20, 2010'] ], function(err, results) {
+exports.processMailArchive = function (err, mailArchive) { 
+  if (err) {
+    console.log('ERROR in mail processing: ' + err);  // _DEBUG
+    throw err;
+  }
+  throw "mail processing undefined";
+}; 
+
+exports.checkMail = function(owner ) {
+  openInbox(function(err, mailbox) {
     if (err) die(err);
-    var fetch = imap.fetch(results, {
-      request: { headers: false, body: 'full'}
-    });
-    fetch.on('message', function(msg) {
+    imap.search([ 'UNSEEN'], function(err, results) {
+      if (err) die(err);
+      if (results.length != 0) { 
+        var fetch = imap.fetch(results
+          , { request: { headers: false, body: 'full'} 
+            , markSeen: true 
+          });
+        fetch.on('message', function(msg) {
+          var parser = new mailparser.MailParser({streamAttachments: false}) ; 
+          parser.on("end", function(mail){
+            if (mail.attachments.length != 0) {
+              var attachmentObjs = _.map(mail.attachments, function(attachment) {
+                  return { mimeType  : attachment.contentType
+                         , name      : attachment.fileName
+                         , content   : attachment.content.toString()
+                         , processed : false
+                         };
+              });
+              console.log('    about ot save the message');  // _DEBUG
+              var mailObj = { owner   : owner
+                            , to      : _.pluck(mail.to, 'address')
+                            , from    : mail.from[0].address
+                            , subject : mail.subject 
+                            , receivedDate  : new Date()
+                            , attachments : attachmentObjs }
+              Models.MailArchive.create(mailObj, function(err, mailArchive) {
+                if (err) { throw err; }
+                exports.processMailArchive(err, MailArchive);
+              });
+            }
+          });
 
-      var fds = {} ; 
-      var filenames = {} ; 
-      var parser = new mailparser.MailParser({streamAttachments: true}) ; 
+          msg.on("data", function(data) { 
+            return parser.write(data.toString()); });
+          msg.on("end", function() { return parser.end(); });
 
-      parser.on("attachment", function(attachment){
-        console.log('-1-1-1-1-1-  attachedment');  // _DEBUG
-            var output = fs.createWriteStream("/tmp/" + attachment.generatedFileName);
-                attachment.stream.pipe(output);
-      });
-
-      parser.on("end", function(mail){
-        console.log('parser end');  // _DEBUG
-        if (mail.attachments) console.log('attachments: ' + JSON.stringify(mail.attachments));  // _DEBUG
-        console.log('to: ' + mail.to);  // _DEBUG
-        console.log('subject: ' + JSON.stringify(mail.subject));  // _DEBUG
-        console.log('from: ' + JSON.stringify(mail.from));  // _DEBUG
-      });
-
-      msg.on("data", function(data) { 
-        return parser.write(data.toString()); });
-      msg.on("end", function() { return parser.end(); });
-
-      console.log('Finished message. Headers ' + show(msg));
-    });
-    fetch.on('end', function() {
-      console.log('Done fetching all messages!');
-      imap.logout(console.log);
+        });
+        // fetch.on('end', function() { return ; });
+      }
     });
   });
-});
+} ;
+

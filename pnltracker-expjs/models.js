@@ -78,11 +78,12 @@ var mailAttachmentSchema = new mongoose.Schema(
     { name      : String
     , mimeType  : String
     , content   : String
+    , processed : Boolean
     });
 
 var mailArchiveSchema = new mongoose.Schema(
     { owner         : {type: Types.ObjectId, ref: 'User'}
-    , to            : String
+    , to            : [String]
     , from          : String
     , subject       : String
     , raw           : String
@@ -100,6 +101,8 @@ var Fill = db.model('Fill', fillSchema);
 exports.Fill = Fill;
 var Trade = db.model('Trade', tradeSchema);
 exports.Trade = Trade;
+var MailArchive = db.model('MailArchive', mailArchiveSchema);
+exports.MailArchive = MailArchive;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Trade Grouping 
