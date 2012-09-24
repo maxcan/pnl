@@ -2,6 +2,9 @@ var mongoose = require('mongoose');
 var Util = require('./util.js');
 var _ = require('underscore');
 var db = mongoose.createConnection('localhost', 'test');
+
+// nodejistu:  mongoose.connect('mongodb://nodejitsu:e052b67bd8b033100b92965756b1d4b8@alex.mongohq.com:10087/nodejitsudb148589429036');
+
 var Types = mongoose.Schema.Types;
 
 exports.closeConnection = function() {db.close();}
@@ -55,6 +58,7 @@ var tradeSchema = new mongoose.Schema(
     , fills     : [fillSchema]
     , isOpen    : Boolean
     , acctId    : String
+    , mailRef   : {type: Types.ObjectId, ref: 'MailArchive'}
     // , isLong    : 'Boolean'
     });
 

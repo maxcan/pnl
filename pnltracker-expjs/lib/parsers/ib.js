@@ -4,7 +4,7 @@ var cheerio = require('cheerio');
 
 
 
-exports.parseEmailedReportString = function(ibHtmlData, owner) {
+exports.parseEmailedReportString = function(ibHtmlData, owner, mailRef) {
   /*****
    *  looking to parse tables like:
    *
@@ -99,6 +99,7 @@ exports.parseEmailedReportString = function(ibHtmlData, owner) {
               , avgPx   : Number(elements[idxPrice])
               , fees    : Number(elements[idxComms]) + Number(elements[idxTax])
               , acctId  : elements[idxAcctId]
+              , mailRef : mailRef
               };
             allTrades.push(newTrade);
           }

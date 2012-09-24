@@ -1,5 +1,6 @@
 var ImapConnection = require('imap').ImapConnection;
 var _ = require('underscore');
+var Ib = require("../lib/parsers/ib.js");
 var fs = require('fs');
 var mailparser = require("mailparser");
 var Models = require("../models.js");
@@ -54,18 +55,37 @@ function mostRecentMessage(cb) {
       return cb(null, msgObj.receivedDate);
     }
   };
-  Model.MailArchive.find()
+  Models.MailArchive.find()
                    .sort('-receivedDate')
                    .limit(1)
                    .exec(mostRecentMessageCallback);
 };
 
-exports.processMailArchive = function (err, mailArchive) { 
+exports.processMailArchive = function (err, mailMsg) { 
   if (err) {
     console.log('ERROR in mail processing: ' + err);  // _DEBUG
     throw err;
   }
-  throw "mail processing undefined";
+
+  if (mailMsg.subject.indexOf('Interactive Brokers Daily Trade Report') != -1) {
+    Models.User.findOne({reportDropboxAddr : { $in: mailMsg.to}},function(err,usr) {
+      if (err) {throw err; }
+      _.each(mailMsg.attachments, handleIbAttachment);
+      function handleIbAttachment(attachment) {
+        if ((attachment.processed === false) &&
+            (attachment.name.indexOf('DailyTradeReport') != -1)) {
+          var trades = 
+                Ib.parseEmailedReportString(attachment.content, usr._id, mailMsg._id);
+          Models.mkTradesAndSave(usr._id, trades, function(err) {
+            if (err) {throw err; }
+            attachment.processed = true;
+            mailMsg.save();
+
+          });
+        }
+      }
+    });
+  }
 }; 
 
 exports.checkMail = function(owner ) {
@@ -98,7 +118,7 @@ exports.checkMail = function(owner ) {
                             , attachments : attachmentObjs }
               Models.MailArchive.create(mailObj, function(err, mailArchive) {
                 if (err) { throw err; }
-                exports.processMailArchive(err, MailArchive);
+                exports.processMailArchive(err, mailArchive);
               });
             }
           });
