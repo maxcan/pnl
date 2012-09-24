@@ -1,4 +1,5 @@
 var ImapConnection = require('imap').ImapConnection;
+var conf    = require('../config.js').genConf() ;
 var _ = require('underscore');
 var Ib = require("../lib/parsers/ib.js");
 var fs = require('fs');
@@ -16,10 +17,10 @@ var util = require('util');
  *******************************************************************************/
 
 var imap = new ImapConnection(
-  { username: 'pnltracker@cantor.mx'
-  , password: 'thxseiko'
-  , host: 'imap.gmail.com'
-  , port: 993
+  { username: conf.imapFetchUsername
+  , password: conf.imapFetchPassword
+  , host:     conf.imapFetchHost
+  , port:     conf.imapFetchPort
   , secure: true
   });
 
@@ -40,7 +41,11 @@ function openInbox(cb) {
     console.log('connecting to imap..');  // _DEBUG
     imap.connect(function(err) {
       imapIsConnected = true;
-      if (err) die(err);
+      if (err) {
+        console.log('Error in imap connect: ' + err);  // _DEBUG
+        die(err);
+      }
+      console.log('connected to IMAP');  // _DEBUG
       imap.openBox('INBOX', false, cb);
     });
   }
@@ -62,6 +67,7 @@ function mostRecentMessage(cb) {
 };
 
 exports.processMailArchive = function (err, mailMsg) { 
+  console.log('processMailArchive ENTERING');  // _DEBUG
   if (err) {
     console.log('ERROR in mail processing: ' + err);  // _DEBUG
     throw err;
@@ -89,11 +95,16 @@ exports.processMailArchive = function (err, mailMsg) {
 }; 
 
 exports.checkMail = function(owner ) {
+  console.log('    MAIL about to open the inbox');  // _DEBUG
   openInbox(function(err, mailbox) {
     if (err) die(err);
     imap.search([ 'UNSEEN'], function(err, results) {
-      if (err) die(err);
+      if (err)  {
+        console.log(' error in check mail: ' + err);  // _DEBUG
+        throw err;
+      }
       if (results.length != 0) { 
+        console.log('MAIL - found messages.  iterating');  // _DEBUG
         var fetch = imap.fetch(results
           , { request: { headers: false, body: 'full'} 
             , markSeen: true 

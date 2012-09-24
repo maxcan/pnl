@@ -1,5 +1,6 @@
 var Models = require('../models') ; 
 var Ib = require("../lib/parsers/ib.js");
+var util = require("../util.js");
 var fs = require('fs');
 
 var tradeFixtures = require('../test/fixtures/parse_trade_output.js');
@@ -14,13 +15,17 @@ exports.list = function(req, res){
 
 exports.show = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
+  util.blockCache(res);
   res.send(req.user);
 };
 
 exports.setDummyUser = function(req,res) {
   if (req.user && req.user._id) { res.redirect('/');}
-  req.session.auth = { loggedIn: true, userId: '50565d101c41d90000000003'};
-  res.redirect('/');
+  Models.User.findOne({email: 'i@cantor.mx'}, function(err, usr) {
+    if (err) throw err;
+    req.session.auth = { loggedIn: true, userId: usr._id};
+    res.redirect('/');
+  });
 }
 exports.loadDummyTrades = function(req,res) {
   if (!req.user || !req.user._id) { res.redirect('/auth/facebook');}

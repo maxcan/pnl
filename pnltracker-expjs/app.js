@@ -12,13 +12,14 @@ var express = require('express')
 , path = require('path')
 , Models = require('./models')
 , fetcher = require('./lib/statement_fetcher')
+, conf    = require('./config.js').genConf()
 ;
 
 var app = express();
 
 everyauth.google
-.appId('903799978070.apps.googleusercontent.com')
-.appSecret('aUfnPV75qEtNjrhEaczfJu__')
+.appId(conf.oauthGoogleAppId)
+.appSecret(conf.oauthGoogleAppSecret)
 .scope('https://www.googleapis.com/auth/userinfo.email') // What you want access to
 // .handleAuthCallbackError( function (req, res) {
   // If a user denies your app, Google will redirect the user to
@@ -53,8 +54,8 @@ everyauth.google
 
 
 everyauth.facebook
-.appId('426843550684294')
-.appSecret('15c7515203b6536d932187ff9949470d')
+.appId(conf.oauthFacebookAppId)
+.appSecret(conf.oauthFacebookAppSecret)
 .scope('email')                        // Defaults to undefined
 .fields('id,name,email,picture')       // Controls the returned fields. Defaults to undefined
 
@@ -99,8 +100,8 @@ everyauth.everymodule.findUserById( function (userId, callback) {
 });
 
 app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
-  app.set('host','dev.pnltracker.com');
+  app.set('port', conf.port);
+  app.set('host', conf.host);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
 

@@ -1,7 +1,10 @@
 var mongoose = require('mongoose');
+var conf    = require('./config.js').genConf();
 var Util = require('./util.js');
+var util = require('util');
 var _ = require('underscore');
-var db = mongoose.createConnection('localhost', 'test');
+var db = mongoose.connect(conf.mongoDbUri) ; // , conf.mongoDbName);
+// var db = mongoose.createConnection(conf.mongoDbUri) ; // , conf.mongoDbName);
 
 // nodejistu:  mongoose.connect('mongodb://nodejitsu:e052b67bd8b033100b92965756b1d4b8@alex.mongohq.com:10087/nodejitsudb148589429036');
 
@@ -32,7 +35,7 @@ exports.newUser = function(obj) {
     ret.email = obj.email;
     ret.name = obj.name;
   }
-  ret.reportDropboxAddr = 'pnltracker+' + exports.randomString(8) + '@cantor.mx';
+  ret.reportDropboxAddr = conf.statementAddressPrefix + exports.randomString(8) + '@cantor.mx';
   return ret;
 }; 
 

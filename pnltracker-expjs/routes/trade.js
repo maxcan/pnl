@@ -1,5 +1,6 @@
 var Models = require('../models') ;
-var util = require('util') ;
+var Util = require('util') ;
+var util = require("../util.js");
 var _ = require('underscore');
 
 var  mkApiFill = function(fill) {
@@ -22,6 +23,7 @@ var mkApiTrade = function (t) {
 
 exports.list = function(req, res){
   if (!req.user) {res.send(403, "authentication required");}
+  util.blockCache(res);
   Models.Trade.find({owner: req.user._id}, function(err, trades) {
     if (err) res.send(500, "Could not Fetch your trades");
     var apiTrades = _.map(trades, mkApiTrade);
@@ -32,5 +34,6 @@ exports.list = function(req, res){
 
 exports.show = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
+  util.blockCache(res);
   res.send(req.user);
 };
