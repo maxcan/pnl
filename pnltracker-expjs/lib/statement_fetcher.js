@@ -38,14 +38,11 @@ function openInbox(cb) {
   if (imapIsConnected) {
     imap.openBox('INBOX', false, cb);
   } else { 
-    console.log('connecting to imap..');  // _DEBUG
     imap.connect(function(err) {
       imapIsConnected = true;
       if (err) {
-        console.log('Error in imap connect: ' + err);  // _DEBUG
         die(err);
       }
-      console.log('connected to IMAP');  // _DEBUG
       imap.openBox('INBOX', false, cb);
     });
   }
@@ -67,16 +64,15 @@ function mostRecentMessage(cb) {
 };
 
 exports.processMailArchive = function (err, mailMsg) { 
-  console.log('processMailArchive ENTERING');  // _DEBUG
   if (err) {
-    console.log('ERROR in mail processing: ' + err);  // _DEBUG
+    console.log('ERROR in mail processing: ' + err); 
     throw err;
   }
 
   if (mailMsg.subject.indexOf('Interactive Brokers Daily Trade Report') != -1) {
     Models.User.findOne({reportDropboxAddr : { $in: mailMsg.to}},function(err,usr) {
       if (err) {throw err; }
-      _.each(mailMsg.attachments, handleIbAttachment);
+      if (usr) _.each(mailMsg.attachments, handleIbAttachment);
       function handleIbAttachment(attachment) {
         if ((attachment.processed === false) &&
             (attachment.name.indexOf('DailyTradeReport') != -1)) {
@@ -95,16 +91,14 @@ exports.processMailArchive = function (err, mailMsg) {
 }; 
 
 exports.checkMail = function(owner ) {
-  console.log('    MAIL about to open the inbox');  // _DEBUG
   openInbox(function(err, mailbox) {
     if (err) die(err);
     imap.search([ 'UNSEEN'], function(err, results) {
       if (err)  {
-        console.log(' error in check mail: ' + err);  // _DEBUG
+        console.log(' error in check mail: ' + err); 
         throw err;
       }
       if (results.length != 0) { 
-        console.log('MAIL - found messages.  iterating');  // _DEBUG
         var fetch = imap.fetch(results
           , { request: { headers: false, body: 'full'} 
             , markSeen: true 
@@ -120,7 +114,6 @@ exports.checkMail = function(owner ) {
                          , processed : false
                          };
               });
-              console.log('    about ot save the message');  // _DEBUG
               var mailObj = { owner   : owner
                             , to      : _.pluck(mail.to, 'address')
                             , from    : mail.from[0].address

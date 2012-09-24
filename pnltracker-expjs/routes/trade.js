@@ -16,7 +16,7 @@ var mkApiTrade = function (t) {
   ret.netCash = t.netCash;
   ret.totalBuy = t.totalBuy;
   ret.totalSell = t.totalSell;
-  _.each(['_id', 'owner', 'symbol','isOpen'], function(k) { ret[k] = t[k];} );
+  _.each(['_id', 'owner', 'symbol','isOpen', 'openDate', 'duration'], function(k) { ret[k] = t[k];} );
   ret.fills  = _.map(t.fills, mkApiFill);
   return ret;
 } ; 

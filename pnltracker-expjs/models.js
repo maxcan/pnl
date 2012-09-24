@@ -57,7 +57,6 @@ fillSchema.virtual('netCash').get(function() {
 var tradeSchema = new mongoose.Schema(
     { owner     : {type: Types.ObjectId, ref: 'User'}
     , symbol    : String
-    , openDate  : Date
     , fills     : [fillSchema]
     , isOpen    : Boolean
     , acctId    : String
@@ -75,6 +74,27 @@ tradeSchema.virtual('netQty').get(function() {
 
 tradeSchema.virtual('totalBuy').get(function() {
   return _.reduce(this.fills,function(sm,fl) {return sm + (fl.qty > 0 ? fl.qty : 0);},0);
+});
+
+tradeSchema.virtual('openDate').get(function() {
+  var fills = this.fills;
+  if (fills.length === 0) return null;
+  var dt = fills[0].date;
+  _.each(fills, function(fl){if (fl.date < dt) dt = fl.date;});
+  return dt;
+});
+
+tradeSchema.virtual('closeDate').get(function() {
+  var fills = this.fills;
+  if (fills.length === 0) return null;
+  var dt = fills[0].date;
+  _.each(fills, function(fl){if (fl.date > dt) dt = fl.date;});
+  return dt;
+});
+
+tradeSchema.virtual('duration').get(function() {
+  var cl = this.closeDate;
+  if (cl) return cl-this.openDate; else return null;
 });
 
 tradeSchema.virtual('totalSell').get(function() {

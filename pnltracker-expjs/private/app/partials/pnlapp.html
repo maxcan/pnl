@@ -1,6 +1,5 @@
-<p>partial for pnl home</p>
 <div ng-controller="HomeCtrl">
-  <h1> name = {{user.name}} </h1>
+  <!-- <h1> name = {{user.name}} </h1> --> 
   <h2> email = {{user.email}} </h2>
   <h2> 
     dropbox = 
@@ -8,7 +7,7 @@
       {{user.reportDropboxAddr[0]}}
     </a>
   </h2>
-
+  <h3>Closed Trades </h3>
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -16,14 +15,42 @@
         <th>Net Cash</th>
         <th>Bot</th>
         <th>Sold</th>
+        <th>Duration</th>
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="trade in trades">
+      <tr ng-repeat="trade in trades | filter: {isOpen:false}">
         <td>{{trade.symbol}}</td>
-        <td>{{trade.netCash}}</td>
+        <td>{{trade.netCash | currency}}</td>
         <td>{{trade.totalBuy}}</td>
         <td>{{trade.totalSell}}</td>
+        <td>{{trade.duration | timespan}}</td>
+        <td>
+          <ul>
+            <li ng-repeat="fill in trade.fills">
+              Qty: {{fill.qty}} Price: {{fill.avgPx}} Date: {{fill.date}}
+            </li>
+          </ul>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <h3> Open Trades</h3>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Bot</th>
+        <th>Sold</th>
+        <th>Open Date
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="trade in trades | filter: {isOpen:true}">
+        <td>{{trade.symbol}}</td>
+        <td>{{trade.totalBuy}}</td>
+        <td>{{trade.totalSell}}</td>
+        <td>{{trade.openDate}}</td>
         <td>
           <ul>
             <li ng-repeat="fill in trade.fills">
