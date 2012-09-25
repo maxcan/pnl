@@ -142,6 +142,7 @@ app.get('/api/user',          userRoutes.show);
 app.get('/api/trades',        tradeRoutes.list);
 
 app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
+app.get('/api/report/get/:uploadId', tradeRoutes.getUpload);
 
 
 var secureStatic = express.static(__dirname+'/private');

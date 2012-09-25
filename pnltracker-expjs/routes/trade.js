@@ -1,5 +1,6 @@
 var Models = require('../models') ;
 var Util = require('util') ;
+var fs = require('fs') ;
 var util = require("../util.js");
 var _ = require('underscore');
 
@@ -44,8 +45,23 @@ exports.reportUpload = function(req, res) {
   if (req.files) {
     _.each(req.files, function(file) {
       console.log('found file.  keys = ' + _.keys(file));  // _DEBUG
+      var content = fs.readFileSync(file.path) ;
+      var uploadObj = { owner: req.user._id
+                      , content: content
+                      , mimeType: file.mime
+                      }
+      console.log(' about to create the opbject');  // _DEBUG
+      Models.Upload.create(uploadObj, function(err,upload) {
+        console.log(' created at path: ' + file.path);  // _DEBUG
+        if (err) throw err;
+        if (file.path.length - file.path.toLowerCase().indexOf('.pdf') != 4) {
+          return res.send(200);
+        } else {
+          console.log(' added pd with objectid : ' + upload._id);  // _DEBUG
+          return res.send(200, {pdfUrl: '/api/report/get/' + upload._id});
+        }
+      });
     });
-    return res.send(200);
   } else {
     return res.send(401, "no files");
   }

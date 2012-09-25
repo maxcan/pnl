@@ -5,8 +5,7 @@
 // old example controllers from angular
 function FileUploadCtrl($scope)
 {
-  $scope.uploader = $('#upload_container').pluploadQueue({
-  // $scope.uploader = new plupload.Uploader({
+  var uploader = $('#upload_container').pluploadQueue({
     runtimes : 'html5,html4',
     url : '../../api/report/upload', 
     max_file_size : '10mb',
@@ -14,11 +13,14 @@ function FileUploadCtrl($scope)
     drop_element: 'drop_area'
   });
 
-  $scope.uploader.init();
+  $scope.uploader = uploader.pluploadQueue();
+  // $scope.uploader.init();
+  $scope.uploader.bind('FileUploaded', function(up, files, res) {
+    if (res) console.log(' res: ' + JSON.stringify(res));  // _DEBUG
+    if (!res) console.log(' res is null' )  ;
+    // $scope.$apply();
+  }); 
 
-  // $scope.uploader.bind('FilesAdded', function(up, files) {
-  //   $scope.$apply();
-  // }); 
 }
 // FileUploadCtrl.$inject = ['scope'];
 

@@ -101,6 +101,11 @@ tradeSchema.virtual('totalSell').get(function() {
   return _.reduce(this.fills,function(sm,fl) {return sm + (fl.qty < 0 ? fl.qty : 0);},0);
 });
 
+var uploadSchema = new mongoose.Schema(
+    { owner         : {type: Types.ObjectId, ref: 'User'}
+    , mimeType      : String
+    , content       : Buffer
+    });
 var mailAttachmentSchema = new mongoose.Schema(
     { name      : String
     , mimeType  : String
@@ -122,6 +127,8 @@ var mailArchiveSchema = new mongoose.Schema(
 
 var User  = db.model('User', userSchema);
 exports.User = User;
+var Upload = db.model('Upload', uploadSchema);
+exports.Upload = Upload;
 var MailArchive  = db.model('User', mailArchiveSchema);
 exports.MailArchive = MailArchive;
 var Fill = db.model('Fill', fillSchema);
