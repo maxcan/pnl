@@ -99,6 +99,10 @@ everyauth.everymodule.findUserById( function (userId, callback) {
   });
 });
 
+var bodyParserWithFiles = new express.bodyParser({ keepExtensions: true, uploadDir: __dirname + "/tmp/" });
+// var bodyParserNoFiles = new express.bodyParser();
+// bodyParserNoFiles.parse['multipart/form-data'] = function(a, b, next) { next(); }
+
 app.configure(function(){
   app.set('port', conf.port);
   app.set('host', conf.host);
@@ -110,19 +114,10 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({secret: 'blalblsdfsdf'}));
-  app.use(express.bodyParser());
+  app.use(express.json());
+  app.use(express.urlencoded());
+
   app.use(everyauth.middleware());
-  // app.use(function(req,res,next) {
-  //   console.log('about to print debug stuff');  // _DEBUG
-  //   try {
-  //     //console.log('cookies:  ' + JSON.stringify(req.cookies));  // _DEBUG
-  //     console.log('session:  ' + util.inspect(req.session, false, null, true));  // _DEBUG
-  //     //console.log('signed cookies:  ' + JSON.stringify(req.signedCookies));  // _DEBUG
-  //   } catch (e) {
-  //     console.log('excepitn: ' + e);  // _DEBUG
-  //   }
-  //   next();
-  // });
 
   app.use(app.router);
   app.use(require('stylus').middleware(__dirname + '/public'));
@@ -139,13 +134,14 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-app.get('/', routes.index);
-app.get('/users', userRoutes.list);
-app.get('/test/users/ld', userRoutes.loadDummyTrades);
-app.get('/test/users/set', userRoutes.setDummyUser);
-app.get('/api/user', userRoutes.show);
-app.get('/api/trades', tradeRoutes.list);
+app.get('/' ,                 routes.index);
+app.get('/users',             userRoutes.list);
+app.get('/test/users/ld',     userRoutes.loadDummyTrades);
+app.get('/test/users/set',    userRoutes.setDummyUser);
+app.get('/api/user',          userRoutes.show);
+app.get('/api/trades',        tradeRoutes.list);
 
+app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
 
 
 var secureStatic = express.static(__dirname+'/private');

@@ -18,3 +18,4 @@ project/plugins/project/
 .DS_Store
 node_modules
 gen/
+tmp/*

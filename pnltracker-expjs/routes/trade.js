@@ -37,3 +37,16 @@ exports.show = function(req, res) {
   util.blockCache(res);
   res.send(req.user);
 };
+
+exports.reportUpload = function(req, res) {
+  if (!req.user) {res.send(403, "authentication required");}
+  util.blockCache(res);
+  if (req.files) {
+    _.each(req.files, function(file) {
+      console.log('found file.  keys = ' + _.keys(file));  // _DEBUG
+    });
+    return res.send(200);
+  } else {
+    return res.send(401, "no files");
+  }
+};
