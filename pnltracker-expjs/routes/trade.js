@@ -39,6 +39,38 @@ exports.show = function(req, res) {
   res.send(req.user);
 };
 
+exports.getUpload = function(req, res) {
+  if (!req.user) {res.send(403, "authentication required");}
+  if (!req.params.uploadId) { res.send(400, "upload id required");}
+  Models.Upload.findOne({_id: req.params.uploadId}, function(err, upload) {
+    if (err) throw err;
+    if (upload) {
+      res.send(200, upload.content)
+    } else {
+      res.send(404, "no such file");
+    }
+
+  });
+  
+}
+exports.setReportText = function(req, res) {
+  if (!req.user) {res.send(403, "authentication required");}
+  Models.Upload.findOne({_id: req.params.uploadId}, function(err, upload) {
+    if (err) throw err;
+    if (upload) {
+      upload.extractedText = req.body.pdfText;
+      upload.save(function(err, savedUpload) {
+        if (err) throw err;
+        res.send(200, upload.content)
+      });
+    } else {
+      res.send(404, "no such file");
+    }
+  });
+  // console.log('got result: ' + req.body.pdfText);  // _DEBUG
+  
+}; 
+
 exports.reportUpload = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
   util.blockCache(res);
@@ -58,7 +90,9 @@ exports.reportUpload = function(req, res) {
           return res.send(200);
         } else {
           console.log(' added pd with objectid : ' + upload._id);  // _DEBUG
-          return res.send(200, {pdfUrl: '/api/report/get/' + upload._id});
+          return res.send(200,  { pdfUrl: '/api/report/get/' + upload._id
+                                , setTextUrl:  '/api/report/setText/' + upload._id
+                                });
         }
       });
     });

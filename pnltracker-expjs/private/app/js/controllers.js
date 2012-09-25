@@ -13,11 +13,57 @@ function FileUploadCtrl($scope)
     drop_element: 'drop_area'
   });
 
+  function handlePdfResponse(pdfUrl, postUrl) {
+
+    console.log(' handlePdfResponse with urk: ' + pdfUrl);  // _DEBUG
+    PDFJS.disableWorker = true;
+    var reportLines = [];
+    PDFJS.getDocument(pdfUrl).then(function(pdf) {
+      var totalPages = pdf.numPages;
+      var catPage = function(curPage) {
+        try { 
+          pdf.getPage(curPage).then(function(page) {
+            page.getTextContent().then(function(bidiResults) {
+              for (var k in bidiResults.bidiTexts) {
+                reportLines.push(bidiResults.bidiTexts[k].str);
+              }
+              if (curPage < totalPages) {
+                catPage(curPage + 1);
+              } else {
+                $.post(postUrl, {pdfText: reportLines});
+                debugger;
+                // ok, send this to the server
+              }
+            });
+          });
+        } catch (e) {
+          // Probably means we overshot the number over available pages
+          throw e;
+        }
+      };
+      catPage(1);
+    });
+  };
   $scope.uploader = uploader.pluploadQueue();
   // $scope.uploader.init();
   $scope.uploader.bind('FileUploaded', function(up, files, res) {
-    if (res) console.log(' res: ' + JSON.stringify(res));  // _DEBUG
-    if (!res) console.log(' res is null' )  ;
+    console.log('file uploaded: res: '+ JSON.stringify(res));  // _DEBUG
+    if (res && res.response) {
+      try {
+        var obj = JSON.parse(res.response);
+        if (obj.pdfUrl && obj.setTextUrl) {
+          console.log('about to handler');  // _DEBUG
+          
+          handlePdfResponse(obj.pdfUrl, obj.setTextUrl) ;
+        } else {
+          console.log('no PDF url');  // _DEBUG
+        }
+      } catch (e) {
+        console.log('BAD JSON FROM SERVER: ' + e ); 
+      }
+    } else {
+      console.log(' res is null' )  ;
+    }
     // $scope.$apply();
   }); 
 

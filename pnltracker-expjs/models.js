@@ -105,6 +105,7 @@ var uploadSchema = new mongoose.Schema(
     { owner         : {type: Types.ObjectId, ref: 'User'}
     , mimeType      : String
     , content       : Buffer
+    , extractedText : [String]
     });
 var mailAttachmentSchema = new mongoose.Schema(
     { name      : String
