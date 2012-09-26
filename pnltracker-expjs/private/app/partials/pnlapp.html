@@ -8,7 +8,14 @@
   <div app-upload>
     Files go here
   </div>
+  <p>
+    Filter Trades: 
+    <input ng-model="tradeFilter">
+  </p>
   <h3>Closed Trades </h3>
+  <h4> 
+    Total PnL:  <span ng-bind="filteredClosedTrades  | pluck:'netCash' | sum | currency"/>
+  </h4>
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -20,7 +27,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="trade in trades | filter: {isOpen:false}">
+      <tr ng-repeat="trade in filteredClosedTrades = (trades | filter: tradeFilter | filter: {isOpen:false} )">
         <td>{{trade.symbol}}</td>
         <td>{{trade.netCash | currency}}</td>
         <td>{{trade.totalBuy}}</td>
@@ -47,11 +54,11 @@
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="trade in trades | filter: {isOpen:true}">
+      <tr ng-repeat="trade in trades | filter: tradeFilter | filter: {isOpen:true}">
         <td>{{trade.symbol}}</td>
         <td>{{trade.totalBuy}}</td>
         <td>{{trade.totalSell}}</td>
-        <td>{{trade.openDate}}</td>
+        <td>{{trade.openDate | date:'medium'}}</td>
         <td>
           <ul>
             <li ng-repeat="fill in trade.fills">

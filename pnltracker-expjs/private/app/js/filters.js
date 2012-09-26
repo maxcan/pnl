@@ -2,14 +2,36 @@
 
 /* Filters */
 
-angular.module('pnlApp.filters', []).
-  filter('interpolate', ['version', function(version) {
+var pnlApp = angular.module('pnlApp.filters', []);
+
+pnlApp.filter('pluck', function() {
+  return function(arr, fld) {
+    var newArr = [];
+    for (var k in arr) {
+      newArr.push(arr[k][fld]);
+    }; 
+    return newArr;
+  }  
+});
+
+
+pnlApp.filter('sum', function() {
+  return function(arr, fld) {
+    var total = 0;
+    for (var k in arr) {
+      total += Number(arr[k]);                
+    }; 
+    return total;
+  }  
+});
+
+pnlApp.filter('interpolate', ['version', function(version) {
     return function(text) {
       return String(text).replace(/\%VERSION\%/mg, version);
     }
-  }]).
+  }]);
 
-  filter('timespan', function() {
+pnlApp.filter('timespan', function() {
     return function(text) {
       var totalTime=  Number(text);
       var mills = totalTime % 1000;
