@@ -2,6 +2,7 @@ var Models = require('../models') ;
 var Util = require('util') ;
 var fs = require('fs') ;
 var util = require("../util.js");
+var TradeStation = require("../lib/parsers/ts.js");
 var _ = require('underscore');
 
 var  mkApiFill = function(fill) {
@@ -61,7 +62,12 @@ exports.setReportText = function(req, res) {
       upload.extractedText = req.body.pdfText;
       upload.save(function(err, savedUpload) {
         if (err) throw err;
-        res.send(200, upload.content)
+        var trades = TradeStation.parseTradeStationExtractedText(upload.extractedText);
+        _.each(trades, function(t){_.extend(t,{owner: req.user._id})});
+        Models.mkTradesAndSave(req.user._id, trades, function(err) {
+          if (err) {throw err; }
+          res.send(200, upload.content)
+        });
       });
     } else {
       res.send(404, "no such file");

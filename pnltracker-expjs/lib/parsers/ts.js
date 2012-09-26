@@ -191,5 +191,8 @@ function stateNew(remLines, fillStack) {
   return stateNew(remLines, fillStack);
 }
 
-var s = stateNew(sampleExtract,[]);
-console.log(util.inspect(s, false, null, true));  // _DEBUG []);
+exports.parseTradeStationExtractedText = function(lines) {
+  return stateNew(lines,[]);  
+}; 
+
+

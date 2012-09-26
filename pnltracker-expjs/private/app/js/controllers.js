@@ -3,7 +3,7 @@
 /* Controllers */
 
 // old example controllers from angular
-function FileUploadCtrl($scope)
+function FileUploadCtrl($scope, Trades, $rootScope)
 {
   var uploader = $('#upload_container').pluploadQueue({
     runtimes : 'html5,html4',
@@ -15,7 +15,6 @@ function FileUploadCtrl($scope)
 
   function handlePdfResponse(pdfUrl, postUrl) {
 
-    console.log(' handlePdfResponse with urk: ' + pdfUrl);  // _DEBUG
     PDFJS.disableWorker = true;
     var reportLines = [];
     PDFJS.getDocument(pdfUrl).then(function(pdf) {
@@ -30,8 +29,10 @@ function FileUploadCtrl($scope)
               if (curPage < totalPages) {
                 catPage(curPage + 1);
               } else {
-                $.post(postUrl, {pdfText: reportLines});
-                debugger;
+                $.post(postUrl, {pdfText: reportLines}, function() {
+                  $rootScope.$broadcast('refreshTrades');
+                  // $rootScope.$apply();
+                });
                 // ok, send this to the server
               }
             });
@@ -52,7 +53,6 @@ function FileUploadCtrl($scope)
       try {
         var obj = JSON.parse(res.response);
         if (obj.pdfUrl && obj.setTextUrl) {
-          console.log('about to handler');  // _DEBUG
           
           handlePdfResponse(obj.pdfUrl, obj.setTextUrl) ;
         } else {
@@ -75,7 +75,12 @@ function TradeDtlCtrl($scope, User, Trades) {
   $scope.trades = Trades.get();
 }
 
-function HomeCtrl($scope, User, Trades) {
+function HomeCtrl($scope, User, Trades, $rootScope) {
+  $rootScope.$on('refreshTrades', function() {
+    $scope.user = User.get();
+    $scope.trades = Trades.get();
+
+  });
   $scope.user = User.get();
   $scope.trades = Trades.get();
 }
