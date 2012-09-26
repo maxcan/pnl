@@ -51,7 +51,8 @@ var fillSchema = new mongoose.Schema(
     });
 
 fillSchema.virtual('netCash').get(function() {
-  return ((-1 * this.qty * this.avgPx) + this.fees)
+  var mult = (this.symbol.length > 5 ? 100 : 1)
+  return ((-1 * this.qty * this.avgPx * mult) + this.fees )
 });
 
 var tradeSchema = new mongoose.Schema(
