@@ -4,7 +4,8 @@ var _ = require('underscore');
 var baseSettings = 
   { host: 'dev.pnltracker.com'
   , port: 3000
-
+  
+  , isDev: false
   // oauth stuff
   , oauthGoogleAppId : '903799978070.apps.googleusercontent.com'
   , oauthGoogleAppSecret : 'aUfnPV75qEtNjrhEaczfJu__'
@@ -40,7 +41,7 @@ var stgSettings = _.extend(_.clone(baseSettings),
       , oauthFacebookAppSecret : 'c7b00c680d9b02d45f803c6d5b1a86a3'
       });
 var devSettings = _.extend(_.clone(baseSettings),
-      {
+      { isDev: true
 
       });
 

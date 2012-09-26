@@ -5,18 +5,20 @@ block content
   p Welcome to #{title}
   if user
     p #{user}
-    p
-      a(href="/test/users/ld") prepop some trades
-    p
-      a(href="/api/trades") see some trades
+    if isDev
+      p
+        a(href="/test/users/ld") prepop some trades
+      p
+        a(href="/api/trades") see some trades
     p
       a(href="/secure/app/") go to the app
     p
       a(href="/logout") logout
   else
     p not logged in
-    p
-      a(href="/test/users/set" ) dummy login
+    if isDev 
+      p
+        a(href="/test/users/set" ) dummy login
     p
       a(href="/auth/facebook") authenticate with facebook
     p
