@@ -83,4 +83,9 @@ function HomeCtrl($scope, User, Trades, $rootScope) {
   });
   $scope.user = User.get();
   $scope.trades = Trades.get();
+  $scope.tradeFilter = '';
+  $scope.setTradeFilter = function(s) {
+    $scope.tradeFilter = s; 
+    $scope.$apply();
+  } 
 }

@@ -1,22 +1,29 @@
 <div ng-controller="HomeCtrl">
   <!-- <h1> name = {{user.name}} </h1> --> 
-  <h2> email = {{user.email}} </h2>
-  <h2> 
-    dropbox = 
-    <a href="mailto://{{user.reportDropboxAddr[0]}}">{{user.reportDropboxAddr[0]}}</a>
-  </h2>
-  <div app-upload>
-    Files go here
+  <div class="row">
+    <div class="span6">
+      <h2> email = {{user.email}} </h2>
+      <h2> 
+        dropbox = 
+        <a href="mailto://{{user.reportDropboxAddr[0]}}">{{user.reportDropboxAddr[0]}}</a>
+      </h2>
+    </div>
+    <div class="span6">
+      <div app-upload>
+        Files go here
+      </div>
+    </div>
   </div>
   <p>
     Filter Trades: 
     <input ng-model="tradeFilter">
+    <a ng-click="tradeFilter = ''">Clear Filter</a>
   </p>
   <h3>Closed Trades </h3>
   <h4> 
     Total PnL:  <span ng-bind="filteredClosedTrades  | pluck:'netCash' | sum | currency"/>
   </h4>
-  <table class="table table-bordered">
+  <table class="table table-bordered table-condensed">
     <thead>
       <tr>
         <th>Symbol</th>
@@ -28,23 +35,32 @@
     </thead>
     <tbody>
       <tr ng-repeat="trade in filteredClosedTrades = (trades | filter: tradeFilter | filter: {isOpen:false} )">
-        <td>{{trade.symbol}}</td>
+        <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
         <td>{{trade.netCash | currency}}</td>
         <td>{{trade.totalBuy}}</td>
         <td>{{trade.totalSell}}</td>
         <td>{{trade.duration | timespan}}</td>
         <td>
-          <ul>
-            <li ng-repeat="fill in trade.fills">
-              Qty: {{fill.qty}} Price: {{fill.avgPx}} Date: {{fill.date}}
-            </li>
-          </ul>
+          Fills:
+          <table class="table table-bordered table-condensed fill-minitable">
+            <thead>
+              <tr><td>Qty</td><td></td><td>Price</td><td>Date</td></tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="fill in trade.fills">
+                <td> {{fill.qty}}</td>
+                <td> @ </td>
+                <td>{{fill.avgPx}}</td> 
+                <td>{{fill.date | date:'medium'}}</td>
+              </tr>
+            </tbody>
+          </table>
         </td>
       </tr>
     </tbody>
   </table>
   <h3> Open Trades</h3>
-  <table class="table table-bordered">
+  <table class="table table-bordered table-condensed">
     <thead>
       <tr>
         <th>Symbol</th>
@@ -55,16 +71,25 @@
     </thead>
     <tbody>
       <tr ng-repeat="trade in trades | filter: tradeFilter | filter: {isOpen:true}">
-        <td>{{trade.symbol}}</td>
+        <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
         <td>{{trade.totalBuy}}</td>
         <td>{{trade.totalSell}}</td>
         <td>{{trade.openDate | date:'medium'}}</td>
         <td>
-          <ul>
-            <li ng-repeat="fill in trade.fills">
-              Qty: {{fill.qty}} Price: {{fill.avgPx}} Date: {{fill.date}}
-            </li>
-          </ul>
+          Fills:
+          <table class="table table-bordered table-condensed fill-minitable">
+            <thead>
+              <tr><td>Qty</td><td></td><td>Price</td><td>Date</td></tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="fill in trade.fills">
+                <td> {{fill.qty}}</td>
+                <td> @ </td>
+                <td>{{fill.avgPx}}</td> 
+                <td>{{fill.date | date:'medium'}}</td>
+              </tr>
+            </tbody>
+          </table>
         </td>
       </tr>
     </tbody>
