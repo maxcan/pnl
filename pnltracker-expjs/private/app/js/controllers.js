@@ -75,6 +75,32 @@ function TradeDtlCtrl($scope, User, Trades) {
   $scope.trades = Trades.get();
 }
 
+function AdminCtrl($scope, $location, User
+                  , AdminUsers
+                  , AdminUploads
+                  , AdminMails
+                  , AdminTrades) {
+  User.get({}, function(u) {
+    $scope.user =  u;
+    if (_.indexOf(u.roles, 'admin') === -1) {
+      console.log('unauthorized');  // _DEBUG
+      $location.path( "/" );
+    }
+
+  });
+  $scope.adminUsers     = AdminUsers.get();
+  $scope.adminUploads   = AdminUploads.get();
+  $scope.adminMails     = AdminMails.get();
+  $scope.adminTrades    = AdminTrades.get();
+  $scope._ = _;
+  $scope.keys = function(k) {
+    if (!k) return null;
+    if (typeof(k) === 'object') return _.keys(k);
+    if (typeof(k) === 'array') return _.range(k);
+    return null;
+  }
+}
+
 function HomeCtrl($scope, User, Trades, $rootScope) {
   $rootScope.$on('refreshTrades', function() {
     $scope.user = User.get();
@@ -84,8 +110,14 @@ function HomeCtrl($scope, User, Trades, $rootScope) {
   $scope.user = User.get();
   $scope.trades = Trades.get();
   $scope.tradeFilter = '';
+  var toggleAsc = true;
+  $scope.setTradeSort = function(s) {
+    $scope.trades = _.sortBy($scope.trades, function(o){return o[s];});
+    if (toggleAsc) $scope.trades.reverse();
+    toggleAsc = !toggleAsc;
+  }
   $scope.setTradeFilter = function(s) {
     $scope.tradeFilter = s; 
-    $scope.$apply();
+    //$scope.$apply();
   } 
 }

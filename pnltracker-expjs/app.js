@@ -3,17 +3,18 @@
  */
 
 var express = require('express')
-, routes = require('./routes')
-, userRoutes = require('./routes/user')
-, tradeRoutes = require('./routes/trade')
-, http = require('http')
-, util = require('util')
-, everyauth = require('everyauth')
-, path = require('path')
-, Models = require('./models')
-, fetcher = require('./lib/statement_fetcher')
-, conf    = require('./config.js').genConf()
-;
+var routes = require('./routes');
+var userRoutes = require('./routes/user');
+var tradeRoutes = require('./routes/trade');
+var adminRoutes = require('./routes/admin');
+var http = require('http');
+var util = require('util');
+var everyauth = require('everyauth');
+var path = require('path');
+var Models = require('./models');
+var fetcher = require('./lib/statement_fetcher');
+var conf    = require('./config.js').genConf();
+var _ = require('underscore');
 
 var app = express();
 
@@ -103,6 +104,18 @@ var bodyParserWithFiles = new express.bodyParser({ keepExtensions: true, uploadD
 // var bodyParserNoFiles = new express.bodyParser();
 // bodyParserNoFiles.parse['multipart/form-data'] = function(a, b, next) { next(); }
 
+var requireRole = function (pat, role) {
+  return function(req, res, next) {
+    if (!req.path.match(pat)) return next();
+    if (!req.user) return res.send(401);
+    if (_.indexOf(req.user.roles, role) != -1) {
+      return next();
+    } else {
+      return res.send(401);
+    }
+  };
+} ; 
+
 app.configure(function(){
   app.set('port', conf.port);
   app.set('host', conf.host);
@@ -116,16 +129,17 @@ app.configure(function(){
   app.use(express.session({secret: 'blalblsdfsdf'}));
   app.use(express.json());
   app.use(express.urlencoded());
-
-  app.use(everyauth.middleware());
-
-  app.use(app.router);
-  app.use(require('stylus').middleware(__dirname + '/public'));
   app.use(require('less-middleware')({
             dest: __dirname + '/public/gen',
             src: __dirname + '/assets/less',
             compress: true
         }));
+
+  app.use(everyauth.middleware());
+
+  app.use(requireRole(/.*admin.*/, 'admin'));
+  app.use(app.router);
+  app.use(require('stylus').middleware(__dirname + '/public'));
   app.use(express.static(path.join(__dirname, 'public')));
 
 });
@@ -145,6 +159,11 @@ app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
 app.get('/api/report/get/:uploadId', tradeRoutes.getUpload);
 app.post('/api/report/setText/:uploadId', tradeRoutes.setReportText);
 
+app.get('/api/admin/users',   adminRoutes.usersList);
+app.get('/api/admin/trades',   adminRoutes.tradesList);
+app.get('/api/admin/uploads',   adminRoutes.uploadsList);
+app.get('/api/admin/mails',   adminRoutes.mailsList);
+
 
 var secureStatic = express.static(__dirname+'/private');
 
@@ -161,6 +180,6 @@ app.get('/secure/*', function(req, res) {
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
   var mailInterval = 1000 * 10; // 30 sec
-  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
-  setInterval(fetcher.checkMail, mailInterval);
+  //  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
+  //  setInterval(fetcher.checkMail, mailInterval);
 });

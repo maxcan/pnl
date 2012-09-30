@@ -42,3 +42,20 @@ pnlApp.filter('timespan', function() {
       return String(days + " Days, " + hours + ":" + mins + ":" + secs + "." + mills); 
     }
   })  ;
+
+
+pnlApp.filter('pp', function() {
+    return function(obj) {
+      if (typeof(obj) === 'array' || typeof(obj) === 'object') {
+        var ret = '<dl>';
+        for (var k in obj) {
+          ret += '<dt>'+k+'</dt><dd>'+obj[k]+'</dd>';
+        }
+        ret += '</dl>';
+        return ret;
+      } else { 
+        return obj;
+      }
+    }
+  })  ;
+

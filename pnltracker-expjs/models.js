@@ -14,6 +14,7 @@ exports.closeConnection = function() {db.close();}
 var userSchema = new mongoose.Schema(
     { name              : String 
     , email             : String
+    , roles             : [String]
     , openId            : String
     , openIdProfile     : String
     , reportDropboxAddr  : [String]
@@ -62,6 +63,7 @@ var tradeSchema = new mongoose.Schema(
     , isOpen    : Boolean
     , acctId    : String
     , mailRef   : {type: Types.ObjectId, ref: 'MailArchive'}
+    , uploadeRef: {type: Types.ObjectId, ref: 'Upload'} 
     // , isLong    : 'Boolean'
     });
 
@@ -101,6 +103,32 @@ tradeSchema.virtual('duration').get(function() {
 tradeSchema.virtual('totalSell').get(function() {
   return _.reduce(this.fills,function(sm,fl) {return sm + (fl.qty < 0 ? fl.qty : 0);},0);
 });
+
+tradeSchema.virtual('vwapBuy').get(function() {
+  var q = 0, p = 0;
+  _.each(this.fills,function(fl) {
+    if (fl.qty > 0) { q += fl.qty; p += (fl.qty * fl.avgPx);}
+  });
+  if (q) return (p / q);
+  return null;
+});
+
+tradeSchema.virtual('vwapSell').get(function() {
+  var q = 0, p = 0;
+  _.each(this.fills,function(fl) {
+    if (fl.qty < 0) { q += fl.qty; p += (fl.qty * fl.avgPx);}
+  });
+  if (q) return Math.abs(p / q);
+  return null;
+});
+
+
+tradeSchema.virtual('maxPrin').get(function() {
+  return (this.fills[0].qty > 0 ? this.totalBuy  * this.vwapBuy
+                                : Math.abs(this.totalSell * this.vwapSell ));
+});
+
+
 
 var uploadSchema = new mongoose.Schema(
     { owner         : {type: Types.ObjectId, ref: 'User'}

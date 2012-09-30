@@ -15,10 +15,13 @@ var  mkApiFill = function(fill) {
 var mkApiTrade = function (t) { 
   var ret = {};
   console.log(ret);  // _DEBUG
+  _.each( ['_id', 'owner', 'symbol','isOpen', 'openDate', 'duration' ]
+        , function(k) { ret[k] = t[k];} );
   ret.netCash = t.netCash;
   ret.totalBuy = t.totalBuy;
   ret.totalSell = t.totalSell;
-  _.each(['_id', 'owner', 'symbol','isOpen', 'openDate', 'duration'], function(k) { ret[k] = t[k];} );
+  ret.vwapSell = t.vwapSell;
+  ret.vwapBuy = t.vwapBuy;
   ret.fills  = _.map(t.fills, mkApiFill);
   return ret;
 } ; 

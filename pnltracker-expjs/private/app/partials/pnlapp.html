@@ -26,11 +26,13 @@
   <table class="table table-bordered table-condensed">
     <thead>
       <tr>
-        <th>Symbol</th>
-        <th>Net Cash</th>
-        <th>Bot</th>
-        <th>Sold</th>
-        <th>Duration</th>
+        <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
+        <th class="sortable" ng-click="setTradeSort('netCash')">Net Cash</th>
+        <th class="sortable" ng-click="setTradeSort('Size')">Size</th>
+        <th class="sortable" ng-click="setTradeSort('maxPrin')">Max Prin</th>
+        <th class="sortable" ng-click="setTradeSort('duration')">Duration</th>
+        <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
+        <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
       </tr>
     </thead>
     <tbody>
@@ -38,8 +40,10 @@
         <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
         <td>{{trade.netCash | currency}}</td>
         <td>{{trade.totalBuy}}</td>
-        <td>{{trade.totalSell}}</td>
+        <td>{{trade.maxPrin | currency}}</td>
         <td>{{trade.duration | timespan}}</td>
+        <td>{{trade.vwapBuy | currency}}</td>
+        <td>{{trade.vwapSell | currency}}</td>
         <td>
           Fills:
           <table class="table table-bordered table-condensed fill-minitable">
@@ -63,10 +67,12 @@
   <table class="table table-bordered table-condensed">
     <thead>
       <tr>
-        <th>Symbol</th>
-        <th>Bot</th>
-        <th>Sold</th>
-        <th>Open Date
+        <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
+        <th class="sortable" ng-click="setTradeSort('totalBuy')">Bot</th>
+        <th class="sortable" ng-click="setTradeSort('totalSell')">Sold</th>
+        <th class="sortable" ng-click="setTradeSort('date')">Open Date
+        <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
+        <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
       </tr>
     </thead>
     <tbody>
@@ -75,6 +81,8 @@
         <td>{{trade.totalBuy}}</td>
         <td>{{trade.totalSell}}</td>
         <td>{{trade.openDate | date:'medium'}}</td>
+        <td>{{trade.vwapBuy | currency}}</td>
+        <td>{{trade.vwapSell | currency}}</td>
         <td>
           Fills:
           <table class="table table-bordered table-condensed fill-minitable">
