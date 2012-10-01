@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var conf    = require('./config.js').genConf();
-var Util = require('./util.js');
+var AppUtil = require('./appUtil.js');
 var util = require('util');
 var _ = require('underscore');
 var db = mongoose.connect(conf.mongoDbUri) ; // , conf.mongoDbName);
@@ -13,7 +13,7 @@ var Types = mongoose.Schema.Types;
 exports.closeConnection = function() {db.close();}
 var userSchema = new mongoose.Schema(
     { name              : String 
-    , email             : String
+    , email             : { type: String, required: true}
     , roles             : [String]
     , openId            : String
     , openIdProfile     : String
@@ -40,14 +40,26 @@ exports.newUser = function(obj) {
   return ret;
 }; 
 
+var securityTypes = ['stock','furure','option','cash','bond'];
+
+var securitySchema = new mongoose.Schema(
+    { symbol        : {type: String, required: true}
+    , securityType  : {type: String , enum: securityTypes}
+    , expDt         : Date
+    , strike        : Number
+    , multiplier    : {type: Number, default: 1, min: 1 }
+    , putCall       : {type: String, enum: ['P','C']}
+    , underlying    : {type: Types.ObjectId, ref: 'Security'}
+    });
+
 var fillSchema = new mongoose.Schema(
     { owner   : {type: Types.ObjectId, ref: 'User'}
-    , date    : Date
-    , qty     : Number
-    , avgPx   : Number
+    , date    : {type: Date, required: true}
+    , qty     : {type: Number, required: true}
+    , avgPx   : {type: Number, required: true}
     , fees    : Number // should generally be a negative number so we can add everything
-    , symbol  : String
-    , isOpen  : Boolean
+    , symbol  : {type: String, required: true}
+    , isOpen  : {type: Boolean, required: true}
     , acctId  : String
     });
 
@@ -57,14 +69,13 @@ fillSchema.virtual('netCash').get(function() {
 });
 
 var tradeSchema = new mongoose.Schema(
-    { owner     : {type: Types.ObjectId, ref: 'User'}
-    , symbol    : String
+    { owner     : {type: Types.ObjectId, ref: 'User', required: true}
+    , symbol    : {type: String, required: true}
     , fills     : [fillSchema]
     , isOpen    : Boolean
     , acctId    : String
     , mailRef   : {type: Types.ObjectId, ref: 'MailArchive'}
     , uploadeRef: {type: Types.ObjectId, ref: 'Upload'} 
-    // , isLong    : 'Boolean'
     });
 
 tradeSchema.virtual('netCash').get(function() {
@@ -165,6 +176,8 @@ var Fill = db.model('Fill', fillSchema);
 exports.Fill = Fill;
 var Trade = db.model('Trade', tradeSchema);
 exports.Trade = Trade;
+var Security = db.model('Security', securitySchema);
+exports.Security = Security;
 var MailArchive = db.model('MailArchive', mailArchiveSchema);
 exports.MailArchive = MailArchive;
 
@@ -214,7 +227,7 @@ function addFillsToTrade(trade, fills, symbol, callback) {
   }
   if (trade.symbol != symbol) 
     throw new Error ("mismatched symbol in addFillsToTrade"); 
-  var curQty = Util.sum(_.pluck(trade.fills,'qty'));
+  var curQty = AppUtil.sum(_.pluck(trade.fills,'qty'));
   var curFill = fills.shift();
   if (curQty + curFill.qty === 0) {
     // clean close

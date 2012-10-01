@@ -1,7 +1,7 @@
 var Ib = require("../lib/parsers/ib.js");
 // var Fetcher = require("../lib/statement_fetcher");
 var Models = require("../models.js");
-var Util = require('../util.js');
+var AppUtil = require('../util.js');
 var _ = require('underscore');
 var assert = require('assert');
 var fs = require('fs');
@@ -20,8 +20,8 @@ exports["Mail"] = function() {
   // Fetcher.testInbox(console.log);
   assert.fail("test");
 }
-exports["Util Functions unit testing"] = function() {
-  var s = Util.sum([1,2,2]);
+exports["AppUtil Functions unit testing"] = function() {
+  var s = AppUtil.sum([1,2,2]);
   assert.eql(5,s ,"sum should be 5 but equals: "+  s);
 }
 
@@ -74,7 +74,7 @@ exports['Model Utility Sort works'] = function() {
 
 exports['Fill splitting works'] = function() {
   var fill = {symbol:'a', date: new Date(2012,09,10), avgPx: 9, qty: 10, fees: 0.4};
-  var splitCash = Util.sum(_.map(Models.splitFill(fill, -7), Models.netCashForFill));
+  var splitCash = AppUtil.sum(_.map(Models.splitFill(fill, -7), Models.netCashForFill));
   assert.eql(Models.netCashForFill(fill), splitCash);
   Models.User.create(Models.newUser({name: 'a', email: 'a@a.com'}), function(e,u) {
     if (e) assert.fail('user creation');
