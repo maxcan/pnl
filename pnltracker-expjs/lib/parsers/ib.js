@@ -95,7 +95,7 @@ exports.parseEmailedReportString = function(ibHtmlData, owner, mailRef) {
               { date    : new Date(elements[idxDateTime])
               , qty     : Number(elements[idxQty])
               , symbol  : "ib:" + elements[idxSym]
-              , exchnge : elements[idxExchange]
+              , exchange : elements[idxExchange]
               , avgPx   : Number(elements[idxPrice])
               , fees    : Number(elements[idxComms]) + Number(elements[idxTax])
               , acctId  : elements[idxAcctId]
@@ -194,7 +194,7 @@ exports.parseGeneratedReportString = function(ibHtmlData, owner) {
                   { date    : new Date(elements[idxDateTime])
                   , qty     : Number(elements[idxQty])
                   , symbol  : "ib:" + elements[idxSym]
-                  , exchnge : elements[idxExchange]
+                  , exchange : elements[idxExchange]
                   , avgPx   : Number(elements[idxPrice])
                   , fees    : Number(elements[idxComms])
                   };
