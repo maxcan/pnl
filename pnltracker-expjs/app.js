@@ -132,7 +132,6 @@ app.configure(function(){
   app.use(require('less-middleware')({
             dest: __dirname + '/public/gen',
             src: __dirname + '/assets/less',
-            prefix: '/gen', 
             compress: true
         }));
 

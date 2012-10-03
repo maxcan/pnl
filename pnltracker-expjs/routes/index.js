@@ -6,7 +6,8 @@ var conf    = require('../config').genConf();
 
 exports.index = function(req, res){
   var loggedIn = req.user;
-  res.render('index', { isDev: conf.isDev, user: req.user, title: 'Express' });
+  if (req.user) return res.redirect('/secure/app');
+  return res.render('index', { isDev: conf.isDev, user: req.user, title: 'Express' });
 };
 
 exports.secure = function(req, res) {
