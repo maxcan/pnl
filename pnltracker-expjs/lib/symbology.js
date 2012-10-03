@@ -56,7 +56,9 @@ exports.securityForRawSymbol = function(sym, callback) {
         return Models.Security.create(stkQuery, function(err, createdStk) {
           return callback(null, createdStk);
         });
-      } else { return callback(null, createdStk);}
+      } else { 
+        return callback(null, stk);
+      }
     });
   }
   var getOption = function (optionObj) {
@@ -129,18 +131,18 @@ exports.securityForRawSymbol = function(sym, callback) {
   } 
 
 };
-
-exports.securityForRawSymbol("ts:GOOG 121020P735", function(e,o) {
-  if (e) console.log('error: ' + e );
-  console.log(util.inspect(o,false,null, true));
-});
-
-exports.securityForRawSymbol("ib:ZNGA 22DEC12 2.0 P", function(e,o) {
-  if (e) console.log('error: ' + e );
-  console.log(util.inspect(o,false,null, true));
-});
-
-exports.securityForRawSymbol("ib:MSFT", function(e,o) {
-  if (e) console.log('error: ' + e );
-  console.log(util.inspect(o,false,null, true));
-});
+//
+//exports.securityForRawSymbol("ts:GOOG 121020P735", function(e,o) {
+//  if (e) console.log('error: ' + e );
+//  console.log(util.inspect(o,false,null, true));
+//});
+//
+//exports.securityForRawSymbol("ib:ZNGA 22DEC12 2.0 P", function(e,o) {
+//  if (e) console.log('error: ' + e );
+//  console.log(util.inspect(o,false,null, true));
+//});
+//
+//exports.securityForRawSymbol("ib:MSFT", function(e,o) {
+//  if (e) console.log('error: ' + e );
+//  console.log(util.inspect(o,false,null, true));
+//});

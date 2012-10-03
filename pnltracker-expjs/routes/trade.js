@@ -1,7 +1,8 @@
 var Models = require('../models') ;
+var ModelsTrade = require('../models/trade') ;
 var Util = require('util') ;
 var fs = require('fs') ;
-var util = require("../util.js");
+var AppUtil = require("../appUtil.js");
 var TradeStation = require("../lib/parsers/ts.js");
 var _ = require('underscore');
 
@@ -15,7 +16,7 @@ var  mkApiFill = function(fill) {
 var mkApiTrade = function (t) { 
   var ret = {};
   console.log(ret);  // _DEBUG
-  _.each( ['_id', 'owner', 'symbol','isOpen', 'openDate', 'duration' ]
+  _.each( ['_id', 'owner', 'symbol','isOpen', 'openDate', 'duration' , 'security']
         , function(k) { ret[k] = t[k];} );
   ret.netCash = t.netCash;
   ret.totalBuy = t.totalBuy;
@@ -28,8 +29,10 @@ var mkApiTrade = function (t) {
 
 exports.list = function(req, res){
   if (!req.user) {res.send(403, "authentication required");}
-  util.blockCache(res);
-  Models.Trade.find({owner: req.user._id}, function(err, trades) {
+  AppUtil.blockCache(res);
+  Models.Trade.find({owner: req.user._id})
+              .populate('security')
+              .exec(function(err, trades) {
     if (err) res.send(500, "Could not Fetch your trades");
     var apiTrades = _.map(trades, mkApiTrade);
     res.send(apiTrades);
@@ -39,7 +42,7 @@ exports.list = function(req, res){
 
 exports.show = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
-  util.blockCache(res);
+  AppUtil.blockCache(res);
   res.send(req.user);
 };
 
@@ -67,7 +70,7 @@ exports.setReportText = function(req, res) {
         if (err) throw err;
         var trades = TradeStation.parseTradeStationExtractedText(upload.extractedText);
         _.each(trades, function(t){_.extend(t,{owner: req.user._id})});
-        Models.mkTradesAndSave(req.user._id, trades, function(err) {
+        ModelsTrade.mkTradesAndSave(req.user._id, trades, function(err) {
           if (err) {throw err; }
           res.send(200, upload.content)
         });
@@ -82,7 +85,7 @@ exports.setReportText = function(req, res) {
 
 exports.reportUpload = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
-  util.blockCache(res);
+  AppUtil.blockCache(res);
   if (req.files) {
     _.each(req.files, function(file) {
       console.log('found file.  keys = ' + _.keys(file));  // _DEBUG

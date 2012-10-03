@@ -2,7 +2,7 @@
 
 var cheerio = require('cheerio');
 
-
+function mkNumber(s) { return Number(s.replace(/,/g,'')); }
 
 exports.parseEmailedReportString = function(ibHtmlData, owner, mailRef) {
   /*****
@@ -93,11 +93,11 @@ exports.parseEmailedReportString = function(ibHtmlData, owner, mailRef) {
           if (elements[idxSym] != hdrSym) { 
             var newTrade = 
               { date    : new Date(elements[idxDateTime])
-              , qty     : Number(elements[idxQty])
+              , qty     : mkNumber(elements[idxQty])
               , symbol  : "ib:" + elements[idxSym]
               , exchange : elements[idxExchange]
-              , avgPx   : Number(elements[idxPrice])
-              , fees    : Number(elements[idxComms]) + Number(elements[idxTax])
+              , avgPx   : mkNumber(elements[idxPrice])
+              , fees    : mkNumber(elements[idxComms]) + mkNumber(elements[idxTax])
               , acctId  : elements[idxAcctId]
               , mailRef : mailRef
               };
@@ -158,7 +158,7 @@ exports.parseGeneratedReportString = function(ibHtmlData, owner) {
   var hdrComms    = "Comm/Tax"
   var transactionsIdPrefix = "tblTransactions_" ; // U764128
   var $ = cheerio.load(ibHtmlData, {lowerCaseTags: true} );
-  // find the account number
+  // find the account mkNumber
   var curId = ''; 
   var allTrades = [];
   $('table').each(function(_, tblElement) {
@@ -192,11 +192,11 @@ exports.parseGeneratedReportString = function(ibHtmlData, owner) {
               if (elements[idxSym] != hdrSym) { 
                 var newTrade = 
                   { date    : new Date(elements[idxDateTime])
-                  , qty     : Number(elements[idxQty])
+                  , qty     : mkNumber(elements[idxQty])
                   , symbol  : "ib:" + elements[idxSym]
                   , exchange : elements[idxExchange]
-                  , avgPx   : Number(elements[idxPrice])
-                  , fees    : Number(elements[idxComms])
+                  , avgPx   : mkNumber(elements[idxPrice])
+                  , fees    : mkNumber(elements[idxComms])
                   };
                 allTrades.push(newTrade);
               }

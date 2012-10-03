@@ -1,7 +1,9 @@
 var Ib = require("../lib/parsers/ib.js");
+var util = require('util');
 // var Fetcher = require("../lib/statement_fetcher");
 var Models = require("../models.js");
-var AppUtil = require('../util.js');
+var ModelsTrade = require("../models/trade");
+var AppUtil = require('../appUtil.js');
 var _ = require('underscore');
 var assert = require('assert');
 var fs = require('fs');
@@ -25,14 +27,29 @@ exports["AppUtil Functions unit testing"] = function() {
   assert.eql(5,s ,"sum should be 5 but equals: "+  s);
 }
 
+// assets deep equality but only on the fields present in the 
+// first array's objects
+var assertEqlFieldSubset = function (baseObjArr, subclassedObjArr) {
+  if (baseObjArr.length === 0) {
+    return assert.eql(baseObjArr, subclassedObjArr);
+  }
+  flds = _.keys(baseObjArr[0]);
+  _.each(baseObjArr, function (e) {assert.eql(flds, _.keys(e),'each object in assertEqlFieldSubset should have the same fields');});
+  var newArr = _.map(subclassedObjArr, function(ele) {
+    var newObj = {};
+    _.each(flds, function(fld) {newObj[fld] = ele[fld];});
+    return newObj;
+  });
+  assert.eql(baseObjArr, newArr);
+};
+
 exports["Ib should read generated file"] = function() {
   fs.readFile("../assets/ib_sample.html", "utf8", function(fsErr,data) {
     if (fsErr) assert.fail(fsErr);
     assert.eql(data.substring(0,6), "<HTML>");
     assert.isNotNull(data);
     var trades = Ib.parseGeneratedReportString(data);
-    assert.eql(trades, ParseFixtures.ibGeneratedSampleTrades);
-    
+    assertEqlFieldSubset( ParseFixtures.ibGeneratedSampleTrades,trades);
   });
 }
 
@@ -41,7 +58,7 @@ exports["Ib should read emailed file"] = function() {
     if (fsErr) assert.fail(fsErr);
     assert.isNotNull(data);
     var trades = Ib.parseEmailedReportString(data);
-    assert.eql(trades, ParseFixtures.ibEmailedSampleTrades);
+    assertEqlFieldSubset(ParseFixtures.ibEmailedSampleTrades, trades );
     
   });
 }
@@ -73,14 +90,14 @@ exports['Model Utility Sort works'] = function() {
 }
 
 exports['Fill splitting works'] = function() {
-  var fill = {symbol:'a', date: new Date(2012,09,10), avgPx: 9, qty: 10, fees: 0.4};
-  var splitCash = AppUtil.sum(_.map(Models.splitFill(fill, -7), Models.netCashForFill));
-  assert.eql(Models.netCashForFill(fill), splitCash);
+  var fill = {symbol:'ib:A', date: new Date(2012,09,10), avgPx: 9, qty: 10, fees: 0.4};
+  var splitCash = AppUtil.sum(_.map(ModelsTrade.splitFill(fill, -7), function(f) {return new Models.Fill(f).netCash;}));
+  assert.eql(new Models.Fill(fill).netCash, splitCash);
   Models.User.create(Models.newUser({name: 'a', email: 'a@a.com'}), function(e,u) {
     if (e) assert.fail('user creation');
       Models.Fill.create(fill, function(f, newFill) {
         if (f) assert.fail('could not create a fill');
-        assert.eql(Models.netCashForFill(fill),newFill.netCash);
+        assert.eql(new Models.Fill(fill).netCash,newFill.netCash);
       });
     Models.User.remove({});
   });
@@ -91,26 +108,26 @@ exports['Fill grouping works'] = function() {
   var t1 = new Date(2012,09,11);
   var t2 = new Date(2012,09,12);
   var ungrouped = 
-    [ { symbol: 'a', avgPx: 1.4, fees: 0.001, date: t1, qty: 3}
-    , { symbol: 'a', avgPx: 1.3, fees: 0.001, date: t2, qty: -2} 
-    , { symbol: 'b', avgPx: 1.5, fees: 0.001, date: t1, qty: 2} 
-    , { symbol: 'a', avgPx: 1.7, fees: 0.001, date: t0, qty: -1} 
-    , { symbol: 'b', avgPx: 1.9, fees: 0.001, date: t2, qty: -2} ]
+    [ { symbol: 'ib:A', avgPx: 1.4, fees: 0.001, date: t1, qty: 3}
+    , { symbol: 'ib:A', avgPx: 1.3, fees: 0.001, date: t2, qty: -2} 
+    , { symbol: 'ib:B', avgPx: 1.5, fees: 0.001, date: t1, qty: 2} 
+    , { symbol: 'ib:A', avgPx: 1.7, fees: 0.001, date: t0, qty: -1} 
+    , { symbol: 'ib:B', avgPx: 1.9, fees: 0.001, date: t2, qty: -2} ]
   var control = 
-    { a: [ { symbol: 'a', avgPx: 1.7, fees: 0.001, date: t0, qty: -1}
-         , { symbol: 'a', avgPx: 1.4, fees: 0.001, date: t1, qty: 3} 
-         , { symbol: 'a', avgPx: 1.3, fees: 0.001, date: t2, qty: -2} ]
-    , b: [ { symbol: 'b', avgPx: 1.5, fees: 0.001, date: t1, qty: 2} 
-         , { symbol: 'b', avgPx: 1.9, fees: 0.001, date: t2, qty: -2} ]
+    { 'ib:A': [ { symbol: 'ib:A', avgPx: 1.7, fees: 0.001, date: t0, qty: -1}
+               , { symbol: 'ib:A', avgPx: 1.4, fees: 0.001, date: t1, qty: 3} 
+               , { symbol: 'ib:A', avgPx: 1.3, fees: 0.001, date: t2, qty: -2} ]
+    , 'ib:B': [ { symbol: 'ib:B', avgPx: 1.5, fees: 0.001, date: t1, qty: 2} 
+               , { symbol: 'ib:B', avgPx: 1.9, fees: 0.001, date: t2, qty: -2} ]
     }
-  var grouped = Models.groupFills(ungrouped) ;
-  assert.eql(control, grouped,'Fill Grouping');
+  var grouped = ModelsTrade.groupFills(ungrouped) ;
+  assert.eql(control, grouped, 'Fill Grouping');
   // Create a user for the rest of the tests
   var asyncTests = function () {
     var createCB = function(err, usr) {
       if (err) throw err;
       for (i in ungrouped) {ungrouped[i].owner = usr;}
-      Models.mkTradesAndSave(usr, ungrouped);
+      ModelsTrade.mkTradesAndSave(usr, ungrouped);
     };
     var remUserCB = function() { Models.User.create(Models.newUser({name:'n',email:'b@b.com'}), createCB) ; } ;
     var remTradeCB = function() { Models.User.remove({}, remUserCB);};
@@ -124,14 +141,14 @@ exports['Check fill grouping results'] = function() {
   var checkGroupedTrades = function(err, trades) {
     if (err) throw err;
     assert.eql(trades.length, 3);
-    assert.eql(trades[0].symbol, 'a');
+    assert.eql(trades[0].symbol, 'ib:A');
     assert.eql(trades[0].fills.length, 2);
     assert.eql(trades[0].fills[0].qty, -1);
-    assert.eql(trades[1].symbol, 'a');
+    assert.eql(trades[1].symbol, 'ib:A');
     assert.eql(trades[2].fills.length, 2);
-    assert.eql(trades[2].symbol, 'b');
+    assert.eql(trades[2].symbol, 'ib:B');
     assert.eql(trades[2].fills.length, 2);
-    assert.eql(trades[2].symbol, 'b');
+    assert.eql(trades[2].symbol, 'ib:B');
     Models.Trade.remove({});
   } ; 
   var findGroupedTrades = function(err) {

@@ -10,7 +10,7 @@ var db = mongoose.connect(conf.mongoDbUri) ; // , conf.mongoDbName);
 
 var Types = mongoose.Schema.Types;
 
-exports.closeConnection = function() {db.close();}
+exports.closeConnection = function() {db.disconnect();}
 var userSchema = new mongoose.Schema(
     { name              : String 
     , email             : { type: String, required: true}
@@ -59,7 +59,7 @@ var fillSchema = new mongoose.Schema(
     , avgPx   : {type: Number, required: true}
     , fees    : Number // should generally be a negative number so we can add everything
     , symbol  : {type: String, required: true}
-    , isOpen  : {type: Boolean, required: true}
+    , isOpen  : String
     , acctId  : String
     });
 
@@ -75,7 +75,8 @@ var tradeSchema = new mongoose.Schema(
     , isOpen    : Boolean
     , acctId    : String
     , mailRef   : {type: Types.ObjectId, ref: 'MailArchive'}
-    , uploadeRef: {type: Types.ObjectId, ref: 'Upload'} 
+    , uploadRef : {type: Types.ObjectId, ref: 'Upload'} 
+    , security  : {type: Types.ObjectId, ref: 'Security'}
     });
 
 tradeSchema.virtual('netCash').get(function() {
@@ -181,16 +182,7 @@ exports.Security = Security;
 var MailArchive = db.model('MailArchive', mailArchiveSchema);
 exports.MailArchive = MailArchive;
 
-////////////////////////////////////////////////////////////////////////////////
-// Trade Grouping 
-////////////////////////////////////////////////////////////////////////////////
-
-function openTradeForUserSymbol(owner, symbol, callback) {
-  Trade.findOne({isOpen: true, symbol:symbol, owner:owner})
-       .sort('-date')
-       .exec(callback);
-}
-
+exports.sortByField = sortByField ; 
 function sortByField(ls, fldName) {
   function cmp(a,b) { 
     if (a[fldName] < b[fldName]) return -1;
@@ -202,124 +194,3 @@ function sortByField(ls, fldName) {
   return newArr;
 }
 
-function groupFills(unsortedFills) {
-  var fills = sortByField(unsortedFills, 'date');
-  var groupedFills = {};
-  for (var fillIdx in fills) { 
-    var fill = fills[fillIdx];
-    if (groupedFills[fill.symbol]) groupedFills[fill.symbol].push(fill)
-    else groupedFills[fill.symbol] = [fill];
-  }
-  return groupedFills;
-}
-
-// add a single fill to a trade.  
-// this will mutate the trade and possibly create another trade. 
-function addFillsToTrade(trade, fills, symbol, callback) {
-  // this can definitely be sped up a bit..
-  if (fills === null || fills.length === 0) { 
-    if (trade.fills.length > 0) return trade.save(callback); 
-    return callback();
-  }
-  for (var idx in fills) {
-    if (fills[idx].symbol != symbol) 
-      throw new Error ("mismatched symbol in addFillsToTrade"); 
-  }
-  if (trade.symbol != symbol) 
-    throw new Error ("mismatched symbol in addFillsToTrade"); 
-  var curQty = AppUtil.sum(_.pluck(trade.fills,'qty'));
-  var curFill = fills.shift();
-  if (curQty + curFill.qty === 0) {
-    // clean close
-    trade.fills.push(curFill);
-    trade.isOpen = false;
-    trade.save(function cleanSave(err) {
-      if (err) throw err;
-      addFillsToTrade(newTrade(trade.owner, symbol), fills, symbol, callback);
-    });
-
-  } else if (curQty > 0 && (curFill.qty + curQty < 0)) {
-    // dirty close from the long side
-    // just break the fill  in two and re run
-    var newFills = splitFill(curFill, curQty).concat(fills);
-    addFillsToTrade(trade, newFills, symbol, callback);
-  } else if (curQty < 0 && (curFill.qty + curQty > 0)) {
-    // dirty close from the short side
-    var newFills = splitFill(curFill, curQty).concat(fills);
-    addFillsToTrade(trade, newFills, symbol, callback);
-  } else {
-    // now were just adding to a position
-    trade.fills.push(curFill);
-    addFillsToTrade(trade, fills, symbol, callback);
-  }
-
-}
-
-function netCashForFill(fill) {
-  return ((-1 * fill.qty * fill.avgPx) - fill.fees)
-}
-function splitFill(fill, qty) {
-  var fstFill = { owner   : fill.owner
-                , date    : fill.date
-                , qty     : -1 * qty
-                , avgPx   : fill.avgPx
-                // technically this is wrong but fuck it
-                , fees    : fill.fees / 2 
-                , symbol  : fill.symbol
-                }
-  var sndFill = { owner   : fill.owner
-                , date    : fill.date
-                , qty     : fill.qty + qty
-                , avgPx   : fill.avgPx
-                // technically this is wrong but fuck it
-                , fees    : fill.fees / 2 
-                , symbol  : fill.symbol
-                }
-  if (qty < 0) {
-    //short
-    if (fill + qty < 0) { return [fill]; }
-    return [fstFill, sndFill] ; 
-  } else {
-    if (fill < qty) { return [fill]; }
-    return [fstFill, sndFill] ; 
-  }
-
-}
-function newTrade(o, s) { return new Trade({owner:o, symbol:s, fills:[], isOpen: true}); }
-
-function mkTradesAndSave(owner, fills, callback) {
-  // 1) group trades by symbol..
-  var groupedFills = groupFills(fills);
-  var remainingTrades = _.keys(groupedFills).length;
-  var groupSymbol = function(curFills, curSym) {
-    openTradeForUserSymbol(owner, curSym, function openTradeCb(err, curTrade) {
-      if (curFills.length === 0) return; 
-      if (err) throw err;
-      if (curTrade === null) {
-        curTrade = newTrade(owner, curSym);
-        curFills[0].qty > 0 ;
-      }
-      // var curQty = 0;
-      // for (var idx in curTrade.fills) {curQty += curTrade.fills[idx].qty; }
-      // for (var fillIdx in groupedFills[curSym]) {
-      addFillsToTrade(curTrade, curFills, curSym, function() {
-        remainingTrades--;
-        if (remainingTrades === 0 && callback) callback();
-      } );
-      });
-    
-    };
-  _.each(groupedFills, groupSymbol);
-  // for (var mutSym in groupedFills) { groupSymbol(mutSym); }
-  // 2) sort each group
-  // 3) add to any existing trades or create a new one.  
-  //   a) each time we add, check to see if we are opening a new position
-  //      or adding or closing an existing one
-
-  // check if the user already has an open position in this symbol
-}
-exports.groupFills = groupFills;
-exports.mkTradesAndSave = mkTradesAndSave ;
-exports.sortByField = sortByField ; 
-exports.netCashForFill = netCashForFill;
-exports.splitFill = splitFill;

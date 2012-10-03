@@ -1,6 +1,7 @@
 var Models = require('../models') ; 
+var ModelsTrade = require('../models/trade') ; 
 var Ib = require("../lib/parsers/ib.js");
-var util = require("../util.js");
+var AppUtil = require("../appUtil.js");
 var fs = require('fs');
 
 var tradeFixtures = require('../test/fixtures/parse_trade_output.js');
@@ -15,7 +16,7 @@ exports.list = function(req, res){
 
 exports.show = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
-  util.blockCache(res);
+  AppUtil.blockCache(res);
   res.send(req.user);
 };
 
@@ -34,9 +35,9 @@ exports.loadDummyTrades = function(req,res) {
       if (fsErr) res.send(500, fsErr);
       var fills = tradeFixtures.ibGeneratedSampleTrades;
       // var fills = Ib.parseEmailedReportString(data);
-      Models.mkTradesAndSave(req.user._id, fills, function(err) {
-        if (err) {res.send(500,'error: ' + err);}
-        res.redirect('/');
+      ModelsTrade.mkTradesAndSave(req.user._id, fills, function(err) {
+        if (err) {return res.send(500,'error: ' + err);}
+        return res.redirect('/');
 
       });
     });

@@ -5,6 +5,7 @@ var Ib = require("../lib/parsers/ib.js");
 var fs = require('fs');
 var mailparser = require("mailparser");
 var Models = require("../models.js");
+var ModelsTrade = require("../models/trade");
 var util = require('util');
 
 /*******************************************************************************
@@ -78,7 +79,7 @@ exports.processMailArchive = function (err, mailMsg) {
             (attachment.name.indexOf('DailyTradeReport') != -1)) {
           var trades = 
                 Ib.parseEmailedReportString(attachment.content, usr._id, mailMsg._id);
-          Models.mkTradesAndSave(usr._id, trades, function(err) {
+          ModelsTrade.mkTradesAndSave(usr._id, trades, function(err) {
             if (err) {throw err; }
             attachment.processed = true;
             mailMsg.save();
