@@ -24,7 +24,7 @@ var mkApiTrade = function (t) {
   ret.vwapBuy = t.vwapBuy;
   ret.symbol = t.symbol.substring(3);
   ret.fills  = _.map(t.fills, mkApiFill);
-  ret.securityDesc = t.security.desc;
+  if (t.security) ret.securityDesc = t.security.desc;
   return ret;
 } ; 
 
