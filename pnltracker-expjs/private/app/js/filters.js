@@ -39,10 +39,9 @@ pnlApp.filter('timespan', function() {
       var mins  = Math.floor((totalTime % ( 60 * 60 * 1000 ) ) / (60 * 1000));
       var hours = Math.floor((totalTime % ( 24 * 60 * 60 * 1000 ) ) / (60 * 60 * 1000));
       var days  = Math.floor(totalTime / ( 24 * 60 * 60 * 1000));
-      return String(days + " Days, " + hours + ":" + mins + ":" + secs + "." + mills); 
+      return String(days + " Days, " + hours + "h " + mins + "m " + secs + "." + mills +'s'); 
     }
   })  ;
-
 
 pnlApp.filter('pp', function() {
     return function(obj) {
@@ -59,3 +58,47 @@ pnlApp.filter('pp', function() {
     }
   })  ;
 
+// pnlApp.filter('getPnlByDuration', function() {
+//   return function(trades) {
+//     var getBucket = function(t) {
+//       if (t.duration < 60 * 1000) return "<1min";
+//       if (t.duration < 60 * 60 * 1000) return "1min<  <1hr";
+//       if (t.duration < 5 * 60 * 60 * 1000) return "1hr<  <5hr";
+//       if (t.duration < 24 * 60 * 60 * 1000) return "5hr<  <1day";
+//       return ">1day";
+//     }
+//     var closedTrades = _.filter(trades, function(t){return !t.isOpen;});
+//     var groupedTrades = _.groupBy(closedTrades, getBucket);
+//     var buckets = [];
+//     _.each(groupedTrades, function(group, bucket) { 
+//       var nc = _.reduce(group, function(s,t) {return s+t.netCash;},0);
+//       buckets.unshift({bucket:bucket, netCash:nc});
+//     });
+//     return buckets;
+//   }
+// });
+// 
+// pnlApp.filter('getPnlByUnderlying', function() {
+//   return function(trades) {
+//     var tradesByUnderlyingArr = [];
+//     var tradesByUnderlying = {};
+//     _.each(trades, function(curTrade) {
+//       if (!curTrade.isOpen) {
+//         var sym = ( curTrade.underlyingSecurity 
+//           ? curTrade.underlyingSecurity.symbol
+//           : curTrade.security.symbol);
+//         if (tradesByUnderlying[sym]) {
+//           tradesByUnderlying[sym] += curTrade.netCash;
+//         } else {
+//           tradesByUnderlying[sym] = curTrade.netCash;
+// 
+//         }
+//       }
+//     });
+//     _.each(tradesByUnderlying, function(nc,sym) {
+//       tradesByUnderlyingArr.unshift({sym:sym, netCash:nc});
+//     });
+// 
+//     return tradesByUnderlyingArr;
+//   }
+// });

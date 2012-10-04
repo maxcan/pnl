@@ -1,6 +1,6 @@
 var Models = require('../models') ;
+var util = require('util');
 var ModelsTrade = require('../models/trade') ;
-var Util = require('util') ;
 var fs = require('fs') ;
 var AppUtil = require("../appUtil.js");
 var TradeStation = require("../lib/parsers/ts.js");
@@ -15,14 +15,14 @@ var  mkApiFill = function(fill) {
 
 var mkApiTrade = function (t) { 
   var ret = {};
-  console.log(ret);  // _DEBUG
-  _.each( ['_id', 'owner', 'symbol','isOpen', 'openDate', 'duration' , 'security']
+  _.each( ['_id', 'owner','isOpen', 'openDate', 'duration' , 'security', 'underlyingSecurity']
         , function(k) { ret[k] = t[k];} );
   ret.netCash = t.netCash;
   ret.totalBuy = t.totalBuy;
   ret.totalSell = t.totalSell;
   ret.vwapSell = t.vwapSell;
   ret.vwapBuy = t.vwapBuy;
+  ret.symbol = t.symbol.substring(3);
   ret.fills  = _.map(t.fills, mkApiFill);
   return ret;
 } ; 
@@ -33,9 +33,28 @@ exports.list = function(req, res){
   Models.Trade.find({owner: req.user._id})
               .populate('security')
               .exec(function(err, trades) {
-    if (err) res.send(500, "Could not Fetch your trades");
-    var apiTrades = _.map(trades, mkApiTrade);
-    res.send(apiTrades);
+    if (err) return res.send(500, "Could not Fetch your trades");
+    populateUnderlying(null, 0);
+    function populateUnderlying(err, idx) {
+      if (idx >= trades.length) {
+        // now we 'escape'
+        var apiTrades = _.map(trades, mkApiTrade);
+        return res.send(apiTrades);
+      } else {
+        if (err) throw new Error('error subpopluating securities');
+        if (trades[idx].security && trades[idx].security.underlying) {
+          Models.Security.findById(trades[idx].security.underlying, function (err, undlSecurity) {
+            if (err) throw new Error('error subpopluating securities');
+            if (!undlSecurity) throw new Error('missing underlying security');
+            console.log('found undl: ' + util.inspect(undlSecurity));
+            trades[idx].underlyingSecurity = undlSecurity;
+            return populateUnderlying(null, idx + 1);
+          });
+        } else {
+          return populateUnderlying(null, idx + 1);
+        }
+      }
+    };
   });
   
 };
@@ -79,7 +98,6 @@ exports.setReportText = function(req, res) {
       res.send(404, "no such file");
     }
   });
-  // console.log('got result: ' + req.body.pdfText);  // _DEBUG
   
 }; 
 
@@ -88,7 +106,6 @@ exports.reportUpload = function(req, res) {
   AppUtil.blockCache(res);
   if (req.files) {
     _.each(req.files, function(file) {
-      console.log('found file.  keys = ' + _.keys(file));  // _DEBUG
       var content = fs.readFileSync(file.path) ;
       var uploadObj = { owner: req.user._id
                       , content: content

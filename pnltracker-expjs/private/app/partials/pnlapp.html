@@ -14,94 +14,140 @@
       </div>
     </div>
   </div>
-  <p>
-    Filter Trades: 
-    <input ng-model="tradeFilter">
-    <a ng-click="tradeFilter = ''">Clear Filter</a>
-  </p>
-  <h3>Closed Trades </h3>
-  <h4> 
-    Total PnL:  <span ng-bind="filteredClosedTrades  | pluck:'netCash' | sum | currency"/>
-  </h4>
-  <table class="table table-bordered table-condensed">
-    <thead>
-      <tr>
-        <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
-        <th class="sortable" ng-click="setTradeSort('netCash')">Net Cash</th>
-        <th class="sortable" ng-click="setTradeSort('Size')">Size</th>
-        <th class="sortable" ng-click="setTradeSort('maxPrin')">Max Prin</th>
-        <th class="sortable" ng-click="setTradeSort('duration')">Duration</th>
-        <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
-        <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="trade in filteredClosedTrades = (trades | filter: tradeFilter | filter: {isOpen:false} )">
-        <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
-        <td>{{trade.netCash | currency}}</td>
-        <td>{{trade.totalBuy}}</td>
-        <td>{{trade.maxPrin | currency}}</td>
-        <td>{{trade.duration | timespan}}</td>
-        <td>{{trade.vwapBuy | currency}}</td>
-        <td>{{trade.vwapSell | currency}}</td>
-        <td>{{trade.security }}</td>
-        <td>
-          Fills:
-          <table class="table table-bordered table-condensed fill-minitable">
-            <thead>
-              <tr><td>Qty</td><td></td><td>Price</td><td>Date</td></tr>
-            </thead>
-            <tbody>
-              <tr ng-repeat="fill in trade.fills">
-                <td> {{fill.qty}}</td>
-                <td> @ </td>
-                <td>{{fill.avgPx}}</td> 
-                <td>{{fill.date | date:'medium'}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h3> Open Trades</h3>
-  <table class="table table-bordered table-condensed">
-    <thead>
-      <tr>
-        <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
-        <th class="sortable" ng-click="setTradeSort('totalBuy')">Bot</th>
-        <th class="sortable" ng-click="setTradeSort('totalSell')">Sold</th>
-        <th class="sortable" ng-click="setTradeSort('date')">Open Date
-        <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
-        <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="trade in trades | filter: tradeFilter | filter: {isOpen:true}">
-        <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
-        <td>{{trade.totalBuy}}</td>
-        <td>{{trade.totalSell}}</td>
-        <td>{{trade.openDate | date:'medium'}}</td>
-        <td>{{trade.vwapBuy | currency}}</td>
-        <td>{{trade.vwapSell | currency}}</td>
-        <td>{{trade.security }}</td>
-        <td>
-          Fills:
-          <table class="table table-bordered table-condensed fill-minitable">
-            <thead>
-              <tr><td>Qty</td><td></td><td>Price</td><td>Date</td></tr>
-            </thead>
-            <tbody>
-              <tr ng-repeat="fill in trade.fills">
-                <td> {{fill.qty}}</td>
-                <td> @ </td>
-                <td>{{fill.avgPx}}</td> 
-                <td>{{fill.date | date:'medium'}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="row-fluid" ng-controller="GroupCtrl">
+    <div class="span6">
+      <h4> 
+        PnL per underlying symbol
+      </h4>
+      <table class="table table-bordered table-condensed">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Net Cash</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="pnlGroup in underlyingGroups">
+            <td>{{pnlGroup.group }}</td>
+            <td>{{pnlGroup.netCash | currency}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="span6">
+      <h4> 
+        PnL per duration symbol
+      </h4>
+      <table class="table table-bordered table-condensed">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Net Cash</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="pnlGroup in durationGroups">
+            <td>{{pnlGroup.group }}</td>
+            <td>{{pnlGroup.netCash | currency}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="span12">
+      <p>
+        Filter Trades: 
+        <input ng-model="tradeFilter">
+        <a ng-click="tradeFilter = ''">Clear Filter</a>
+      </p>
+      <h3>Closed Trades </h3>
+      <h4> 
+        Total PnL:  <span ng-bind="filteredClosedTrades  | pluck:'netCash' | sum | currency"/>
+      </h4>
+      <table class="table table-bordered table-condensed">
+        <thead>
+          <tr>
+            <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
+            <th class="sortable" ng-click="setTradeSort('netCash')">Net Cash</th>
+            <th class="sortable" ng-click="setTradeSort('Size')">Size</th>
+            <th class="sortable" ng-click="setTradeSort('maxPrin')">Max Prin</th>
+            <th class="sortable" ng-click="setTradeSort('duration')">Duration</th>
+            <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
+            <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="trade in filteredClosedTrades = (trades | filter: tradeFilter | filter: {isOpen:false} )">
+            <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
+            <td>{{trade.netCash | currency}}</td>
+            <td>{{trade.totalBuy}}</td>
+            <td>{{trade.maxPrin | currency}}</td>
+            <td>{{trade.duration | timespan}}</td>
+            <td>{{trade.vwapBuy | currency}}</td>
+            <td>{{trade.vwapSell | currency}}</td>
+            <td>{{trade.security }}</td>
+            <td>{{trade.underlyingSecurity.symbol }}</td>
+            <td>
+              Fills:
+              <table class="table table-bordered table-condensed fill-minitable">
+                <thead>
+                  <tr><td>Qty</td><td></td><td>Price</td><td>Date</td></tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="fill in trade.fills">
+                    <td> {{fill.qty}}</td>
+                    <td> @ </td>
+                    <td>{{fill.avgPx}}</td> 
+                    <td>{{fill.date | date:'medium'}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <h3> Open Trades</h3>
+      <table class="table table-bordered table-condensed">
+        <thead>
+          <tr>
+            <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
+            <th class="sortable" ng-click="setTradeSort('totalBuy')">Bot</th>
+            <th class="sortable" ng-click="setTradeSort('totalSell')">Sold</th>
+            <th class="sortable" ng-click="setTradeSort('date')">Open Date
+            <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
+            <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="trade in trades | filter: tradeFilter | filter: {isOpen:true}">
+            <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
+            <td>{{trade.totalBuy}}</td>
+            <td>{{trade.totalSell}}</td>
+            <td>{{trade.openDate | date:'medium'}}</td>
+            <td>{{trade.vwapBuy | currency}}</td>
+            <td>{{trade.vwapSell | currency}}</td>
+            <td>{{trade.security }}</td>
+            <td>{{trade.underlyingSecurity.symbol }}</td>
+            <td>
+              Fills:
+              <table class="table table-bordered table-condensed fill-minitable">
+                <thead>
+                  <tr><td>Qty</td><td></td><td>Price</td><td>Date</td></tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="fill in trade.fills">
+                    <td> {{fill.qty}}</td>
+                    <td> @ </td>
+                    <td>{{fill.avgPx}}</td> 
+                    <td>{{fill.date | date:'medium'}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

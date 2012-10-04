@@ -101,6 +101,44 @@ function AdminCtrl($scope, $location, User
   }
 }
 
+function GroupCtrl($scope, User, Trades, $rootScope) {
+  function closedTrades (trades) {
+    return _.filter(trades, function(t){return !t.isOpen;});
+  }
+  function mkGenericGroup(trades, groupingFunction) {
+    var groupedTrades = _.groupBy(closedTrades(trades), groupingFunction);
+    var buckets = [];
+    _.each(groupedTrades, function(group, bucket) { 
+      var nc = _.reduce(group, function(s,t) {return s+t.netCash;},0);
+      buckets.unshift({group:bucket, netCash:nc});
+    });
+    return buckets;
+  }
+  function mkUnderlying(trades) {
+    var getSym = function(t) {
+      return (t.underlyingSecurity ? t.underlyingSecurity.symbol : t.security.symbol);
+    };
+     return mkGenericGroup(trades, getSym);
+  }
+  function mkDuration(trades) {
+    var getBucket = function(t) {
+      if (t.duration < 60 * 1000) return "<1min";
+      if (t.duration < 60 * 60 * 1000) return "1min<  <1hr";
+      if (t.duration < 5 * 60 * 60 * 1000) return "1hr<  <5hr";
+      if (t.duration < 24 * 60 * 60 * 1000) return "5hr<  <1day";
+      return ">1day";
+    }
+    return mkGenericGroup(trades, getBucket);
+  }
+  function refreshTrades(trades) {
+    $scope.durationGroups = mkDuration(trades);
+    $scope.underlyingGroups = mkUnderlying(trades);
+  }
+  $rootScope.$on('refreshTrades', function() {
+    Trades.get(refreshTrades);
+  });
+  Trades.get(refreshTrades);
+}
 function HomeCtrl($scope, User, Trades, $rootScope) {
   $rootScope.$on('refreshTrades', function() {
     $scope.user = User.get();
