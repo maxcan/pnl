@@ -19,11 +19,15 @@
   <!-- <h1> name = {{user.name}} </h1> --> 
   <div class="row-fluid">
     <div class="span8">
-      <h2> email = {{user.email}} </h2>
-      <h2> 
+      <h3> Welcome </h3>
+      <h4> Your email is = {{user.email}} </h4>
+      <h4> 
         dropbox = 
         <a href="mailto://{{user.reportDropboxAddr[0]}}">{{user.reportDropboxAddr[0]}}</a>
-      </h2>
+      </h4>
+      <h4>
+        <a href="/logout">Logout</a>
+      </h4>
     </div>
     <div class="span4">
       <div app-upload>

@@ -1,27 +1,76 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  if user
-    p #{user}
-    if isDev
-      h1
-        DEV MODE
-      p
-        a(href="/test/users/ld") prepop some trades
-      p
-        a(href="/api/trades") see some trades
-    p
-      a(href="/secure/app/") go to the app
-    p
-      a(href="/logout") logout
-  else
-    p not logged in
-    if isDev 
-      p
-        a(href="/test/users/set" ) dummy login
-    p
-      a(href="/auth/facebook") authenticate with facebook
-    p
-      a(href="/auth/google") authenticate with google
+
+  .navbar.navbar-fixed-top.navbar-inverse
+      .navbar-inner
+        .container
+          a.brand(href='#')
+            | pnltracker.com
+          ul.nav
+            li
+              a(href='mailto:info@pnltracker.com') 
+                | Contact
+    .container
+      .hero-unit
+        div
+          h1 Welcome to PnLTracker!
+          p  PnLTracker is a cloud based tool to help you analyze your profitability.
+          p
+            br
+          p
+            i
+              | NOTE: PNLTRACKER IS A PRERELEASE PRODUCT AND WE ACCEPT ZERO LIABILITY
+              | FOR ANY TRADING LOSSES GENERATED AS A RESULT OF THIS PLATFORM OR ANYTHING
+              | OF THE SORT.
+      if isDev 
+        .row
+          .span12
+            a.btn(href="/test/users/set" ) dummy login
+        hr
+      .row
+        .span6
+          div(style='text-align: right;')
+            | Create an account or sign in:
+        .span3
+          a.btn(href="/auth/facebook") authenticate with facebook
+        .span3
+          a.btn(href="/auth/google") authenticate with google
+      .row
+        .span4
+          div
+            h2
+              | Heading
+            p
+              | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus
+              | ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo
+              | sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed
+              | odio dui.
+          a.btn(href='#')
+            | View details »
+        .span4
+          div
+            h2
+              | Heading
+            p
+              | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus
+              | ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo
+              | sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed
+              | odio dui.
+          a.btn(href='#')
+            | View details »
+        .span4
+          div
+            h2
+              | Heading
+            p
+              | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus
+              | ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo
+              | sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed
+              | odio dui.
+          a.btn(href='#')
+            | View details »
+      hr
+      div
+        | © Company 2012
+

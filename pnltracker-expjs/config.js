@@ -19,7 +19,7 @@ var baseSettings =
   // statement fetching:
   , statementAddressHost: 'pnltracker.com'
   , imapFetchUsername: 'dropdev'
-  , imapFetchPassword: '49smh2kv0'
+  , imapFetchPassword: 'xsdf9smh2kv0'
   , imapFetchHost: 'imap.gmail.com'
   , imapFetchPort: 993
   } ;
@@ -28,7 +28,7 @@ var prdSettings = {};
 var stgSettings = _.extend(_.clone(baseSettings), 
       { host: 'pnltracker-stg.jit.su' 
       // , port: 80
-      , imapFetchPassword: 'j34tlkjdsk'
+      , imapFetchPassword: 'j3sdf4tlk:wajdsk'
       , imapFetchUsername: 'dropstg'
       , mongoDbName: 'pnltracker'
       , mongoDbUri: 'mongodb://nodejitsu:e052b67bd8b033100b92965756b1d4b8@alex.mongohq.com:10087/nodejitsudb148589429036'
