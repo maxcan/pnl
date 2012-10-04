@@ -101,42 +101,56 @@ function AdminCtrl($scope, $location, User
   }
 }
 
-function GroupCtrl($scope, User, Trades, $rootScope) {
-  function closedTrades (trades) {
-    return _.filter(trades, function(t){return !t.isOpen;});
-  }
-  function mkGenericGroup(trades, groupingFunction) {
-    var groupedTrades = _.groupBy(closedTrades(trades), groupingFunction);
-    var buckets = [];
-    _.each(groupedTrades, function(group, bucket) { 
-      var nc = _.reduce(group, function(s,t) {return s+t.netCash;},0);
-      buckets.unshift({group:bucket, netCash:nc});
-    });
-    return buckets;
-  }
-  function mkUnderlying(trades) {
-    var getSym = function(t) {
-      return (t.underlyingSecurity ? t.underlyingSecurity.symbol : t.security.symbol);
-    };
-     return mkGenericGroup(trades, getSym);
+// utility functions
+function closedTrades (trades) {
+  return _.filter(trades, function(t){return !t.isOpen;});
+}
+
+function mkGenericGroup(trades, groupingFunction) {
+  var groupedTrades = _.groupBy(closedTrades(trades), groupingFunction);
+  var buckets = [];
+  _.each(groupedTrades, function(group, bucket) { 
+    var nc = _.reduce(group, function(s,t) {return s+t.netCash;},0);
+    buckets.unshift({group:bucket, netCash:nc});
+  });
+  return buckets;
+}
+
+function DurationGroupCtrl($scope, Trades, $rootScope) {
+  var toggleAsc = true;
+  $scope.setSort = function(col) {
+    $scope.groups = _.sortBy($scope.groups, col);
+    if (toggleAsc) $scope.groups.reverse();
+    toggleAsc = !toggleAsc;
   }
   function mkDuration(trades) {
-    var getBucket = function(t) {
+    return mkGenericGroup(trades,  function(t) {
       if (t.duration < 60 * 1000) return "<1min";
       if (t.duration < 60 * 60 * 1000) return "1min<  <1hr";
       if (t.duration < 5 * 60 * 60 * 1000) return "1hr<  <5hr";
       if (t.duration < 24 * 60 * 60 * 1000) return "5hr<  <1day";
       return ">1day";
-    }
-    return mkGenericGroup(trades, getBucket);
+    });
   }
-  function refreshTrades(trades) {
-    $scope.durationGroups = mkDuration(trades);
-    $scope.underlyingGroups = mkUnderlying(trades);
+  function refreshTrades(trades) {$scope.groups = mkDuration(trades);}
+  $rootScope.$on('refreshTrades', function() {Trades.get(refreshTrades);});
+  Trades.get(refreshTrades);
+}
+
+function UndlGroupCtrl($scope, Trades, $rootScope) {
+  var toggleAsc  = true;
+  $scope.setSort = function(col) {
+    $scope.groups = _.sortBy($scope.groups, col);
+    if (toggleAsc) $scope.groups.reverse();
+    toggleAsc = !toggleAsc;
   }
-  $rootScope.$on('refreshTrades', function() {
-    Trades.get(refreshTrades);
-  });
+  function mkUnderlying(trades) {
+    return mkGenericGroup(trades,  function(t) {
+      return (t.underlyingSecurity ? t.underlyingSecurity.symbol : t.security.symbol);
+    });
+  }
+  function refreshTrades(trades) { $scope.groups = mkUnderlying(trades); }
+  $rootScope.$on('refreshTrades', function() {Trades.get(refreshTrades);});
   Trades.get(refreshTrades);
 }
 function HomeCtrl($scope, User, Trades, $rootScope) {
@@ -149,6 +163,14 @@ function HomeCtrl($scope, User, Trades, $rootScope) {
   $scope.trades = Trades.get();
   $scope.tradeFilter = '';
   var toggleAsc = true;
+  $scope.setTradeSortUnderlying = function() {
+    $scope.trades = _.sortBy($scope.trades, function(o){
+      if (o.underlyingSecurity) return o.underlyingSecurity.symbol;
+      return '';
+    });
+    if (toggleAsc) $scope.trades.reverse();
+    toggleAsc = !toggleAsc;
+  }
   $scope.setTradeSort = function(s) {
     $scope.trades = _.sortBy($scope.trades, function(o){return o[s];});
     if (toggleAsc) $scope.trades.reverse();

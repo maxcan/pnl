@@ -1,3 +1,20 @@
+<script type='text/ng-template' id='groupTableSnippet'>
+      <table class="table table-bordered table-condensed">
+        <thead>
+          <tr>
+            <th class="sortable" ng-click="setSort('group')">Symbol</th>
+            <th class="sortable" ng-click="setSort('netCash')">Net Cash</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="pnlGroup in groups">
+            <td>{{pnlGroup.group }}</td>
+            <td>{{pnlGroup.netCash | currency}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+</script>
 <div ng-controller="HomeCtrl">
   <!-- <h1> name = {{user.name}} </h1> --> 
   <div class="row-fluid">
@@ -14,48 +31,19 @@
       </div>
     </div>
   </div>
-  <div class="row-fluid" ng-controller="GroupCtrl">
-    <div class="span6">
-      <h4> 
-        PnL per underlying symbol
-      </h4>
-      <table class="table table-bordered table-condensed">
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Net Cash</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="pnlGroup in underlyingGroups">
-            <td>{{pnlGroup.group }}</td>
-            <td>{{pnlGroup.netCash | currency}}</td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="row-fluid">
+    <div class="span6" ng-controller="UndlGroupCtrl">
+      <h4>PnL per underlying symbol</h4>
+      <ng-include src="'groupTableSnippet'"></ng-include>
     </div>
-    <div class="span6">
-      <h4> 
-        PnL per duration symbol
-      </h4>
-      <table class="table table-bordered table-condensed">
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Net Cash</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="pnlGroup in durationGroups">
-            <td>{{pnlGroup.group }}</td>
-            <td>{{pnlGroup.netCash | currency}}</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="span6" ng-controller="DurationGroupCtrl">
+      <h4>PnL per duration symbol</h4>
+      <ng-include src="'groupTableSnippet'"></ng-include>
     </div>
   </div>
   <div class="row-fluid">
     <div class="span12">
+      <hr>
       <p>
         Filter Trades: 
         <input ng-model="tradeFilter">
@@ -75,6 +63,8 @@
             <th class="sortable" ng-click="setTradeSort('duration')">Duration</th>
             <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
             <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
+            <th >Security Description</th>
+            <th class="sortable" ng-click="setTradeSortUnderlying()">Underlying Symbol</th</th>
           </tr>
         </thead>
         <tbody>
@@ -86,7 +76,7 @@
             <td>{{trade.duration | timespan}}</td>
             <td>{{trade.vwapBuy | currency}}</td>
             <td>{{trade.vwapSell | currency}}</td>
-            <td>{{trade.security }}</td>
+            <td>{{trade.securityDesc }}</td>
             <td>{{trade.underlyingSecurity.symbol }}</td>
             <td>
               Fills:
@@ -117,6 +107,8 @@
             <th class="sortable" ng-click="setTradeSort('date')">Open Date
             <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
             <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
+            <th >Security Description</th>
+            <th class="sortable" ng-click="setTradeSortUnderlying()">Underlying Symbol</th</th>
           </tr>
         </thead>
         <tbody>
@@ -127,7 +119,7 @@
             <td>{{trade.openDate | date:'medium'}}</td>
             <td>{{trade.vwapBuy | currency}}</td>
             <td>{{trade.vwapSell | currency}}</td>
-            <td>{{trade.security }}</td>
+            <td>{{trade.securityDesc }}</td>
             <td>{{trade.underlyingSecurity.symbol }}</td>
             <td>
               Fills:

@@ -52,6 +52,16 @@ var securitySchema = new mongoose.Schema(
     , underlying    : {type: Types.ObjectId, ref: 'Security'}
     });
 
+securitySchema.virtual('desc').get(function() {
+  switch (this.securityType) {
+    case 'stock': return 'Common Equity';
+    case 'option': return 'Option: ' + this.strike + ' ' + this.putCall + ' exp: ' + this.expDt;
+    case 'future': return 'Future';
+    
+  }
+  return 'unsupported security type';
+});
+
 var fillSchema = new mongoose.Schema(
     { owner   : {type: Types.ObjectId, ref: 'User'}
     , date    : {type: Date, required: true}

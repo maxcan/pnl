@@ -24,6 +24,7 @@ var mkApiTrade = function (t) {
   ret.vwapBuy = t.vwapBuy;
   ret.symbol = t.symbol.substring(3);
   ret.fills  = _.map(t.fills, mkApiFill);
+  ret.securityDesc = t.security.desc;
   return ret;
 } ; 
 
@@ -46,7 +47,6 @@ exports.list = function(req, res){
           Models.Security.findById(trades[idx].security.underlying, function (err, undlSecurity) {
             if (err) throw new Error('error subpopluating securities');
             if (!undlSecurity) throw new Error('missing underlying security');
-            console.log('found undl: ' + util.inspect(undlSecurity));
             trades[idx].underlyingSecurity = undlSecurity;
             return populateUnderlying(null, idx + 1);
           });

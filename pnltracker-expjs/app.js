@@ -181,5 +181,5 @@ http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
   var mailInterval = 1000 * 10; // 30 sec
   //  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
-  //  setInterval(fetcher.checkMail, mailInterval);
+  setInterval(fetcher.checkMail, mailInterval);
 });
