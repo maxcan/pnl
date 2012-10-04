@@ -18,7 +18,7 @@ var util = require('util');
  *******************************************************************************/
 
 var imap = new ImapConnection(
-  { username: conf.imapFetchUsername
+  { username: conf.imapFetchUsername + '@' + conf.statementAddressHost
   , password: conf.imapFetchPassword
   , host:     conf.imapFetchHost
   , port:     conf.imapFetchPort

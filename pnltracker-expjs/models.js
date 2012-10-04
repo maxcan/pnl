@@ -36,7 +36,8 @@ exports.newUser = function(obj) {
     ret.email = obj.email;
     ret.name = obj.name;
   }
-  ret.reportDropboxAddr = conf.statementAddressPrefix + exports.randomString(8) + '@cantor.mx';
+  ret.reportDropboxAddr =
+    conf.imapFetchUsername + '+' + exports.randomString(8) + '@' + conf.statementAddressHost;
   return ret;
 }; 
 
