@@ -28,7 +28,7 @@ var prdSettings = {};
 var stgSettings = _.extend(_.clone(baseSettings), 
       { host: 'pnltracker-stg.jit.su' 
       // , port: 80
-      , imapFetchPassword: 'j3sdf4tlk:wajdsk'
+      , imapFetchPassword: 'j3sdf4tlkjdsk'
       , imapFetchUsername: 'dropstg'
       , mongoDbName: 'pnltracker'
       , mongoDbUri: 'mongodb://nodejitsu:e052b67bd8b033100b92965756b1d4b8@alex.mongohq.com:10087/nodejitsudb148589429036'
