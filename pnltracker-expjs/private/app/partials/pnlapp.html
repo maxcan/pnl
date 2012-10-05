@@ -22,16 +22,14 @@
       <h3> Welcome </h3>
       <h4> Your email is = {{user.email}} </h4>
       <h4> 
-        dropbox = 
+        Mail your Interactive Brokers Daily Trade Reports to:
+        <br>
         <a href="mailto://{{user.reportDropboxAddr[0]}}">{{user.reportDropboxAddr[0]}}</a>
-      </h4>
-      <h4>
-        <a href="/logout">Logout</a>
       </h4>
     </div>
     <div class="span4">
+      <h4>If you have TradeStation PDFs, you can upload here:</h4>
       <div app-upload>
-        Files go here
       </div>
     </div>
   </div>
