@@ -96,6 +96,7 @@ function AdminCtrl($scope, $location, $http, User
     });
   };
   $http.get('../../api/admin/authcodes').success(function(a) { $scope.authCodes = a;  });
+  $scope.mkValueModel   = function(o) { return {tableValues:o};};
   $scope.adminUsers     = AdminUsers.get();
   $scope.adminUploads   = AdminUploads.get();
   $scope.adminMails     = AdminMails.get();
@@ -162,10 +163,10 @@ function UndlGroupCtrl($scope, Trades, $rootScope) {
   Trades.get(refreshTrades);
 }
 function HomeCtrl($scope, User, Trades, $rootScope, $http) {
+  setInterval(function() { $rootScope.$broadcast('refreshTrades');}, 10000);
   $rootScope.$on('refreshTrades', function() {
-    $scope.user = User.get();
-    $scope.trades = Trades.get();
-
+    User.get(function(u){$scope.user  = u ; });
+    Trades.get(function(t){$scope.trades = t; } ) ; 
   });
   $scope.user = User.get(function(user) {
     if ((!user.roles) || user.roles.indexOf('basic') === -1) {
