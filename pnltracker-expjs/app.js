@@ -176,12 +176,13 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-app.get('/' ,                 routes.index);
-app.get('/users',             userRoutes.list);
-app.get('/test/users/ld',     userRoutes.loadDummyTrades);
-app.get('/test/users/set',    userRoutes.setDummyUser);
-app.get('/api/user',          userRoutes.show);
-app.get('/api/trades',        tradeRoutes.list);
+app.get('/' ,                   routes.index);
+app.get('/users',               userRoutes.list);
+app.get('/test/users/ld',       userRoutes.loadDummyTrades);
+app.get('/test/users/set',      userRoutes.setDummyUser);
+app.get('/api/user',            userRoutes.show);
+app.post('/api/user/authcode',  userRoutes.setAuthCode);
+app.get('/api/trades',          tradeRoutes.list);
 
 app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
 app.get('/api/report/get/:uploadId', tradeRoutes.getUpload);
@@ -191,6 +192,7 @@ app.get('/api/admin/users',   adminRoutes.usersList);
 app.get('/api/admin/trades',   adminRoutes.tradesList);
 app.get('/api/admin/uploads',   adminRoutes.uploadsList);
 app.get('/api/admin/mails',   adminRoutes.mailsList);
+app.post('/api/admin/authcode',   adminRoutes.authCode);
 
 
 var secureStatic = express.static(__dirname+'/private');

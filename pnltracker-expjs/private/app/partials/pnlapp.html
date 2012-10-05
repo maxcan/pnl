@@ -16,6 +16,21 @@
 
 </script>
 <div ng-controller="HomeCtrl">
+  <div id="authCodeEntryModal" class="modal hide fade" data-keyboard='false' data-backdrop="static">
+    <div class="modal-header">
+      <h3>Authorization Code Required:</h3>
+    </div>
+    <div class="modal-body">
+      <p>Authorization Code:</p>
+      <input ng-model="authcode">
+    </div>
+    <div class="modal-footer">
+      <a ng-click="submitAuthCode()" class="btn btn-primary">Submit</a>
+    </div>
+  </div>
+
+
+
   <!-- <h1> name = {{user.name}} </h1> --> 
   <div class="row-fluid">
     <div class="span8">

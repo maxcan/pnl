@@ -11,10 +11,11 @@ var db = mongoose.connect(conf.mongoDbUri) ; // , conf.mongoDbName);
 var Types = mongoose.Schema.Types;
 
 exports.closeConnection = function() {db.disconnect();}
+var roleTypes = ['basic', 'admin'];
 var userSchema = new mongoose.Schema(
     { name              : String 
     , email             : { type: String, required: true}
-    , roles             : [String]
+    , roles             : [ {type: String, enum: roleTypes} ] 
     , openId            : String
     , openIdProfile     : String
     , reportDropboxAddr  : [String]
@@ -177,7 +178,13 @@ var mailArchiveSchema = new mongoose.Schema(
     , attachments   : [mailAttachmentSchema]
     });
 
+var authCodeSchema = new mongoose.Schema(
+    { value         : String
+    , roleGiven     : {type: String, enum: roleTypes}
+    });
 
+var AuthCode = db.model('AuthCode', authCodeSchema);
+exports.AuthCode = AuthCode;
 var User  = db.model('User', userSchema);
 exports.User = User;
 var Upload = db.model('Upload', uploadSchema);

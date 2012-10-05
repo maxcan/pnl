@@ -1,4 +1,5 @@
 var Models = require('../models') ; 
+var util = require('util');
 var ModelsTrade = require('../models/trade') ; 
 var Ib = require("../lib/parsers/ib.js");
 var AppUtil = require("../appUtil.js");
@@ -11,37 +12,57 @@ var tradeFixtures = require('../test/fixtures/parse_trade_output.js');
  */
 
 exports.list = function(req, res){
-  res.send("respond with a resource");
+  return res.send("respond with a resource");
 };
 
 exports.show = function(req, res) {
-  if (!req.user) {res.send(403, "authentication required");}
+  if (!req.user) {return res.send(403, "authentication required");}
   AppUtil.blockCache(res);
-  res.send(req.user);
+  return res.send(req.user);
 };
 
 exports.setDummyUser = function(req,res) {
-  if (req.user && req.user._id) { res.redirect('/');}
+  if (req.user && req.user._id) { return res.redirect('/');}
   Models.User.findOne({email: 'i@cantor.mx'}, function(err, usr) {
     if (err) throw err;
     req.session.auth = { loggedIn: true, userId: usr._id};
-    res.redirect('/');
+    return res.redirect('/');
   });
 }
 exports.loadDummyTrades = function(req,res) {
-  if (!req.user || !req.user._id) { res.redirect('/auth/facebook');}
+  if (!req.user || !req.user._id) { return res.redirect('/auth/facebook');}
   Models.Trade.find({owner: req.user._id}).remove(function(err, prevTrade) {
     fs.readFile("../assets/ib_email_sample.html", "utf8", function(fsErr,data) {
-      if (fsErr) res.send(500, fsErr);
+      if (fsErr) return res.send(500, fsErr);
       var fills = tradeFixtures.ibGeneratedSampleTrades;
       // var fills = Ib.parseEmailedReportString(data);
       ModelsTrade.mkTradesAndSave(req.user._id, fills, function(err) {
         if (err) {return res.send(500,'error: ' + err);}
         return res.redirect('/');
-
       });
     });
-
   });
-
 }; 
+
+exports.setAuthCode = function(req, res) {
+  if (!req.user || !req.user._id) { return res.redirect('/auth/facebook');}
+  if (!req.body.authcode) { return res.send(500, 'authcode required');}
+  Models.AuthCode.findOne({value: req.body.authcode}, function(err, ac) {
+    if (err) return res.send(500, 'mongo error: ' + err);
+    if (req.user.roles.indexOf(ac.roleGiven) != -1) {
+      return res.send(500, 'user already has that role');
+    }
+    req.user.roles.unshift(ac.roleGiven);
+    req.user.save(function(err) {
+      if (err) {
+        console.log('ERROR in set auth code.  tell support! ' + err); 
+        return res.send(500, 'couldnt save');
+      }
+      Models.AuthCode.findByIdAndRemove(ac._id, function() {
+        return res.send(200, 'role assigned');
+
+      });
+
+    }) ; 
+  });
+};

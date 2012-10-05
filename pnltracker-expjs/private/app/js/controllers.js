@@ -75,7 +75,7 @@ function TradeDtlCtrl($scope, User, Trades) {
   $scope.trades = Trades.get();
 }
 
-function AdminCtrl($scope, $location, User
+function AdminCtrl($scope, $location, $http, User
                   , AdminUsers
                   , AdminUploads
                   , AdminMails
@@ -88,6 +88,12 @@ function AdminCtrl($scope, $location, User
     }
 
   });
+  $scope.getAuthCode    = function() {
+    $http.post('../../api/admin/authcode').success(function(d) {
+      alert('successfully generated code: ' + d);
+      console.log('successfully generated code: ' + d);
+    });
+  };
   $scope.adminUsers     = AdminUsers.get();
   $scope.adminUploads   = AdminUploads.get();
   $scope.adminMails     = AdminMails.get();
@@ -153,13 +159,30 @@ function UndlGroupCtrl($scope, Trades, $rootScope) {
   $rootScope.$on('refreshTrades', function() {Trades.get(refreshTrades);});
   Trades.get(refreshTrades);
 }
-function HomeCtrl($scope, User, Trades, $rootScope) {
+function HomeCtrl($scope, User, Trades, $rootScope, $http) {
   $rootScope.$on('refreshTrades', function() {
     $scope.user = User.get();
     $scope.trades = Trades.get();
 
   });
-  $scope.user = User.get();
+  $scope.user = User.get(function(user) {
+    if ((!user.roles) || user.roles.indexOf('basic') === -1) {
+      $('#authCodeEntryModal').modal();
+    }
+  });
+  $scope.submitAuthCode = function() {
+    $http.post('../../api/user/authcode', {authcode: $scope.authcode})
+         .success(function() {
+           $('#authCodeEntryModal').modal('hide');
+           $rootScope.$broadcast('refreshTrades');
+           alert('Successfully Authorized');
+         })
+         .error(function(d, s) {
+           console.log('error setting code: ' + d + ': status = ' + s);
+           alert('failed to authorize');
+         });
+    console.log('auth code: ' + $scope.authcode);  // _DEBUG
+  };
   $scope.trades = Trades.get();
   $scope.tradeFilter = '';
   var toggleAsc = true;

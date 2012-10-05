@@ -13,6 +13,15 @@ exports.usersList = function(req, res){
   });
 };
 
+exports.authCode = function(req, res){
+  var val = Models.randomString(8);
+  Models.AuthCode.create({value: val, roleGiven: 'basic'}, function(err) {
+    if (err) return res.send(400, err);
+    return res.send(200, val);
+  });
+};
+ 
+
 exports.uploadsList = function(req, res){
   var loggedIn = req.user;
   Models.Upload.find({}, function(err, a) {
