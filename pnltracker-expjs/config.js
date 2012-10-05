@@ -4,7 +4,7 @@ var _ = require('underscore');
 var baseSettings = 
   { host: 'dev.pnltracker.com'
   , port: 3000
-  
+  , allowNonSsl: false
   , isDev: false
   // oauth stuff
   , oauthGoogleAppId : '903799978070.apps.googleusercontent.com'
@@ -26,7 +26,7 @@ var baseSettings =
 
 var prdSettings = {};
 var stgSettings = _.extend(_.clone(baseSettings), 
-      { host: 'pnltracker-stg.jit.su' 
+      { host: 'pnltracker-stg.nodejitsu.com'
       , port: 80
       , imapFetchPassword: 'j3sdf4tlkjdsk'
       , imapFetchUsername: 'dropstg'
@@ -42,6 +42,7 @@ var stgSettings = _.extend(_.clone(baseSettings),
       });
 var devSettings = _.extend(_.clone(baseSettings),
       { isDev: true
+      , allowNonSsl: true
 
       });
 
