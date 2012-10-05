@@ -3,10 +3,27 @@
   <p>
     <a class='btn' ng-click="getAuthCode()">Generate Auth Code</a>
     </p>
+  <h4>Auth Codes:</h4>
+  <div class="row-fluid">
+    <div class="hscroll span12">
+      <table class="table-bordered table table-condensed"> 
+        <thead>
+          <tr>
+            <th ng-repeat="key in keys(authCodes[0])"> {{key}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="authCode in authCodes">
+            <td ng-repeat="key in keys(authCodes[0])">{{authCode[key]  }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
   <h4>Trades:</h4>
   <div class="row-fluid">
     <div class="hscroll span12">
-      <table class="table-bordered table"> 
+      <table class="table-bordered table table-condensed"> 
         <thead>
           <tr>
             <th ng-repeat="key in keys(adminTrades[0])"> {{key}}</th>
@@ -24,7 +41,7 @@
   <h4>Users:</h4>
   <div class="row-fluid">
     <div class="hscroll span12">
-      <table class="table-bordered table"> 
+      <table class="table-bordered table table-condensed"> 
         <thead>
           <tr>
             <th ng-repeat="key in keys(adminUsers[0])"> {{key}}</th>
@@ -43,7 +60,7 @@
 
   <div class="row-fluid">
     <div class="hscroll span12">
-      <table class="table-bordered table"> 
+      <table class="table-bordered table table-condensed"> 
         <thead>
           <tr>
             <th ng-repeat="key in keys(adminUploads[0])"> {{key}}</th>
@@ -61,7 +78,7 @@
   <h4>Mails:</h4>
   <div class="row-fluid">
     <div class="hscroll span12">
-      <table class="table-bordered table"> 
+      <table class="table-bordered table table-condensed"> 
         <thead>
           <tr>
             <th ng-repeat="key in keys(adminMails[0])"> {{key}}</th>

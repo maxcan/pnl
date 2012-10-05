@@ -188,11 +188,12 @@ app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
 app.get('/api/report/get/:uploadId', tradeRoutes.getUpload);
 app.post('/api/report/setText/:uploadId', tradeRoutes.setReportText);
 
-app.get('/api/admin/users',   adminRoutes.usersList);
-app.get('/api/admin/trades',   adminRoutes.tradesList);
+app.get('/api/admin/users',     adminRoutes.usersList);
+app.get('/api/admin/trades',    adminRoutes.tradesList);
 app.get('/api/admin/uploads',   adminRoutes.uploadsList);
-app.get('/api/admin/mails',   adminRoutes.mailsList);
-app.post('/api/admin/authcode',   adminRoutes.authCode);
+app.get('/api/admin/mails',     adminRoutes.mailsList);
+app.get('/api/admin/authcodes', adminRoutes.authCodesList);
+app.post('/api/admin/authcode', adminRoutes.genAuthCode);
 
 
 var secureStatic = express.static(__dirname+'/private');

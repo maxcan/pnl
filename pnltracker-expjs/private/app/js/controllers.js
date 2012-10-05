@@ -92,8 +92,10 @@ function AdminCtrl($scope, $location, $http, User
     $http.post('../../api/admin/authcode').success(function(d) {
       alert('successfully generated code: ' + d);
       console.log('successfully generated code: ' + d);
+      $http.get('../../api/admin/authcodes').success(function(a) { $scope.authCodes = a;  });
     });
   };
+  $http.get('../../api/admin/authcodes').success(function(a) { $scope.authCodes = a;  });
   $scope.adminUsers     = AdminUsers.get();
   $scope.adminUploads   = AdminUploads.get();
   $scope.adminMails     = AdminMails.get();
