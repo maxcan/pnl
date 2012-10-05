@@ -163,7 +163,7 @@ function UndlGroupCtrl($scope, Trades, $rootScope) {
   Trades.get(refreshTrades);
 }
 function HomeCtrl($scope, User, Trades, $rootScope, $http) {
-  setInterval(function() { $rootScope.$broadcast('refreshTrades');}, 10000);
+  setInterval(function() { $rootScope.$broadcast('refreshTrades');}, 45000);
   $rootScope.$on('refreshTrades', function() {
     User.get(function(u){$scope.user  = u ; });
     Trades.get(function(t){$scope.trades = t; } ) ; 
@@ -189,6 +189,11 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http) {
   $scope.trades = Trades.get();
   $scope.tradeFilter = '';
   var toggleAsc = true;
+  $scope.isAdmin = function() {
+    if ($scope.user && $scope.user.roles) 
+      return $scope.user.roles.indexOf('admin') != -1;
+    return false;
+  }
   $scope.setTradeSortUnderlying = function() {
     $scope.trades = _.sortBy($scope.trades, function(o){
       if (o.underlyingSecurity) return o.underlyingSecurity.symbol;

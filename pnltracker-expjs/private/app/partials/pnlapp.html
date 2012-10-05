@@ -20,15 +20,21 @@
     <div class="modal-header">
       <h3>Authorization Code Required:</h3>
     </div>
-    <div class="modal-body">
-      <p>Authorization Code:</p>
-      <input ng-model="authcode">
-    </div>
-    <div class="modal-footer">
-      <a ng-click="submitAuthCode()" class="btn btn-primary">Submit</a>
-    </div>
+    <form ng-submit='submitAuthCode()'>
+      <div class="modal-body">
+        <p>Authorization Code:</p>
+        <input ng-model="authcode">
+      </div>
+      <div class="modal-footer">
+        <a href='/logout' class='btn btn-danger'>Nevermind, Logout</a>
+        <input type="submit" class="btn btn-primary"/>
+      </div>
+    </form>
   </div>
 
+  <div class='ng-show: isAdmin()'>
+    <a href='#admin' class='btn'>Admin Page</a>
+  </div>
 
 
   <!-- <h1> name = {{user.name}} </h1> --> 
