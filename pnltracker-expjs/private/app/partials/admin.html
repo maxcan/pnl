@@ -4,6 +4,9 @@
     <a class='btn' ng-click="getAuthCode()">Generate Auth Code</a>
     </p>
   <h4>Auth Codes:</h4>
+  <p>
+    <span ng-repeat="ac in authCodes">{{ac}}, </span>
+  </p>
   <div class="row-fluid">
     <div class="hscroll span12">
       <table class="table-bordered table table-condensed"> 
