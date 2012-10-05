@@ -9,6 +9,6 @@ angular.module('pnlApp', ['pnlApp.filters', 'pnlApp.services', 'pnlApp.directive
                          , controller: TradeDtlCtrl});
     $routeProvider.when('/admin'
                        , {templateUrl: 'partials/admin.html'
-                         , controller: TradeDtlCtrl});
+                         , controller: AdminCtrl});
     $routeProvider.otherwise({redirectTo: '/home'});
   }]);

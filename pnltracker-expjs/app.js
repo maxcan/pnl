@@ -8,6 +8,8 @@ var userRoutes = require('./routes/user');
 var tradeRoutes = require('./routes/trade');
 var adminRoutes = require('./routes/admin');
 var http = require('http');
+var less = require('less');
+var fs = require('fs');
 var util = require('util');
 var everyauth = require('everyauth');
 var path = require('path');
@@ -116,6 +118,31 @@ var requireRole = function (pat, role) {
   };
 } ; 
 
+console.log('about to generate less files');  // _DEBUG
+try {
+  fs.readFile(__dirname + '/assets/less/application.less',function(error,data){
+    if (error) {
+      console.log('error rendering css: ' + error);  
+      throw error;
+    } else { 
+      data = data.toString();
+      console.log('read in data, about to generate the css');  // _DEBUG
+      less.render(data, function (e, css) {
+        fs.writeFile(__dirname + '/public/gen/application.css', css, function(err){
+          if (err) {
+            console.log('error saving css: ' + err);
+          }
+          console.log('RENDERED less');
+        });
+      });
+    }
+  });
+} catch (e) {
+  console.log('error generating less : ' + e );
+}
+console.log('generated less files');  // _DEBUG
+
+
 app.configure(function(){
   app.set('port', conf.port);
   app.set('host', conf.host);
@@ -129,13 +156,14 @@ app.configure(function(){
   app.use(express.session({secret: 'blalblsdfsdf'}));
   app.use(express.json());
   app.use(express.urlencoded());
-  app.use(require('less-middleware')({
-            dest: __dirname + '/public/gen',
-            src: __dirname + '/assets/less',
-            compress: true
-        }));
-
   app.use(everyauth.middleware());
+
+  //  app.use(require('less-middleware')({
+  //            dest: __dirname + '/public/gen/',
+  //            prefix: 'gen', 
+  //            debug: true,
+  //            src: __dirname + '/assets/less/',
+  //        }));
 
   app.use(requireRole(/.*admin.*/, 'admin'));
   app.use(app.router);
