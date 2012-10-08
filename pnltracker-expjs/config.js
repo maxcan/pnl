@@ -27,7 +27,7 @@ var baseSettings =
 var prdSettings = {};
 var stgSettings = _.extend(_.clone(baseSettings), 
       { host: 'staging.pnltracker.com'
-      , port: 3000
+      , port: 80
       , imapFetchPassword: 'j3sdf4tlkjdsk'
       , imapFetchUsername: 'dropstg'
       // , mongoDbName: 'pnltracker'
