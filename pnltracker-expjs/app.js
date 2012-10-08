@@ -186,6 +186,7 @@ app.configure('development', function(){
 });
 
 app.get('/' ,                   routes.index);
+app.get('/ping',                function(req,res) { return res.send(200, 'pong'); });
 app.get('/users',               userRoutes.list);
 app.get('/test/users/ld',       userRoutes.loadDummyTrades);
 app.get('/test/users/set',      userRoutes.setDummyUser);
