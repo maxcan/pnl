@@ -31,6 +31,7 @@ pnlModule.directive('scrollTo', function(){
           debugger;
           var c = $(attrs.scrollTo).position();
           if (c) {window.scrollTo(c.left, c.top);}
+          return false;
         }
       }
     }
