@@ -107,7 +107,7 @@ var bodyParserWithFiles = new express.bodyParser({ keepExtensions: true, uploadD
 // bodyParserNoFiles.parse['multipart/form-data'] = function(a, b, next) { next(); }
 
 var checkSsl = function(req, res, next) {
-    if (conf.allowNonSsl || res.path === '/ping') {
+    if (conf.allowNonSsl || req.path === '/ping') {
       return next();
     }
     if (req.headers["x-forwarded-proto"] === "https"){ return next(); }
