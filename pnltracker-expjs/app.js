@@ -106,12 +106,18 @@ var bodyParserWithFiles = new express.bodyParser({ keepExtensions: true, uploadD
 // var bodyParserNoFiles = new express.bodyParser();
 // bodyParserNoFiles.parse['multipart/form-data'] = function(a, b, next) { next(); }
 
+var annoyingProxyTrackerShit = function (req, res, next) {
+    if (req.path.indexOf('/proxy') === 0) {
+        return res.send(410, 'go away');
+    }
+    return next();
+} ;
 var checkSsl = function(req, res, next) {
     if (conf.allowNonSsl || req.path === '/ping') {
       return next();
     }
     if (req.headers["x-forwarded-proto"] === "https"){ return next(); }
-    return res.redirect("https://" + conf.host + req.url);  
+    return res.redirect(301, "https://" + conf.host + req.url);  
 } ; 
 
 var requireRole = function (pat, role) {
@@ -161,6 +167,7 @@ app.configure(function(){
   app.use(express.logger('dev'));
   app.use(express.methodOverride());
   app.use(express.cookieParser());
+  app.use(annoyingProxyTrackerShit);
   app.use(checkSsl);
   app.use(express.session({secret: 'blalblsdfsdf'}));
   app.use(express.json());
