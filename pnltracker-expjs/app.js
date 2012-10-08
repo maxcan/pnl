@@ -108,6 +108,7 @@ var bodyParserWithFiles = new express.bodyParser({ keepExtensions: true, uploadD
 
 var annoyingProxyTrackerShit = function (req, res, next) {
     if (req.path.indexOf('/proxy') === 0) {
+        console.log('Annoying proxy shit.  IP = ' + req.ip);
         return res.send(410, 'go away');
     }
     return next();
