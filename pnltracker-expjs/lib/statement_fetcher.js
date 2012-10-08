@@ -39,12 +39,16 @@ function openInbox(cb) {
   if (imapIsConnected) {
     imap.openBox('INBOX', false, cb);
   } else { 
+    console.log('About to connect to mail');  // _DEBUG
     imap.connect(function(err) {
-      imapIsConnected = true;
       if (err) {
-        die(err);
+        console.log('ERROR erorr in imap ocnnection: ' + err);  // _DEBUG
+        
+      } else { 
+        console.log('connected');  // _DEBUG
+        imapIsConnected = true;
+        imap.openBox('INBOX', false, cb);
       }
-      imap.openBox('INBOX', false, cb);
     });
   }
 }
