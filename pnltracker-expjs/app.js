@@ -218,8 +218,11 @@ app.get('/secure/*', function(req, res) {
   }
   });
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log("Express server listening on port " + app.get('port'));
+var listenPort = (conf.listenPort ? conf.listenPort : app.get('port'));
+
+http.createServer(app).listen(listenPort, function(){
+  console.log("Express server listening on port " + listenPort);
+  console.log("     However, app port is :" + app.get('port'));
   var mailInterval = 1000 * 10; // 30 sec
   //  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
   setInterval(fetcher.checkMail, mailInterval);
