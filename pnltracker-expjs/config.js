@@ -31,9 +31,8 @@ var stgSettings = _.extend(_.clone(baseSettings),
       , listenPort: 3000
       , imapFetchPassword: 'j3sdf4tlkjdsk'
       , imapFetchUsername: 'dropstg'
-      // , mongoDbName: 'pnltracker'
-      ////  , mongoDbUri: 'mongodb://nodejitsu:e052b67bd8b033100b92965756b1d4b8@alex.mongohq.com:10087/nodejitsudb148589429036'
-
+      , mongoDbName: 'pnltracker_stg'
+      , mongoDbUri: 'mongodb://localhost/pnltracker_stg'
 
       // oauth stuff
       , oauthGoogleAppId : '630789708184.apps.googleusercontent.com'
