@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var dateFormat = require('dateformat');
 var conf    = require('./config.js').genConf();
 var AppUtil = require('./appUtil.js');
 var util = require('util');
@@ -57,7 +58,9 @@ var securitySchema = new mongoose.Schema(
 securitySchema.virtual('desc').get(function() {
   switch (this.securityType) {
     case 'stock': return 'Common Equity';
-    case 'option': return 'Option: ' + this.strike + ' ' + this.putCall + ' exp: ' + this.expDt;
+    case 'option': 
+      var dtStr = dateFormat(this.expDt, 'yyyy-mm-dd');
+      return 'Option: ' + this.strike + ' ' + this.putCall + ' exp: ' + dtStr;
     case 'future': return 'Future';
     
   }

@@ -14,7 +14,6 @@ pnlApp.filter('pluck', function() {
   }  
 });
 
-
 pnlApp.filter('sum', function() {
   return function(arr, fld) {
     var total = 0;
@@ -24,6 +23,8 @@ pnlApp.filter('sum', function() {
     return total;
   }  
 });
+
+pnlApp.filter('count', function() { return function(arr) { return arr.length; }});
 
 pnlApp.filter('interpolate', ['version', function(version) {
     return function(text) {
