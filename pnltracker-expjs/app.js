@@ -5,6 +5,7 @@
 var express = require('express')
 var routes = require('./routes');
 var userRoutes = require('./routes/user');
+var mailRoutes = require('./routes/mail');
 var tradeRoutes = require('./routes/trade');
 var adminRoutes = require('./routes/admin');
 var http = require('http');
@@ -201,6 +202,7 @@ app.get('/test/users/set',      userRoutes.setDummyUser);
 app.get('/api/user',            userRoutes.show);
 app.post('/api/user/authcode',  userRoutes.setAuthCode);
 app.get('/api/trades',          tradeRoutes.list);
+app.get('/api/mails',           mailRoutes.list);
 
 app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
 app.get('/api/report/get/:uploadId', tradeRoutes.getUpload);
