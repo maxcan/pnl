@@ -46,13 +46,20 @@ exports.list = function(req, res){
         return res.send(apiTrades);
       } else {
         if (err) throw new Error('error subpopluating securities');
-        if (trades[idx].security && trades[idx].security.underlying) {
-          Models.Security.findById(trades[idx].security.underlying, function (err, undlSecurity) {
-            if (err) throw new Error('error subpopluating securities');
-            if (!undlSecurity) throw new Error('missing underlying security');
-            trades[idx].underlyingSecurity = undlSecurity;
+        if (trades[idx].security) {
+          if (trades[idx].security.underlying) {
+            Models.Security.findById(trades[idx].security.underlying, function (err, undlSecurity) {
+              if (err) throw new Error('error subpopluating securities');
+              if (!undlSecurity) throw new Error('missing underlying security');
+              trades[idx].underlyingSecurity = undlSecurity;
+              return populateUnderlying(null, idx + 1);
+            });
+          } else {
+            // security, but no underlying, set to self
+            trades[idx].underlyingSecurity = trades[idx].security;
             return populateUnderlying(null, idx + 1);
-          });
+
+          }
         } else {
           return populateUnderlying(null, idx + 1);
         }
