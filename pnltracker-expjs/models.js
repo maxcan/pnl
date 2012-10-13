@@ -6,9 +6,6 @@ var AppUtil = require('./appUtil.js');
 var util = require('util');
 var _ = require('underscore');
 var db = mongoose.connect(conf.mongoDbUri) ; // , conf.mongoDbName);
-// var db = mongoose.createConnection(conf.mongoDbUri) ; // , conf.mongoDbName);
-
-// nodejistu:  mongoose.connect('mongodb://nodejitsu:e052b67bd8b033100b92965756b1d4b8@alex.mongohq.com:10087/nodejitsudb148589429036');
 
 var Types = mongoose.Schema.Types;
 
@@ -48,6 +45,7 @@ var securityTypes = ['stock','furure','option','cash','bond'];
 
 var securitySchema = new mongoose.Schema(
     { symbol        : {type: String, required: true}
+    , desc          : String
     , securityType  : {type: String , enum: securityTypes}
     , expDt         : Date
     , strike        : Number
@@ -56,17 +54,53 @@ var securitySchema = new mongoose.Schema(
     , underlying    : {type: Types.ObjectId, ref: 'Security'}
     });
 
-securitySchema.virtual('desc').get(function() {
+securitySchema.pre('save', function(next) {
+  var security = this;
   switch (this.securityType) {
-    case 'stock': return 'Common Equity';
+    case 'stock': 
+      security.desc + ' Equity';
+      return (next());
     case 'option': 
-      var dtStr = dateFormat(this.expDt, 'yyyy-mm-dd');
-      return 'Option: ' + this.strike + ' ' + this.putCall + ' exp: ' + dtStr;
-    case 'future': return 'Future';
-    
+      return exports.Security.findById(security.underlying, function(err, undl) {
+        if (err) {
+          console.log('error generating symbol desc:' + err);
+          return next(err);
+        }
+        if (!undl) {
+          console.log('missing underling for symbol ' + security._id);
+          return next('missing underlying for security: ' + security._id);
+        }
+
+
+        var dtStr = dateFormat(this.expDt, 'yyyy-mm-dd');
+        security.desc = undl.symbol + ' ' + security.putCall +  security.strike + ' ' + dtStr;
+        return next();
+      });
+    case 'future':
+      return exports.Security.findById(security.underlying, function(err, undl) {
+        if (err) {
+          console.log('error generating symbol desc:' + err);
+          return next(err);
+        }
+        var dtStr = dateFormat(this.expDt, 'yyyy-mm-dd');
+        security.desc = undl.symbol + ' FUTURE ' + dtStr;
+        return next();
+      });
   }
-  return 'unsupported security type';
+
 });
+
+// securitySchema.virtual('desc').get(function() {
+//   switch (this.securityType) {
+//     case 'stock': return 'Common Equity';
+//     case 'option': 
+//       var dtStr = dateFormat(this.expDt, 'yyyy-mm-dd');
+//       return 'Option: ' + this.strike + ' ' + this.putCall + ' exp: ' + dtStr;
+//     case 'future': return 'Future';
+//     
+//   }
+//   return 'unsupported security type';
+// });
 
 var fillSchema = new mongoose.Schema(
     { owner   : {type: Types.ObjectId, ref: 'User'}

@@ -1,4 +1,5 @@
 var conf    = require('../config').genConf();
+var async = require('async') ;
 var Models = require('../models') ;
 
 /*
@@ -53,4 +54,20 @@ exports.tradesList = function(req, res){
     if (err) return res.send(400, err);
     return res.send(200, a);
   });
+};
+
+exports.cleanDb = function(req, res) {
+  Models.Security.find({}, function(err, securities){ 
+    if (err) return res.send(500, err);
+    return async.forEach(securities, saveSec, processUploads);
+    function saveSec(sec, asyncCb) { sec.save(asyncCb); };
+  });
+  function processUploads() {
+    Models.BrokerReport.find({}, function(err, reports) {
+      if (err) return res.send(500, err);
+      return async.forEach(reports, saveRep, succ);
+      function saveRep(rep, asyncCb) { rep.save(asyncCb); };
+    });
+  }
+  function succ() { return res.send(200); }
 };

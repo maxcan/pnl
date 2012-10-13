@@ -99,6 +99,12 @@ function AdminCtrl($scope, $location, $http, User
     }
 
   });
+  $scope.cleanDb = function () {
+    $http.post('../../api/admin/clean-db').success(function(d) {
+      alert('cleaned!');
+      console.log('successfully generated code: ' + d);
+    });
+  };
   $scope.getAuthCode    = function() {
     $http.post('../../api/admin/authcode').success(function(d) {
       alert('successfully generated code: ' + d);

@@ -216,6 +216,7 @@ app.get('/api/admin/uploads',   adminRoutes.uploadsList);
 app.get('/api/admin/mails',     adminRoutes.mailsList);
 app.get('/api/admin/authcodes', adminRoutes.authCodesList);
 app.post('/api/admin/authcode', adminRoutes.genAuthCode);
+app.post('/api/admin/clean-db', adminRoutes.cleanDb);
 
 
 var secureStatic = express.static(__dirname+'/private');
