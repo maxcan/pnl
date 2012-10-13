@@ -4,7 +4,6 @@ var util = require('util');
 var ModelsTrade = require('../models/trade') ;
 var fs = require('fs') ;
 var AppUtil = require("../appUtil.js");
-var TradeStation = require("../lib/parsers/ts.js");
 var _ = require('underscore');
 
 var  mkApiFill = function(fill) {
@@ -91,19 +90,22 @@ exports.getUpload = function(req, res) {
 }
 exports.setReportText = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
-  Models.BrokerReport.findOne({_id: req.params.uploadId}, function(err, upload) {
+  Models.BrokerReport.findOne({_id: req.params.uploadId}, function(err, uploadedReport) {
     if (err) throw err;
-    if (upload) {
-      upload.extractedText = req.body.pdfText;
-      upload.save(function(err, savedUpload) {
-        if (err) throw err;
-        var trades = TradeStation.parseTradeStationExtractedText(upload.extractedText);
-        _.each(trades, function(t){
-          _.extend(t,{owner: req.user._id, reportRef: upload._id})
-        });
-        ModelsTrade.mkTradesAndSave(req.user._id, trades, function(err) {
-          if (err) {throw err; }
-          res.send(200, upload.content)
+    if (uploadedReport) {
+      uploadedReport.extractedText = req.body.pdfText;
+      uploadedReport.save(function(err, savedUpload) {
+        console.log('saved report, going to process');  // _DEBUG
+        return BrokerReportManager.processUpload(savedUpload, function(err) {
+          if (err) {
+            if (err === BrokerReportManager.DuplicateUpload) {
+              console.log('Duplicate Report, not processing');
+              return res.send(200, "This was a duplicate upload and will be ignored");
+            }
+            console.log('error saving uplaoded report:' + err);
+            return res.send(500);
+          }
+          return res.send(200);
         });
       });
     } else {
@@ -119,7 +121,6 @@ exports.reportUpload = function(req, res) {
   if (req.files) {
     _.each(req.files, function(file) {
       var content = fs.readFileSync(file.path) ;
-      console.log('Handling upload: '  + util.inspect(file));  // _DEBUG
       var uploadObj = { owner: req.user._id
                       , content: content
                       , uploadMethod: 'upload'

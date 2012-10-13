@@ -1,3 +1,4 @@
+var crypto = require('crypto');
 var mongoose = require('mongoose');
 var dateFormat = require('dateformat');
 var conf    = require('./config.js').genConf();
@@ -166,7 +167,16 @@ var brokerReportSchema = new mongoose.Schema(
     , mailRef       : {type: Types.ObjectId, ref: 'MailArchive'}
     , receivedDate  : Date
     , senderIp      : String
+    , md5Hash       : String
     });
+
+brokerReportSchema.pre('save', function(next) {
+  var report = this;
+  var md5sum = crypto.createHash('md5');
+  md5sum.update(report.content);
+  report.md5Hash = md5sum.digest('base64');
+  return next();
+});
 
 var mailArchiveSchema = new mongoose.Schema(
     { owner         : {type: Types.ObjectId, ref: 'User'}

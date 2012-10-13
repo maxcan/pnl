@@ -124,7 +124,13 @@ exports.checkMail = function( ) {
                       if (err) return asyncCallback(err);
                       reportIds.push(report._id);
                       report.mailObj = mailArchive;
-                      return BrokerReportManager.processUpload(report, asyncCallback);
+                      function chkDupeCallBack(err) {
+                        if (err && err === BrokerReportManager.DuplicateUpload) {
+                          return asyncCallback();
+                        }
+                        return asyncCallback(err);
+                      }
+                      return BrokerReportManager.processUpload(report, chkDupeCallBack);
                     });
                 }
               });

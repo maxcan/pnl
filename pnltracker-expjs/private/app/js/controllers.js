@@ -29,10 +29,11 @@ function FileUploadCtrl($scope, Trades, $rootScope)
               if (curPage < totalPages) {
                 catPage(curPage + 1);
               } else {
-                $.post(postUrl, {pdfText: reportLines}, function() {
-                  $rootScope.$broadcast('refreshTrades');
-                  // $rootScope.$apply();
-                });
+                $.post(postUrl, {pdfText: reportLines})
+                 .success(function(data) {
+                   if (data && data != 'OK') alert(data);
+                   $rootScope.$broadcast('refreshTrades');
+                  });
                 // ok, send this to the server
               }
             });
