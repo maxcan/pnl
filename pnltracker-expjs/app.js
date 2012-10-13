@@ -24,6 +24,8 @@ var app = express();
 everyauth.google
 .appId(conf.oauthGoogleAppId)
 .appSecret(conf.oauthGoogleAppSecret)
+.authQueryParam({ access_type:'online', approval_prompt:'auto' })
+
 .scope('https://www.googleapis.com/auth/userinfo.email') // What you want access to
 // .handleAuthCallbackError( function (req, res) {
   // If a user denies your app, Google will redirect the user to

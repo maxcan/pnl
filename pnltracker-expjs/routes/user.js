@@ -1,4 +1,5 @@
 var Models = require('../models') ; 
+var conf    = require('../config.js').genConf();
 var util = require('util');
 var ModelsTrade = require('../models/trade') ; 
 var Ib = require("../lib/parsers/ib.js");
@@ -47,6 +48,18 @@ exports.loadDummyTrades = function(req,res) {
 exports.setAuthCode = function(req, res) {
   if (!req.user || !req.user._id) { return res.redirect('/auth/facebook');}
   if (!req.body.authcode) { return res.send(500, 'authcode required');}
+  if (conf.ignoreAuthCode) {
+    if (!req.user.roles) { req.user.roles = [] ; } 
+    req.user.roles.unshift('basic');
+    console.log('IGNORING AUTH CODE FOR DEV');  // _DEBUG
+    return req.user.save(function(err) {
+      if (err) {
+        console.log('ERROR in set auth code.  tell support! ' + err); 
+        return res.send(500, 'couldnt save');
+      }
+      return res.send(200);
+    });
+  }
   Models.AuthCode.findOne({value: req.body.authcode}, function(err, ac) {
     if (err) return res.send(500, 'mongo error: ' + err);
     if (req.user.roles.indexOf(ac.roleGiven) != -1) {

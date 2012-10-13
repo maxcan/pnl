@@ -1,4 +1,5 @@
 var Models = require('../models') ;
+var BrokerReportManager = require('../lib/broker_report_manager.js');
 var util = require('util');
 var ModelsTrade = require('../models/trade') ;
 var fs = require('fs') ;
@@ -77,7 +78,7 @@ exports.show = function(req, res) {
 exports.getUpload = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
   if (!req.params.uploadId) { res.send(400, "upload id required");}
-  Models.Upload.findOne({_id: req.params.uploadId}, function(err, upload) {
+  Models.BrokerReport.findOne({_id: req.params.uploadId}, function(err, upload) {
     if (err) throw err;
     if (upload) {
       res.send(200, upload.content)
@@ -90,14 +91,16 @@ exports.getUpload = function(req, res) {
 }
 exports.setReportText = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
-  Models.Upload.findOne({_id: req.params.uploadId}, function(err, upload) {
+  Models.BrokerReport.findOne({_id: req.params.uploadId}, function(err, upload) {
     if (err) throw err;
     if (upload) {
       upload.extractedText = req.body.pdfText;
       upload.save(function(err, savedUpload) {
         if (err) throw err;
         var trades = TradeStation.parseTradeStationExtractedText(upload.extractedText);
-        _.each(trades, function(t){_.extend(t,{owner: req.user._id})});
+        _.each(trades, function(t){
+          _.extend(t,{owner: req.user._id, reportRef: upload._id})
+        });
         ModelsTrade.mkTradesAndSave(req.user._id, trades, function(err) {
           if (err) {throw err; }
           res.send(200, upload.content)
@@ -116,20 +119,30 @@ exports.reportUpload = function(req, res) {
   if (req.files) {
     _.each(req.files, function(file) {
       var content = fs.readFileSync(file.path) ;
+      console.log('Handling upload: '  + util.inspect(file));  // _DEBUG
       var uploadObj = { owner: req.user._id
                       , content: content
+                      , uploadMethod: 'upload'
                       , mimeType: file.mime
+                      , receivedDate: new Date()
+                      , processed: false
+                      , senderId: req.ip
+                      , fileName: file.name
                       }
-      console.log(' about to create the opbject');  // _DEBUG
-      Models.Upload.create(uploadObj, function(err,upload) {
+      Models.BrokerReport.create(uploadObj, function(err,report) {
         console.log(' created at path: ' + file.path);  // _DEBUG
         if (err) throw err;
         if (file.path.length - file.path.toLowerCase().indexOf('.pdf') != 4) {
-          return res.send(200);
+          BrokerReportManager.processUpload(report, function(err) {
+            if (err) {
+              console.log('Error processing file: ' + e + ' repid: ' + report._id);  // _DEBUG
+              return res.send(500,'could not process your file.  contact support');
+            }
+            return res.send(200);
+          });
         } else {
-          console.log(' added pd with objectid : ' + upload._id);  // _DEBUG
-          return res.send(200,  { pdfUrl: '/api/report/get/' + upload._id
-                                , setTextUrl:  '/api/report/setText/' + upload._id
+          return res.send(200,  { pdfUrl: '/api/report/get/' + report._id
+                                , setTextUrl:  '/api/report/setText/' + report._id
                                 });
         }
       });

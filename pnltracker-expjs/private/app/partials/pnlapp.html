@@ -31,14 +31,24 @@
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span3 bs-docs-sidebar">
-        <ul class="nav nav-list bs-docs-sidenav affix">
-          <li><a scroll-to="#top"><i class="icon-chevron-right"></i>Top</a></li>
-          <li><a scroll-to="#ts_upload"><i class="icon-chevron-right"></i>TradeStation PDF Upload</a></li>
-          <li><a scroll-to="#pnl_by_underlying"><i class="icon-chevron-right"></i> PnL by Underlying </a></li>
-          <li><a scroll-to="#pnl_by_duration"><i class="icon-chevron-right"></i> PnL by Duration </a></li>
-          <li><a scroll-to="#trade_breakdown"><i class="icon-chevron-right"></i> Trade Breakdown </a></li>
-          <li><a scroll-to="#trades_open"><i class="icon-chevron-right"></i> Open Trades </a></li>
-        </ul>
+        <div class="affix">
+          <ul class="nav nav-list bs-docs-sidenav">
+            <li>
+              <a>
+                <div class="input-append">
+                  <input  class="input input-small" type="text"  placeholder="Filter Trades" ng-model="tradeFilter" ng-change="filterChanged()">
+                  <button class="btn" ng-click="tradeFilter = ''">Clear Filter</button>
+                </div>
+              </a>
+            </li>
+            <li><a scroll-to="#top"><i class="icon-chevron-right"></i>Top</a></li>
+            <li><a scroll-to="#ts_upload"><i class="icon-chevron-right"></i>TradeStation PDF Upload</a></li>
+            <li><a scroll-to="#pnl_by_underlying"><i class="icon-chevron-right"></i> PnL by Underlying </a></li>
+            <li><a scroll-to="#pnl_by_duration"><i class="icon-chevron-right"></i> PnL by Duration </a></li>
+            <li><a scroll-to="#trade_breakdown"><i class="icon-chevron-right"></i> Trade Breakdown </a></li>
+            <li><a scroll-to="#trades_open"><i class="icon-chevron-right"></i> Open Trades </a></li>
+          </ul>
+        </div>
       </div>
       <div class="span9">
         <div id="authCodeEntryModal" class="modal hide fade" data-keyboard='false' data-backdrop="static">
@@ -108,11 +118,6 @@
         <div id="trade_breakdown" class="row-fluid">
           <div class="span12">
             <hr>
-            <p>
-              Filter Trades: 
-              <input ng-model="tradeFilter">
-              <a ng-click="tradeFilter = ''">Clear Filter</a>
-            </p>
             <h3>Closed Trades </h3>
             <h4> 
               Total PnL:  <span ng-bind="filteredClosedTrades  | pluck:'netCash' | sum | currency"/>

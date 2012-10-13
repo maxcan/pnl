@@ -90,7 +90,7 @@ var tradeSchema = new mongoose.Schema(
     , isOpen    : Boolean
     , acctId    : String
     , mailRef   : {type: Types.ObjectId, ref: 'MailArchive'}
-    , uploadRef : {type: Types.ObjectId, ref: 'Upload'} 
+    , reportRef : {type: Types.ObjectId, ref: 'BrokerReport'} 
     , security  : {type: Types.ObjectId, ref: 'Security'}
     });
 
@@ -155,19 +155,17 @@ tradeSchema.virtual('maxPrin').get(function() {
                                 : Math.abs(this.totalSell * this.vwapSell ));
 });
 
-
-
-var uploadSchema = new mongoose.Schema(
+var brokerReportSchema = new mongoose.Schema(
     { owner         : {type: Types.ObjectId, ref: 'User'}
+    , uploadMethod  : {type: String, enum: ['email','upload']}
+    , fileName      : String
+    , processed     : Boolean
     , mimeType      : String
     , content       : Buffer
     , extractedText : [String]
-    });
-var mailAttachmentSchema = new mongoose.Schema(
-    { name      : String
-    , mimeType  : String
-    , content   : String
-    , processed : Boolean
+    , mailRef       : {type: Types.ObjectId, ref: 'MailArchive'}
+    , receivedDate  : Date
+    , senderIp      : String
     });
 
 var mailArchiveSchema = new mongoose.Schema(
@@ -178,7 +176,7 @@ var mailArchiveSchema = new mongoose.Schema(
     , raw           : String
     , receivedDate  : Date
     , msgId         : String
-    , attachments   : [mailAttachmentSchema]
+    , attachments   : [{type: Types.ObjectId, ref: 'BrokerReport'}]
     });
 
 var authCodeSchema = new mongoose.Schema(
@@ -190,8 +188,6 @@ var AuthCode = db.model('AuthCode', authCodeSchema);
 exports.AuthCode = AuthCode;
 var User  = db.model('User', userSchema);
 exports.User = User;
-var Upload = db.model('Upload', uploadSchema);
-exports.Upload = Upload;
 var MailArchive  = db.model('User', mailArchiveSchema);
 exports.MailArchive = MailArchive;
 var Fill = db.model('Fill', fillSchema);
@@ -200,6 +196,8 @@ var Trade = db.model('Trade', tradeSchema);
 exports.Trade = Trade;
 var Security = db.model('Security', securitySchema);
 exports.Security = Security;
+var BrokerReport = db.model('BrokerReport', brokerReportSchema);
+exports.BrokerReport = BrokerReport;
 var MailArchive = db.model('MailArchive', mailArchiveSchema);
 exports.MailArchive = MailArchive;
 

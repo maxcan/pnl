@@ -43,6 +43,7 @@ var stgSettings = _.extend(_.clone(baseSettings),
 var devSettings = _.extend(_.clone(baseSettings),
       { isDev: true
       , allowNonSsl: true
+      , ignoreAuthCode: true
 
       });
 

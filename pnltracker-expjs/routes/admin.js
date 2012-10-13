@@ -31,7 +31,7 @@ exports.authCodesList = function(req, res){
 
 exports.uploadsList = function(req, res){
   var loggedIn = req.user;
-  Models.Upload.find({}, function(err, a) {
+  Models.BrokerReport.find({}, function(err, a) {
     if (err) return res.send(400, err);
     return res.send(200, a);
   });

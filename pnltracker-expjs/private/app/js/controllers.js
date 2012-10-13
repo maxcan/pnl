@@ -141,12 +141,12 @@ function DurationGroupCtrl($scope, Trades, $rootScope) {
       return ">1day";
     });
   }
-  function refreshTrades(trades) {$scope.groups = mkDuration(trades);}
-  $rootScope.$on('refreshTrades', function() {Trades.get(refreshTrades);});
-  Trades.get(refreshTrades);
+  $rootScope.$on('loadedTrades', function() {
+    $scope.groups = mkDuration($scope.$parent.filteredClosedTrades); 
+  });
 }
 
-function UndlGroupCtrl($scope, Trades, $rootScope) {
+function UndlGroupCtrl($scope, $rootScope) {
   var toggleAsc  = true;
   $scope.setSort = function(col) {
     $scope.groups = _.sortBy($scope.groups, col);
@@ -158,15 +158,19 @@ function UndlGroupCtrl($scope, Trades, $rootScope) {
       return (t.underlyingSecurity ? t.underlyingSecurity.symbol : t.security.symbol);
     });
   }
-  function refreshTrades(trades) { $scope.groups = mkUnderlying(trades); }
-  $rootScope.$on('refreshTrades', function() {Trades.get(refreshTrades);});
-  Trades.get(refreshTrades);
+  $rootScope.$on('loadedTrades', function() {
+    $scope.groups = mkUnderlying($scope.$parent.filteredClosedTrades); 
+  });
 }
-function HomeCtrl($scope, User, Trades, $rootScope, $http) {
+function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   setInterval(function() { $rootScope.$broadcast('refreshTrades');}, 45000);
   $rootScope.$on('refreshTrades', function() {
     User.get(function(u){$scope.user  = u ; });
-    Trades.get(function(t){$scope.trades = t; } ) ; 
+    Trades.get(function(t) {
+      $scope.trades = t; 
+      $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
+      $rootScope.$broadcast('loadedTrades');
+      } ) ; 
   });
   $scope.user = User.get(function(user) {
     if ((!user.roles) || user.roles.indexOf('basic') === -1) {
@@ -184,9 +188,16 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http) {
            console.log('error setting code: ' + d + ': status = ' + s);
            alert('failed to authorize');
          });
-    console.log('auth code: ' + $scope.authcode);  // _DEBUG
   };
-  $scope.trades = Trades.get();
+  $scope.trades = Trades.get(function(t) {
+    $scope.trades = t; 
+    $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
+    $rootScope.$broadcast('loadedTrades');
+  });
+  $scope.filterChanged = function() {
+    $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
+    $rootScope.$broadcast('loadedTrades');
+  };
   $scope.tradeFilter = '';
   var toggleAsc = true;
   $scope.isAdmin = function() {
