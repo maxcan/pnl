@@ -28,6 +28,7 @@
 
     </div>
   </div>
+
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span3 bs-docs-sidebar">
@@ -103,6 +104,13 @@
             <div app-upload></div>
           </div>
         </div>
+
+        <div id="pnl_chart" class="row-fluid">
+          <div class="span12" ng-controller="UndlGroupCtrl">
+            <div ng-controller="ChartCtrl"> <svg height="200" width="300" id="test_chart"></svg></div>
+          </div>
+        </div>
+
         <div id="pnl_by_underlying" class="row-fluid">
           <div class="span12" ng-controller="UndlGroupCtrl">
             <h4>PnL per underlying symbol</h4>

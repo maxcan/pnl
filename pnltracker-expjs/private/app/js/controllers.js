@@ -1,8 +1,6 @@
 'use strict';
 
-/* Controllers */
 
-// old example controllers from angular
 function FileUploadCtrl($scope, Trades, $rootScope)
 {
   var uploader = new plupload.Uploader(

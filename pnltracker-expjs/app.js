@@ -237,6 +237,13 @@ http.createServer(app).listen(listenPort, function(){
   console.log("Express server listening on port " + listenPort);
   console.log("     However, app port is :" + app.get('port'));
   var mailInterval = 1000 * 10; // 30 sec
+  function wrapCheckMail() {
+    try {
+      fetcher.checkMail();
+    } catch (e) {
+      console.log('ERROR COULD NOT CHECK MAIL: ' + e); // _TODO email an admin here
+    }
+  }
   //  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
-  setInterval(fetcher.checkMail, mailInterval);
+  setInterval(wrapCheckMail, mailInterval);
 });
