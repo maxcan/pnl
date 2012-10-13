@@ -1,8 +1,9 @@
 <div id="upload_container" ng-controller="FileUploadCtrl">
   <div id="drop_area" style="border: 1px black dashed;">Drag files to here<br><br><br></div>
-  Files to upload:<br>
-  <div ng-repeat="currFile in uploader.files">{{currFile.name}} ({{currFile.size}})</div>
-  <br><br>
+  Uploaded:
+  <div ng-repeat="currFile in files">{{currFile.name}} ({{currFile.size}})</div>
+  <br>
+  <a class="btn btn-primary btn-block" id="upload_select_btn_shim">Select Files</a>
   <!-- For debugging -->
 </div>
 

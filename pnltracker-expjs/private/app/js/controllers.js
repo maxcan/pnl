@@ -5,13 +5,17 @@
 // old example controllers from angular
 function FileUploadCtrl($scope, Trades, $rootScope)
 {
-  var uploader = $('#upload_container').pluploadQueue({
-    runtimes : 'html5,html4',
-    url : '../../api/report/upload', 
-    max_file_size : '10mb',
-    // container: 'uploadContainer',
-    drop_element: 'drop_area'
+  var uploader = new plupload.Uploader(
+    // $('#upload_container').pluploadQueue({
+  // var uploader = $('#upload_container').pluploadQueue({
+    { container: 'upload_container'
+    , runtimes : 'html5,html4'
+    , url : '../../api/report/upload'
+    , max_file_size : '10mb'
+    , browse_button: 'upload_select_btn_shim'
+    , drop_element: 'drop_area'
   });
+  uploader.init();
 
   function handlePdfResponse(pdfUrl, postUrl) {
 
@@ -46,10 +50,16 @@ function FileUploadCtrl($scope, Trades, $rootScope)
       catPage(1);
     });
   };
-  $scope.uploader = uploader.pluploadQueue();
+  $scope.uploader = uploader;
   // $scope.uploader.init();
+  $scope.files = [];
+  $scope.uploader.bind('FilesAdded', function(up, files) {
+    _.each(files, function(f) {$scope.files.unshift(f)});
+    $scope.$apply();
+    $scope.uploader.start();
+  });
+
   $scope.uploader.bind('FileUploaded', function(up, files, res) {
-    console.log('file uploaded: res: '+ JSON.stringify(res));  // _DEBUG
     if (res && res.response) {
       try {
         var obj = JSON.parse(res.response);
