@@ -245,5 +245,5 @@ http.createServer(app).listen(listenPort, function(){
     }
   }
   //  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
-  // setInterval(wrapCheckMail, mailInterval);
+  setInterval(wrapCheckMail, mailInterval);
 });
