@@ -2,20 +2,30 @@
 
 function ChartCtrl($scope, $rootScope) {
   $scope.initialized = false;
+  $scope.groupUndl = true;
+  $scope.toggleGroupUndl = function() {
+    updateCharts();
+  }
+  function getSym(t) {
+    return ($scope.groupUndl ? t.underlyingSecurity.symbol : t.securityDesc);
+  }
   var lineCharts =
     [ { wrapper: '#cumulative_pnl_chart', fxn: calculatePnlSeriesByUnderlying }
     ] ;
-  $rootScope.$on('loadedTrades', function() {
-    if ($scope.initialized) { 
+  function updateCharts() {
+    if (false && $scope.initialized) { 
       updateChartData(); 
     } else {
+      console.log(' updating charts');  // _DEBUG
       _.each(lineCharts, function(o) { buildLineChart(o.wrapper, o.fxn); });
       buildPieChart('#profit_share_pie_chart'
                    , function() { return calculateProfitShareByUnderlying(true);});
       buildPieChart('#loss_share_pie_chart'
                    , function() { return calculateProfitShareByUnderlying(false);});
     }
-  });
+
+  }
+  $rootScope.$on('loadedTrades', updateCharts);
 
   // utility functions
   function closedTrades (trds) {return _.filter(trds, function(t){return !t.isOpen;}); }
@@ -25,13 +35,13 @@ function ChartCtrl($scope, $rootScope) {
     var trades = closedTrades($scope.trades);
     _.each(trades, function(t) {    
       if ((t.netCash > 0 && isProfit) || (t.netCash <= 0 && !isProfit)) {
-        if (!comps[t.underlyingSecurity.symbol])
-          comps[t.underlyingSecurity.symbol] = 0;
-        comps[t.underlyingSecurity.symbol] += t.netCash;
+        if (!comps[getSym(t)])
+          comps[getSym(t)] = 0;
+        comps[getSym(t)] += t.netCash;
       } else {
-        if (!losses[t.underlyingSecurity.symbol])
-          losses[t.underlyingSecurity.symbol] = 0;
-        losses[t.underlyingSecurity.symbol] += t.netCash;
+        if (!losses[getSym(t)])
+          losses[getSym(t)] = 0;
+        losses[getSym(t)] += t.netCash;
       }
     });
     var retVals = [];
@@ -48,7 +58,7 @@ function ChartCtrl($scope, $rootScope) {
     var underlyings = {} ; // { sym:[ { x : date, y : double} ] } 
     var sortedTrades = _.sortBy(closedTrades($scope.trades), 'closeDate');
     _.each(sortedTrades, function(trade) {
-      var sym = trade.underlyingSecurity.symbol;
+      var sym = getSym(trade); 
       if (! underlyings[sym] ) {underlyings[sym] = []; }
       var dt = new Number(new Date(trade.closeDate));
       underlyings[sym].push({x: dt, y: trade.netCash});
