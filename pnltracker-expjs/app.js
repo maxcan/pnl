@@ -239,6 +239,7 @@ http.createServer(app).listen(listenPort, function(){
   var mailInterval = 1000 * 10; // 30 sec
   function wrapCheckMail() {
     try {
+    console.log('about to fetch mail');  // _DEBUG
       fetcher.checkMail();
     } catch (e) {
       console.log('ERROR COULD NOT CHECK MAIL: ' + e); // _TODO email an admin here
