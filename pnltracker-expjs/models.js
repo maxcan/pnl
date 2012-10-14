@@ -58,7 +58,7 @@ securitySchema.pre('save', function(next) {
   var security = this;
   switch (this.securityType) {
     case 'stock': 
-      security.desc + ' Equity';
+      security.desc = security.symbol + ' Equity';
       return (next());
     case 'option': 
       return exports.Security.findById(security.underlying, function(err, undl) {

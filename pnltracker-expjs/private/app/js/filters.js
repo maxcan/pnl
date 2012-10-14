@@ -14,6 +14,10 @@ pnlApp.filter('pluck', function() {
   }  
 });
 
+pnlApp.filter('percent', function() {
+  return function(num) { return(Math.round(num * 100)+ ' %'); }  
+});
+
 pnlApp.filter('sum', function() {
   return function(arr, fld) {
     var total = 0;
@@ -40,7 +44,9 @@ pnlApp.filter('timespan', function() {
       var mins  = Math.floor((totalTime % ( 60 * 60 * 1000 ) ) / (60 * 1000));
       var hours = Math.floor((totalTime % ( 24 * 60 * 60 * 1000 ) ) / (60 * 60 * 1000));
       var days  = Math.floor(totalTime / ( 24 * 60 * 60 * 1000));
-      return String(days + " Days, " + hours + "h " + mins + "m " + secs + "." + mills +'s'); 
+      if (days > 0) return String(days + " Days, " + hours + "h " + mins + "m " + secs + "." + mills +'s'); 
+      if (hours > 0) return String(hours + "h " + mins + "m " + secs + "." + mills +'s'); 
+      return String(mins + "m " + secs + "." + mills +'s'); 
     }
   })  ;
 

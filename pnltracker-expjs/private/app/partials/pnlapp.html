@@ -4,12 +4,22 @@
           <tr>
             <th class="sortable" ng-click="setSort('group')">Symbol</th>
             <th class="sortable" ng-click="setSort('netCash')">Net Cash</th>
+            <th class="sortable" ng-click="setSort('cntTotal')">Trades</th>
+            <th class="sortable" ng-click="setSort('pctWin')">% Win</th>
+            <th class="sortable" ng-click="setSort('cntGain')">Winning Trades</th>
+            <th class="sortable" ng-click="setSort('cntLoss')">Losing Trades</th>
+            <th class="sortable" ng-click="setSort('cntScratch')">Scratch Trades</th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="pnlGroup in groups">
             <td>{{pnlGroup.group }}</td>
             <td>{{pnlGroup.netCash | currency}}</td>
+            <td>{{pnlGroup.cntTotal }}</td>
+            <td>{{pnlGroup.pctWin | percent}}</td>
+            <td>{{pnlGroup.cntGain }}</td>
+            <td>{{pnlGroup.cntLoss }}</td>
+            <td>{{pnlGroup.cntScratch }}</td>
           </tr>
         </tbody>
       </table>
@@ -44,6 +54,7 @@
             </li>
             <li><a scroll-to="#top"><i class="icon-chevron-right"></i>Top</a></li>
             <li><a scroll-to="#ts_upload"><i class="icon-chevron-right"></i>TradeStation PDF Upload</a></li>
+            <li><a scroll-to="#pnl_charts"><i class="icon-chevron-right"></i>Charts</a></li>
             <li><a scroll-to="#pnl_by_underlying"><i class="icon-chevron-right"></i> PnL by Underlying </a></li>
             <li><a scroll-to="#pnl_by_duration"><i class="icon-chevron-right"></i> PnL by Duration </a></li>
             <li><a scroll-to="#trade_breakdown"><i class="icon-chevron-right"></i> Trade Breakdown </a></li>
@@ -52,6 +63,60 @@
         </div>
       </div>
       <div class="span9">
+        <div id="tradeDetailsModal" class="modal hide fade" >
+          <div class="modal-header">
+            <h3>{{detailTrade.symbol}} </h3>
+          </div>
+          <div class="modal-body">
+            <h4>
+              <div ng-switch on="detailTrade.isOpen">
+                <div ng-switch-when="true">
+                  <dl class="dl-horizontal">
+                    <dt>Open Quantity:</dt>
+                    <dd>{{detailTrade.netQty}} shares</dd>
+                    <dt>Security</dt>
+                    <dd>{{detailTrade.securityDesc}}</dd>
+                    <dt>Open Date:</dt>
+                    <dd>{{detailTrade.openDate | date:'short'}}</dd>
+                    <dt></dt>
+                    <dd></dd>
+                  </dl>
+                </div>
+                <div ng-switch-default>
+                  <dl class="dl-horizontal">
+                    <dt>Net Cash:</dt>
+                    <dd>{{detailTrade.netCash | currency}}</dd>
+                    <dt>Open Date:</dt>
+                    <dd>{{detailTrade.openDate | date:'short'}}</dd>
+                    <dt>Close Date:</dt>
+                    <dd>{{detailTrade.closeDate | date:'short'}}</dd>
+                    <dt>Security</dt>
+                    <dd>{{detailTrade.securityDesc}}</dd>
+                    <dt></dt>
+                    <dd></dd>
+                  </dl>
+                  
+                </div>
+              </div>
+            </h4>
+            Fills:
+            <table class="table table-condensed fill-minitable">
+              <thead><tr><td>Qty</td><td></td><td>Price</td><td>Date</td><td>Time</td></tr></thead>
+              <tbody>
+                <tr ng-repeat="fill in detailTrade.fills | orderBy:date">
+                  <td> {{fill.qty}}</td>
+                  <td> @ </td>
+                  <td>{{fill.avgPx}}</td> 
+                  <td>{{fill.date | date:'shortDate'}}</td>
+                  <td>{{fill.date | date:'shortTime'}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+          </div>
+        </div>
         <div id="authCodeEntryModal" class="modal hide fade" data-keyboard='false' data-backdrop="static">
           <div class="modal-header">
             <h3>Authorization Code Required:</h3>
@@ -105,9 +170,22 @@
           </div>
         </div>
 
-        <div id="pnl_chart" class="row-fluid">
+        <div id="pnl_charts" class="row-fluid">
           <div class="span12" ng-controller="UndlGroupCtrl">
-            <div ng-controller="ChartCtrl"> <svg height="200" width="300" id="test_chart"></svg></div>
+            <div ng-controller="ChartCtrl" class="row-fluid">
+              <div id="cumulative_pnl_chart" class="span6">
+                <h4>Cumulative PnL <em>click on the symbols in the legends!</em></h4>
+                <svg class="chart" id="test_chart"></svg>
+              </div>
+              <div id="profit_share_pie_chart" class="span3">
+                <h4>Profit Share</h4>
+                <svg class="chart" ></svg>
+              </div>
+              <div id="loss_share_pie_chart" class="span3">
+                <h4>Loss Share</h4>
+                <svg class="chart" ></svg>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -133,6 +211,7 @@
             <table class="table table-bordered table-condensed">
               <thead>
                 <tr>
+                  <th></th>
                   <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
                   <th class="sortable" ng-click="setTradeSort('netCash')">Net Cash</th>
                   <th class="sortable" ng-click="setTradeSort('Size')">Size</th>
@@ -142,35 +221,20 @@
                   <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
                   <th >Security Description</th>
                   <th class="sortable" ng-click="setTradeSortUnderlying()">Underlying Symbol</th</th>
-                  <th>Fills</th>
                 </tr>
               </thead>
               <tbody>
                 <tr ng-repeat="trade in filteredClosedTrades = (trades | filter: tradeFilter | filter: {isOpen:false} )">
+                  <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
                   <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
-                  <td>{{trade.netCash | currency}}</td>
+                  <td>{{trade.netCash  | currency}}</td>
                   <td>{{trade.totalBuy}}</td>
-                  <td>{{trade.maxPrin | currency}}</td>
+                  <td>{{trade.maxPrin  | currency}}</td>
                   <td>{{trade.duration | timespan}}</td>
-                  <td>{{trade.vwapBuy | currency}}</td>
+                  <td>{{trade.vwapBuy  | currency}}</td>
                   <td>{{trade.vwapSell | currency}}</td>
                   <td>{{trade.securityDesc }}</td>
                   <td>{{trade.underlyingSecurity.symbol }}</td>
-                  <td>
-                    Fills:
-                    <table class="table table-condensed fill-minitable">
-                      <thead><tr><td>Qty</td><td></td><td>Price</td><td>Date</td><td>Time</td></tr></thead>
-                      <tbody>
-                        <tr ng-repeat="fill in trade.fills | orderBy:date">
-                          <td> {{fill.qty}}</td>
-                          <td> @ </td>
-                          <td>{{fill.avgPx}}</td> 
-                          <td>{{fill.date | date:'shortDate'}}</td>
-                          <td>{{fill.date | date:'shortTime'}}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -178,6 +242,7 @@
             <table id="testid" class="table table-bordered table-condensed">
               <thead>
                 <tr>
+                  <th></th>
                   <th class="sortable" ng-click="setTradeSort('symbol')">Symbol</th>
                   <th class="sortable" ng-click="setTradeSort('totalBuy')">Bot</th>
                   <th class="sortable" ng-click="setTradeSort('totalSell')">Sold</th>
@@ -186,11 +251,11 @@
                   <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
                   <th >Security Description</th>
                   <th class="sortable" ng-click="setTradeSortUnderlying()">Underlying Symbol</th</th>
-                  <th>Fills</th>
                 </tr>
               </thead>
               <tbody>
                 <tr ng-repeat="trade in trades | filter: tradeFilter | filter: {isOpen:true}">
+                  <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
                   <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
                   <td>{{trade.totalBuy}}</td>
                   <td>{{trade.totalSell}}</td>
@@ -199,20 +264,6 @@
                   <td>{{trade.vwapSell | currency}}</td>
                   <td>{{trade.securityDesc }}</td>
                   <td>{{trade.underlyingSecurity.symbol }}</td>
-                  <td>
-                    <table class="table table-condensed fill-minitable">
-                      <thead><tr><td>Qty</td><td></td><td>Price</td><td>Date</td><td>Time</td></tr></thead>
-                      <tbody>
-                        <tr ng-repeat="fill in trade.fills | orderBy:date">
-                          <td> {{fill.qty}}</td>
-                          <td> @ </td>
-                          <td>{{fill.avgPx}}</td> 
-                          <td>{{fill.date | date:'shortDate'}}</td>
-                          <td>{{fill.date | date:'shortTime'}}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
                 </tr>
               </tbody>
             </table>

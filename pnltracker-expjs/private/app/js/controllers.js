@@ -103,6 +103,13 @@ function AdminCtrl($scope, $location, $http, User
       console.log('successfully generated code: ' + d);
     });
   };
+  $scope.loadDummyTrades = function() {
+    $http.get('../../test/admin/users/ld').success(function(d) {
+      alert('loaded');
+    }).error(function(e) {
+      alert('failed to load: ' + e);
+    });
+  };
   $scope.getAuthCode    = function() {
     $http.post('../../api/admin/authcode').success(function(d) {
       alert('successfully generated code: ' + d);
@@ -135,7 +142,19 @@ function mkGenericGroup(trades, groupingFunction) {
   var buckets = [];
   _.each(groupedTrades, function(group, bucket) { 
     var nc = _.reduce(group, function(s,t) {return s+t.netCash;},0);
-    buckets.unshift({group:bucket, netCash:nc});
+    var ret = { group: bucket
+              , netCash: nc
+              , cntTotal: 0
+              , cntGain: 0
+              , cntLoss: 0};
+    _.each(group, function(t) { 
+      ret.cntTotal++;
+      if (t.netCash > 1) { ret.cntGain++;}
+      else if (t.netCash < -1) { ret.cntLoss++;}
+    });
+    ret.cntScratch = ret.cntTotal - (ret.cntGain + ret.cntLoss);
+    ret.pctWin = ret.cntGain / ret.cntTotal;
+    buckets.unshift(ret);
   });
   return buckets;
 }
@@ -220,6 +239,10 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
       return $scope.user.roles.indexOf('admin') != -1;
     return false;
   }
+  $scope.showTradeDetails = function(trade) {
+    $scope.detailTrade = trade;
+    $('#tradeDetailsModal').modal();
+  };
   $scope.setTradeSortUnderlying = function() {
     $scope.trades = _.sortBy($scope.trades, function(o){
       if (o.underlyingSecurity) return o.underlyingSecurity.symbol;

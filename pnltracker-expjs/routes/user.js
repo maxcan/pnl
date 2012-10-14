@@ -33,14 +33,10 @@ exports.setDummyUser = function(req,res) {
 exports.loadDummyTrades = function(req,res) {
   if (!req.user || !req.user._id) { return res.redirect('/auth/facebook');}
   Models.Trade.find({owner: req.user._id}).remove(function(err, prevTrade) {
-    fs.readFile("../assets/ib_email_sample.html", "utf8", function(fsErr,data) {
-      if (fsErr) return res.send(500, fsErr);
-      var fills = tradeFixtures.ibGeneratedSampleTrades;
-      // var fills = Ib.parseEmailedReportString(data);
-      ModelsTrade.mkTradesAndSave(req.user._id, fills, function(err) {
-        if (err) {return res.send(500,'error: ' + err);}
-        return res.redirect('/');
-      });
+    var fills = tradeFixtures.sampleTradeSet;
+    ModelsTrade.mkTradesAndSave(req.user._id, fills, function(err) {
+      if (err) {return res.send(500,'error: ' + err);}
+      return res.redirect('/');
     });
   });
 }; 

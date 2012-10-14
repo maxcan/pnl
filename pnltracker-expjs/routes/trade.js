@@ -18,10 +18,13 @@ var mkApiTrade = function (t) {
   _.each( ['_id', 'owner','isOpen', 'openDate', 'duration' , 'security', 'underlyingSecurity']
         , function(k) { ret[k] = t[k];} );
   ret.netCash = t.netCash;
+  ret.netQty = t.netQty;
   ret.totalBuy = t.totalBuy;
   ret.totalSell = t.totalSell;
   ret.vwapSell = t.vwapSell;
   ret.vwapBuy = t.vwapBuy;
+  ret.maxPrin = t.maxPrin;
+  ret.closeDate = t.closeDate;
   ret.symbol = t.symbol.substring(3);
   ret.fills  = _.map(t.fills, mkApiFill);
   if (t.security) ret.securityDesc = t.security.desc;

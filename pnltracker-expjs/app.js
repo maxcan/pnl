@@ -199,7 +199,7 @@ app.configure('development', function(){
 app.get('/' ,                   routes.index);
 app.get('/ping',                function(req,res) { return res.send(200, 'pong'); });
 app.get('/users',               userRoutes.list);
-app.get('/test/users/ld',       userRoutes.loadDummyTrades);
+app.get('/test/admin/users/ld', userRoutes.loadDummyTrades);
 app.get('/test/users/set',      userRoutes.setDummyUser);
 app.get('/api/user',            userRoutes.show);
 app.post('/api/user/authcode',  userRoutes.setAuthCode);
@@ -245,5 +245,5 @@ http.createServer(app).listen(listenPort, function(){
     }
   }
   //  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
-  setInterval(wrapCheckMail, mailInterval);
+  // setInterval(wrapCheckMail, mailInterval);
 });

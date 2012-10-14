@@ -1,8 +1,9 @@
 <div ng-controller="AdminCtrl">
   <h1> hi mr. admin</h1>
-  <p><a class='btn' ng-click="getAuthCode()">Generate Auth Code</a></p>
-  <p><a class='btn' ng-click="cleanDb()">Clean Database</a></p>
-  <p><a class='btn' href="#">Go Home</a></p>
+  <a class='btn' ng-click="getAuthCode()">Generate Auth Code</a>
+  <a class='btn' ng-click="cleanDb()">Clean Database</a>
+  <a class='btn' ng-click="loadDummyTrades()">Load dummy trades</a>
+  <a class='btn' href="#">Go Home</a>
   <h4>Auth Codes:</h4>
   <p>
     <span ng-repeat="ac in authCodes">{{ac.value}}, </span>
