@@ -168,11 +168,12 @@ function DurationGroupCtrl($scope, Trades, $rootScope) {
   }
   function mkDuration(trades) {
     return mkGenericGroup(trades,  function(t) {
-      if (t.duration < 60 * 1000) return "<1min";
-      if (t.duration < 60 * 60 * 1000) return "1min<  <1hr";
-      if (t.duration < 5 * 60 * 60 * 1000) return "1hr<  <5hr";
-      if (t.duration < 24 * 60 * 60 * 1000) return "5hr<  <1day";
-      return ">1day";
+      if (t.duration < 60 * 1000)                 return "Less than 1 min";
+      if (t.duration < 60 * 60 * 1000)            return "1 min to 1 hr";
+      if (t.duration < 5 * 60 * 60 * 1000)        return "1 hr to 5 hrs";
+      if (t.duration < 24 * 60 * 60 * 1000)       return "5 hrs to 1 day";
+      if (t.duration < 7 * 24 * 60 * 60 * 1000)   return "1 day to 1 week";
+      return "More than 1 week";
     });
   }
   $rootScope.$on('loadedTrades', function() {
