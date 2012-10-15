@@ -3,6 +3,16 @@
 
 @import "assets/less/variables.less";
 
+/* Mixin */
+.transform (@rotate: 90deg, @scale: 1, @skew: 1deg, @translate: 10px) {
+  -webkit-transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
+     -moz-transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
+       -o-transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
+      -ms-transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
+          transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
+          }
+
+
 * { font-family: "proxima-nova",sans-serif
   ; color: @flatBody
   ; }
@@ -21,9 +31,25 @@ div.chart-wrapper
   }
   a.brand 
     { font-weight: 800
-    ; color: @baseBeige
+    ; color: @baseFlat
     ; font-size: 2.8em
-    ; }
+    ; margin-bottom: -0.25em /* hack for the beta thing */ 
+    ; 
+    &:after 
+      { content: "BETA"
+      ; position: relative
+      ; font-size: 0.5em
+      ; left: -1.3em
+      ; top: 0.3em
+      ; margin-bottom: -3em
+      ; background: fade(@baseContrast, 60%)
+      ; .transform(20)
+      ; border: 1px solid fade(darken(@baseFlat, 25%), 80%)
+      ; padding: 0.5px 3px
+      ; color:  fade(darken(@baseFlat, 25%), 80%)
+
+      }
+    }
 }
 .hero-unit { padding: 2.5em 3em } 
 body { padding-top: @navbarHeight * 1.2; } 
