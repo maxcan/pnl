@@ -79,7 +79,6 @@ function ChartCtrl($scope, $rootScope) {
       });
       ret.push( { values: newVals, key: undlSym } );
     });
-    console.log('REturning: ' + JSON.stringify(ret));  // _DEBUG
     return ret;
   }
   function buildPieChart(wrapperId, dataFunction) {
@@ -87,7 +86,6 @@ function ChartCtrl($scope, $rootScope) {
     var width = $(wrapperId).width();
     var height = width ;
     var chartData = dataFunction();
-    console.log('dataFunction: : ' + JSON.stringify(chartData));  // _DEBUG
     nv.addGraph(function() {
       var chart = nv.models.pieChart()
         .x(function(d) { return d.label })

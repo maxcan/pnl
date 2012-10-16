@@ -18,7 +18,7 @@ var Models = require('./models');
 var fetcher = require('./lib/statement_fetcher');
 var conf    = require('./config.js').genConf();
 var _ = require('underscore');
-
+var MongoStore = require('connect-mongo')(express);
 var app = express();
 
 everyauth.google
@@ -173,7 +173,10 @@ app.configure(function(){
   app.use(express.cookieParser());
   app.use(annoyingProxyTrackerShit);
   app.use(checkSsl);
-  app.use(express.session({secret: 'blalblsdfsdf'}));
+  app.use(express.session(
+      { secret: 'blalblsdfsdf'
+      , store:  new MongoStore({url: conf.mongoDbUri + '/' + conf.mongoDbSessionName})
+      }));
   app.use(express.json());
   app.use(express.urlencoded());
   app.use(everyauth.middleware());

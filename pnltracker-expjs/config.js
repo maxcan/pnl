@@ -14,6 +14,7 @@ var baseSettings =
 
   // mongoose
   , mongoDbName: 'test'
+  , mongoDbSessionName: 'sessions'
   , mongoDbUri: 'mongodb://localhost/test'
 
   // statement fetching:

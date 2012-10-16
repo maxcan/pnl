@@ -1,6 +1,10 @@
 extends layout
 
 block content
+  script
+    $(function() {
+      $('#login_dropdown').mouseover(function() { $('#login_dropdown').click();});
+    });
   .navbar.navbar-fixed-top.navbar-inverse
       .navbar-inner
         .container-fluid
@@ -12,7 +16,7 @@ block content
                 | Contact
           ul.nav.pull-right
             li.dropdown
-              a.dropdown-toggle(href='#', data-toggle='dropdown')
+              a.dropdown-toggle#login_dropdown(href='#', data-toggle='dropdown')
                 | Login/Register
               ul.dropdown-menu
                 li  
