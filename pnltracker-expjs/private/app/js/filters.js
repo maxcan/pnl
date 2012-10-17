@@ -14,6 +14,12 @@ pnlApp.filter('pluck', function() {
   }  
 });
 
+pnlApp.filter('maxLen', function() {
+  return function(str, len) {
+    return str.substring(str, (len ? len : 255));
+  }
+});
+
 pnlApp.filter('percent', function() {
   return function(num) { return(Math.round(num * 100)+ ' %'); }  
 });

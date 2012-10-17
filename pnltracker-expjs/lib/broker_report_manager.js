@@ -59,6 +59,8 @@ function processUploadDupeChecked(report, callback) {
   }
 }
 function processUploadedTsReport(uploadedReport, callback) {
+  console.log('About to process report: ' + uploadedReport._id);  // _DEBUG
+  console.log('            filename   : ' + uploadedReport.fileName);  // _DEBUG
   var trades = TradeStation.parseTradeStationExtractedText(uploadedReport.extractedText);
   _.each(trades, function(t){
     _.extend(t,{owner: uploadedReport.owner, reportRef: uploadedReport._id})

@@ -1,4 +1,5 @@
 var Models = require('../models') ;
+var async = require('async') ;
 var BrokerReportManager = require('../lib/broker_report_manager.js');
 var util = require('util');
 var ModelsTrade = require('../models/trade') ;
@@ -122,7 +123,17 @@ exports.reportUpload = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
   AppUtil.blockCache(res);
   if (req.files) {
-    _.each(req.files, function(file) {
+    var resObjs = [];
+    return async.forEach(req.files, saveSingleFile, sendCombinedResp ) ; 
+    // _.each(req.files, function(file) {
+    function sendCombinedResp(err) {
+      if (err) {
+        console.log('ERROR in processing upload.. ');  // _DEBUG
+        return res.send(500, err);
+      }
+      return res.send(200, resObjs);
+    }
+    function saveSingleFile(file, asyncCallback) { 
       var content = fs.readFileSync(file.path) ;
       var uploadObj = { owner: req.user._id
                       , content: content
@@ -136,21 +147,23 @@ exports.reportUpload = function(req, res) {
       Models.BrokerReport.create(uploadObj, function(err,report) {
         console.log(' created at path: ' + file.path);  // _DEBUG
         if (err) throw err;
-        if (file.path.length - file.path.toLowerCase().indexOf('.pdf') != 4) {
+        if (file.mime.length - file.mime.toLowerCase().indexOf('/pdf') != 4) {
           BrokerReportManager.processUpload(report, function(err) {
             if (err) {
               console.log('Error processing file: ' + e + ' repid: ' + report._id);  // _DEBUG
-              return res.send(500,'could not process your file.  contact support');
+              return asyncCallback('could not process your file.  contact support');
+              // return res.send(500,'could not process your file.  contact support');
             }
-            return res.send(200);
+            return asyncCallback(null); // no further processing necessary
           });
         } else {
-          return res.send(200,  { pdfUrl: '/api/report/get/' + report._id
-                                , setTextUrl:  '/api/report/setText/' + report._id
-                                });
+          // its a PDF.  we need to extract the text client side..
+          resObjs.push({ pdfUrl: '/api/report/get/' + report._id
+                       , setTextUrl:  '/api/report/setText/' + report._id });
+          return asyncCallback(null);
         }
       });
-    });
+    };
   } else {
     return res.send(401, "no files");
   }

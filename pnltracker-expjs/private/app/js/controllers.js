@@ -60,13 +60,15 @@ function FileUploadCtrl($scope, Trades, $rootScope)
   $scope.uploader.bind('FileUploaded', function(up, files, res) {
     if (res && res.response) {
       try {
-        var obj = JSON.parse(res.response);
-        if (obj.pdfUrl && obj.setTextUrl) {
-          
-          handlePdfResponse(obj.pdfUrl, obj.setTextUrl) ;
-        } else {
-          console.log('no PDF url');  // _DEBUG
-        }
+        var resObjs = JSON.parse(res.response);
+        _.each(resObjs, function(obj) { 
+          if (obj.pdfUrl && obj.setTextUrl) {
+            
+            handlePdfResponse(obj.pdfUrl, obj.setTextUrl) ;
+          } else {
+            console.log('no PDF url');  // _DEBUG
+          }
+        });
       } catch (e) {
         console.log('BAD JSON FROM SERVER: ' + e ); 
       }

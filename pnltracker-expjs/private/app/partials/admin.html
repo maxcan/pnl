@@ -72,7 +72,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="adminUpload in adminUploads">
-            <td ng-repeat="key in keys(adminUploads[0])">{{adminUpload[key]  }}</td>
+            <td ng-repeat="key in keys(adminUploads[0])">{{adminUpload[key] | maxLen }}</td>
           </tr>
         </tbody>
       </table>
@@ -90,7 +90,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="adminMail in adminMails">
-            <td ng-repeat="key in keys(adminMails[0])">{{adminMail[key]  }}</td>
+            <td ng-repeat="key in keys(adminMails[0])">{{adminMail[key] | maxLen}}</td>
           </tr>
         </tbody>
 

@@ -122,24 +122,28 @@ var patTxnFee = /^.* Fee +([0-9,]+\.\d\d)$/;
 var patNetAmt = /NET AMOUNT +([0-9,]+\.\d\d)$/;
 
 function stateNew(remLines, fillStack) {
-  var curLine = remLines.shift();
+  function nextLine() { 
+    var l = remLines.shift();
+    return l;
+  }
+  var curLine = nextLine();
   if (!curLine) return fillStack;
   var matchTradeDate = curLine.match(patTradeDateLine);
   if (!matchTradeDate) return stateNew(remLines, fillStack);
   if (remLines.length < 7) throw new Error('Insufficient lines following date declaration');
-  var matchDesc = remLines.shift().match(patDescription); 
+  var matchDesc = nextLine().match(patDescription); 
   if (!matchDesc) throw new Error('could not find desc after date');
 
-  var matchOptionInfo = remLines.shift().match(patOptionInfo); 
+  var matchOptionInfo = nextLine().match(patOptionInfo); 
   if (!matchOptionInfo) throw new Error('could not find OptionInfo ');
 
-  var matchOpenClose = remLines.shift().match(patOpenClose); 
+  var matchOpenClose = nextLine().match(patOpenClose); 
   if (!matchOpenClose) throw new Error('could not find OpenClose ');
 
-  var matchDetailLine = remLines.shift().match(patDetailLine); 
+  var matchDetailLine = nextLine().match(patDetailLine); 
   if (!matchDetailLine) throw new Error('could not find DetailLine ');
 
-  var matchCommission = remLines.shift().match(patCommission); 
+  var matchCommission = nextLine().match(patCommission); 
   if (!matchCommission) throw new Error('could not find Commission ');
 
   // ok, now we need to loop through fees..
@@ -147,7 +151,7 @@ function stateNew(remLines, fillStack) {
   var totalGenericFees = 0;
   var givenNetAmt;
   var iterateOverGenericFees = function() {
-    var nextItem = remLines.shift();
+    var nextItem = nextLine();
     var matchGenericFee = nextItem.match(patGenericFee);
     if (matchGenericFee) {
       totalGenericFees += Number(matchGenericFee[1]);
