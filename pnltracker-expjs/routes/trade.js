@@ -105,8 +105,9 @@ exports.setReportText = function(req, res) {
               console.log('Duplicate Report, not processing');
               return res.send(200, "This was a duplicate upload and will be ignored");
             }
-            console.log('error saving uplaoded report:' + err);
-            return res.send(500);
+            var errStr = 'Failed to save report: ' + err;
+            console.log(errStr);
+            return res.send(500, errStr);
           }
           return res.send(200);
         });

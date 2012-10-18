@@ -32,7 +32,15 @@ function FileUploadCtrl($scope, Trades, $rootScope)
                 catPage(curPage + 1);
               } else {
                 $.post(postUrl, {pdfText: reportLines})
+                 .error(function(data, status, headers, config) {
+                   console.log('post error');  // _DEBUG
+                   var err = (data.responseText 
+                             ? data.responseText + '\nSupport has been notified'
+                             : 'Unknown Error Occurred.  Please contact support');
+                   alert(err);
+                 })
                  .success(function(data) {
+                   console.log('post success!');  // _DEBUG
                    if (data && data != 'OK') alert(data);
                    $rootScope.$broadcast('refreshTrades');
                   });
@@ -201,9 +209,23 @@ function UndlGroupCtrl($scope, $rootScope) {
 }
 function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   setInterval(function() { $rootScope.$broadcast('refreshTrades');}, 45000);
+  var lastRefresh = new Date();
+  var nextRefresh = new Date();
+  var minRefreshPeriod = 5000;
   $rootScope.$on('refreshTrades', function() {
+    var curDate = new Date();
+    console.log('next refresh: ' + nextRefresh);  // _DEBUG
+    console.log('last refresh: ' + lastRefresh);  // _DEBUG
+    console.log('curRef req:   ' + curDate);  // _DEBUG
+    if (nextRefresh > curDate) return;  // already have a "future" request queued
+    if ((curDate - lastRefresh) < minRefreshPeriod) {
+      nextRefresh = curDate + minRefreshPeriod;
+      setTimeout(function(){ $rootScope.$broadcast('refreshTrades'); }, minRefreshPeriod);
+      return;
+    }
     User.get(function(u){$scope.user  = u ; });
     Trades.get(function(t) {
+      lastRefresh = curDate;
       $scope.trades = t; 
       $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
       $rootScope.$broadcast('loadedTrades');

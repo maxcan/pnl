@@ -49,7 +49,13 @@ function openInbox(cb) {
       } else { 
         console.log('connected');  // _DEBUG
         imapIsConnected = true;
-        imap.openBox('INBOX', false, cb);
+        try { 
+          imap.openBox('INBOX', false, cb);
+        } catch (e) {
+          console.log('ERORR on openInbox: '+  e);
+          imap.logout();
+          imapIsConnected = false;
+        }
       }
     });
   }

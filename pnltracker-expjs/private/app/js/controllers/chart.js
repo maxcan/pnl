@@ -16,7 +16,7 @@ function ChartCtrl($scope, $rootScope) {
     if (false && $scope.initialized) { 
       updateChartData(); 
     } else {
-      console.log(' updating charts');  // _DEBUG
+      console.log(' updating charts'); 
       _.each(lineCharts, function(o) { buildLineChart(o.wrapper, o.fxn); });
       buildPieChart('#profit_share_pie_chart'
                    , function() { return calculateProfitShareByUnderlying(true);});

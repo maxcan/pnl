@@ -112,7 +112,7 @@ var sampleExtract = [
 // this is the trade and settlement date of a trade and represents the beginning of 
 // a new block
 var patTradeDateLine = /^(\d\d\/\d\d\/\d{4}) +(\d\d\/\d\d\/\d{4}) +(Bought|Sold)/;
-var patDescription = /^[A-Z0-9a-z&.-_ ]*$/  
+var patDescription = /^[-A-Z0-9a-z&._ ]*$/  
 var patOptionInfo = /^([A-Z]{3}) +(\d\d),(\d{4}) +@ +([.0-9]+) +(PUT|CALL)/;
 var patOpenClose  = /^(OPENING|CLOSING) CONTRACT/;
 
@@ -128,15 +128,12 @@ var patOpenClose  = /^(OPENING|CLOSING) CONTRACT/;
 //    9: total principal       '538.00',
 
 var patDetailLine = 
-  /^([A-Z]{1,5}) +(\d\d)(\d\d)(\d\d)(C|P)([0-9.]+) +([0-9,]+) ([0-9,]+\.\d\d) Principal ([0-9,]*\.\d\d) +.*$/;
+  /^([A-Z]{1,5}) +(\d\d)(\d\d)(\d\d)(C|P)([0-9.]+) +([0-9,]+) ([0-9,]+\.\d\d+) Principal ([0-9,]*\.\d\d) +.*$/;
 
 //      'MCP 100 14.00 Principal 1,400.00 MGN V1 V2738',
 //  1: sym 2: qty 3: px 4: prin
 var patDetailLineCom = 
   /^([A-Z]{1,5}) +([0-9,]+) ([0-9,]+\.\d\d) Principal ([0-9,]*\.\d\d) +.*$/;
-
-
-
 
 var patCommission = /^.* Commission ([0-9,]+\.\d\d)$/;
 var patGenericFee = /^.* Fee +([0-9,]+\.\d\d)$/;
