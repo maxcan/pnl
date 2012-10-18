@@ -32,6 +32,11 @@ function show(obj) {
   return util.inspect(obj, false, Infinity);
 }
 
+function closeConnection() {
+  try { imap.logout(); }  catch (e) {console.log('ERRRO ' + e);}  // _DEBUG
+  imapIsConnected = false;
+}
+
 function die(err) {
   console.log('Uh oh: ' + err);
   process.exit(1);
@@ -53,8 +58,7 @@ function openInbox(cb) {
           imap.openBox('INBOX', false, cb);
         } catch (e) {
           console.log('ERORR on openInbox: '+  e);
-          imap.logout();
-          imapIsConnected = false;
+          closeConnection;
         }
       }
     });
@@ -80,7 +84,15 @@ function mostRecentMessage(cb) {
 exports.checkMail = function( ) {
   openInbox(function(err, mailbox) {
     if (err) die(err);
-    imap.search([ 'UNSEEN'], function(err, results) {
+    try { 
+      imap.search([ 'UNSEEN'], searchCallback);
+    } catch (e) {
+      console.log('IMAP error: ' + e);  // _DEBUG
+      closeConnection() ; 
+      return ; 
+    }
+
+    function searchCallback(err, results) {
       if (err)  {
         console.log(' error in check mail: ' + err); 
         throw err;
@@ -94,8 +106,7 @@ exports.checkMail = function( ) {
             });
         } catch (e) {
           console.log('IMAP error: ' + e);  // _DEBUG
-          imap.logout();
-          imapIsConnected = false;
+          closeConnection();
           return ; 
         }
         fetch.on('message', function(msg) {
@@ -158,7 +169,7 @@ exports.checkMail = function( ) {
         });
         // fetch.on('end', function() { return ; });
       }
-    });
+    }
   });
 } ;
 
