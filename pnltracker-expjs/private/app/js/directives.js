@@ -29,7 +29,7 @@ pnlModule.directive('scrollTo', function(){
         // Toggle the closed/opened state
         function fireScroll() {
           var c = $(attrs.scrollTo).position();
-          if (c) {window.scrollTo(c.left, c.top);}
+          if (c) {window.scrollTo(c.left, c.top - 60);}
           return false;
         }
       }

@@ -14,11 +14,10 @@ function ChartCtrl($scope, $rootScope) {
   var lineCharts =
     [ { wrapper: '#cumulative_pnl_chart', fxn: calculatePnlSeriesByUnderlying }
     ] ;
-  function updateCharts() {
+  function updateChartsInner() {
     if (false && $scope.initialized) { 
       updateChartData(); 
     } else {
-      console.log(' updating charts'); 
       // check if we're down to a single symbol
       if ($scope.groupUndl) {
         var symMap = {};
@@ -34,7 +33,7 @@ function ChartCtrl($scope, $rootScope) {
           var symMap = {};
           _.each(closedTrades(), function(t) { symMap[t.underlyingSecurity.symbol] = 1;});
           // only one symbol.  We should auto-ungroup
-          if (_.keys(symMap).length != 1) {
+          if (_.keys(symMap).length != 1 || $scope.tradeFilter === '' ) {
             $scope.groupUndl = true;
             forcedUngroup = false;
           }
@@ -50,6 +49,9 @@ function ChartCtrl($scope, $rootScope) {
     }
 
   }
+  function updateCharts() { setTimeout(function() {
+    console.log(' about to call update charts');  // _DEBUG
+    updateChartsInner();}, 1) ; }
   $rootScope.$on('loadedTrades', updateCharts);
 
   // utility functions
@@ -139,7 +141,7 @@ function ChartCtrl($scope, $rootScope) {
     nv.addGraph({
       generate: function() {
         var width = $(wrapperId).width();
-        var height = width * 0.65;
+        var height = width * 0.5;
         var chart = nv.models.lineChart().width(width).height(height)  ;
         chart.yAxis.tickFormat(d3.format('.02f'))
                    .axisLabel('Cumulative PnL');

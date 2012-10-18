@@ -170,6 +170,10 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
     $rootScope.$broadcast('loadedTrades');
   };
   $scope.tradeFilter = '';
+  $scope.clearTradeFilter = function () {
+    $scope.tradeFilter = ''; 
+    $rootScope.$broadcast('loadedTrades');
+  } ;
   var toggleAsc = true;
   $scope.isAdmin = function() {
     if ($scope.user && $scope.user.roles) 

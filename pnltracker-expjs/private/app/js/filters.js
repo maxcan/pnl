@@ -35,7 +35,7 @@ pnlApp.filter('sum', function() {
   }  
 });
 
-pnlApp.filter('count', function() { return function(arr) { return arr.length; }});
+pnlApp.filter('count', function() { return function(arr) { return (arr ? arr.length : 0); }});
 
 pnlApp.filter('interpolate', ['version', function(version) {
     return function(text) {
