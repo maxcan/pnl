@@ -24,6 +24,31 @@
       </table>
     </div>
   </div>
+
+  <h4>Users:</h4>
+  <div class="row-fluid">
+    <div class="hscroll span12">
+      <table class="table-bordered table table-condensed"> 
+        <thead>
+          <tr>
+            <th></th>
+            <th ng-repeat="key in keys(adminUsers[0])"> {{key}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="adminUser in adminUsers">
+            <td>
+              <a href="{{'/api/admin/setuser/' + adminUser._id}}">
+                SET USER
+              </a>
+            </td>
+            <td ng-repeat="key in keys(adminUsers[0])">{{adminUser[key]  }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <h4>Trades:</h4>
   <div class="row-fluid">
     <div class="hscroll span12">
@@ -41,25 +66,6 @@
       </table>
     </div>
   </div>
-
-  <h4>Users:</h4>
-  <div class="row-fluid">
-    <div class="hscroll span12">
-      <table class="table-bordered table table-condensed"> 
-        <thead>
-          <tr>
-            <th ng-repeat="key in keys(adminUsers[0])"> {{key}}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="adminUser in adminUsers">
-            <td ng-repeat="key in keys(adminUsers[0])">{{adminUser[key]  }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
   <h4>Uploads:</h4>
 
   <div class="row-fluid">
@@ -67,11 +73,15 @@
       <table class="table-bordered table table-condensed"> 
         <thead>
           <tr>
+            <th></th>
             <th ng-repeat="key in keys(adminUploads[0])"> {{key}}</th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="adminUpload in adminUploads">
+            <Td>
+              <a href="{{'/api/admin/report/' + adminUpload._id}}">get rep</a>
+            </td>
             <td ng-repeat="key in keys(adminUploads[0])">{{adminUpload[key] | maxLen }}</td>
           </tr>
         </tbody>

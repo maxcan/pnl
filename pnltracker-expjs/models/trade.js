@@ -118,8 +118,8 @@ function groupFills(unsortedFills) {
 function addFillsToTrade(trade, fills, symbol, callback) {
   // this can definitely be sped up a bit..
   if (!trade) {
-    console.log('fills: ' + util.inspect(fills));  // _DEBUG
-    console.log('symbol: ' + util.inspect(symbol));  // _DEBUG
+    console.log(' trade is null in addFillsToTrade: fills: ' + util.inspect(fills));  
+    console.log('symbol: ' + util.inspect(symbol));  
     throw new Error('trade is null in addFillsToTrade.  not good');
   }
   if (fills === null || fills.length === 0) { 

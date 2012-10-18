@@ -11,21 +11,17 @@ exports.processUpload = function (report, callback) {
   Models.BrokerReport.findOne( { md5Hash:report.md5Hash
                                , processed: true }
                              , function(err, dupedReport) {
-    console.log('processupload cehck report cb');
     if (dupedReport) {
-      console.log('DUPED report');  // _DEBUG
+      console.log('DUPED report.  ids = ' + report._id + ' and ' + dupedReport._id);
       return callback(exports.DuplicateUpload);
     }
     return processUploadDupeChecked(report, callback);
   });
 }
 function processUploadDupeChecked(report, callback) {
-  console.log('processing report: ');  // _DEBUG
   if (report.uploadMethod === 'email') {
-    console.log('processing email');  // _DEBUG
     if (report.mailObj) return processEmailUpload(report, processTradesCB);
     if (report.mailRef) {
-      console.log('Need to populate the original mail object');  // _DEBUG
       return Models.MailArchive.findById(report.mailRef, function(e,ma) {
         if (e) return callback(e);
         if (!ma)
@@ -41,7 +37,6 @@ function processUploadDupeChecked(report, callback) {
     if (err) {
       return callback(err);
     }
-    console.log(' about ot save the trades');  // _DEBUG
     ModelsTrade.mkTradesAndSave(report.owner, trades, function(err) {
       if (err) {
         console.log('Error on mktrades and save: ' + err);  
@@ -59,33 +54,37 @@ function processUploadDupeChecked(report, callback) {
   }
 }
 function processUploadedTsReport(uploadedReport, callback) {
-  console.log('About to process report: ' + uploadedReport._id);  // _DEBUG
-  console.log('            filename   : ' + uploadedReport.fileName);  // _DEBUG
-  var trades = TradeStation.parseTradeStationExtractedText(uploadedReport.extractedText);
-  _.each(trades, function(t){
-    _.extend(t,{owner: uploadedReport.owner, reportRef: uploadedReport._id})
-  });
-  return callback(null, trades);
+  console.log('About to process report: ' + uploadedReport._id);  
+  console.log('            filename   : ' + uploadedReport.fileName);  
+  try { 
+    var trades = TradeStation.parseTradeStationExtractedText(uploadedReport.extractedText);
+    _.each(trades, function(t){
+      _.extend(t,{owner: uploadedReport.owner, reportRef: uploadedReport._id})
+    });
+    return callback(null, trades);
+  } catch (e) {
+    console.log(' error proceesing rep: ' + uploadedReport._id);  
+    console.log(' error:  ' + e);
+    return callback('failed on ' + uploadedReport.fileName);
+
+  }
 }
 function processEmailUpload(report, callback) {
-  console.log('processEmailUpload loading');  // _DEBUG
   var mailMsg = report.mailObj;
   if (mailMsg.subject.indexOf('Interactive Brokers Daily Trade Report') != -1) {
     Models.User.findOne({reportDropboxAddr : { $in: mailMsg.to}},function(err,usr) {
       if (err) return callback(err);
       if (!usr) return callback('Could not get user for db address: ' + mailMsg.to);
-      console.log('found owner');  // _DEBUG
       if ((report.processed === false) &&
           (report.fileName.indexOf('DailyTradeReport') != -1)) {
         var trades = 
               Ib.parseEmailedReportString(report.content, usr._id, mailMsg._id, report._id);
-        console.log('found trades: ' + util.inspect(trades));  // _DEBUG
         report.owner = usr._id;
         return report.save(function() { return callback(null, trades);}); 
       }
     });
   } else {
-    console.log('unexpected sujbect: ' + mailMsg.subject);  // _DEBUG
+    console.log('unexpected sujbect: ' + mailMsg.subject);  
     return callback('mismatched subject: ' + mailMsg.subject);
   }
 } 

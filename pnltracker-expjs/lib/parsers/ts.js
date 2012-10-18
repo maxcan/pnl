@@ -28,6 +28,19 @@ var sampleExtract = [
                 "Trade",
                 "Date Date Sold Description CUSIP Quantity Price Money Type Money Amount Type MC Number",
 
+
+'10/11/2012 10/12/2012 Sold',
+'J P MORGAN CHASE & CO',
+'OCT 20,2012 @ 40 CALL',
+'CLOSING CONTRACT',
+'JPM 121020C40 3 2.50 Principal 750.00 MGN 41 40420',
+'46625H2*9 Commission 3.00',
+'Options Regulatory Fee 0.09',
+'Transaction Fee 0.02',
+'NET AMOUNT 746.89',
+
+
+
         "09/05/2012 09/06/2012 Bought",
         "DISNEY WALT CO",
         "OCT 20,2012 @ 50 CALL",
@@ -99,7 +112,7 @@ var sampleExtract = [
 // this is the trade and settlement date of a trade and represents the beginning of 
 // a new block
 var patTradeDateLine = /^(\d\d\/\d\d\/\d{4}) +(\d\d\/\d\d\/\d{4}) +(Bought|Sold)/;
-var patDescription = /^[A-Z0-9a-z ]*$/  ; 
+var patDescription = /^[A-Z0-9a-z&.-_ ]*$/  
 var patOptionInfo = /^([A-Z]{3}) +(\d\d),(\d{4}) +@ +([.0-9]+) +(PUT|CALL)/;
 var patOpenClose  = /^(OPENING|CLOSING) CONTRACT/;
 
@@ -114,37 +127,65 @@ var patOpenClose  = /^(OPENING|CLOSING) CONTRACT/;
 //    8: price                 '2.69',
 //    9: total principal       '538.00',
 
-var patDetailLine = /^([A-Z]{1,5}) +(\d\d)(\d\d)(\d\d)(C|P)([0-9.]+) +([0-9,]+) ([0-9,]+\.\d\d) Principal ([0-9,]*\.\d\d) +.*$/;
+var patDetailLine = 
+  /^([A-Z]{1,5}) +(\d\d)(\d\d)(\d\d)(C|P)([0-9.]+) +([0-9,]+) ([0-9,]+\.\d\d) Principal ([0-9,]*\.\d\d) +.*$/;
+
+//      'MCP 100 14.00 Principal 1,400.00 MGN V1 V2738',
+//  1: sym 2: qty 3: px 4: prin
+var patDetailLineCom = 
+  /^([A-Z]{1,5}) +([0-9,]+) ([0-9,]+\.\d\d) Principal ([0-9,]*\.\d\d) +.*$/;
+
+
+
 
 var patCommission = /^.* Commission ([0-9,]+\.\d\d)$/;
 var patGenericFee = /^.* Fee +([0-9,]+\.\d\d)$/;
 var patTxnFee = /^.* Fee +([0-9,]+\.\d\d)$/;
 var patNetAmt = /NET AMOUNT +([0-9,]+\.\d\d)$/;
 
-function stateNew(remLines, fillStack) {
+function stateNew(remLines, fillStack, lineIdxArg) {
+  var lineIdx = lineIdxArg;
   function nextLine() { 
-    var l = remLines.shift();
+    if (lineIdx >= remLines.length) return null;
+    var l = remLines[lineIdx];
+    lineIdx++;
     return l;
+  }
+  function mkErr(e) { 
+    console.log('err on line: ' + lineIdx);  
+    console.log(remLines[lineIdx-3]);  
+    console.log(remLines[lineIdx-2]); 
+    console.log(remLines[lineIdx-1]);  
+    console.log(remLines[lineIdx]);  
+    throw new Error(lineIdx +  ": " + e); 
+
   }
   var curLine = nextLine();
   if (!curLine) return fillStack;
   var matchTradeDate = curLine.match(patTradeDateLine);
-  if (!matchTradeDate) return stateNew(remLines, fillStack);
-  if (remLines.length < 7) throw new Error('Insufficient lines following date declaration');
+  if (!matchTradeDate) return stateNew(remLines, fillStack, lineIdx);
+  if (remLines.length < 7) mkErr('Insufficient lines following date declaration');
   var matchDesc = nextLine().match(patDescription); 
-  if (!matchDesc) throw new Error('could not find desc after date');
+  if (!matchDesc) mkErr('could not find desc after date');
 
-  var matchOptionInfo = nextLine().match(patOptionInfo); 
-  if (!matchOptionInfo) throw new Error('could not find OptionInfo ');
+  var optOrCommonLine = nextLine();
+  var matchOptionInfo = optOrCommonLine.match(patOptionInfo); 
+  if ((optOrCommonLine != 'COM') && !matchOptionInfo) mkErr('could not find OptionInfo ');
 
-  var matchOpenClose = nextLine().match(patOpenClose); 
-  if (!matchOpenClose) throw new Error('could not find OpenClose ');
+  // no open/close for common equity
+  var matchOpenClose = null;
+  if (optOrCommonLine != 'COM') {
+    matchOpenClose = nextLine().match(patOpenClose); 
+    if (!matchOpenClose) mkErr('could not find OpenClose ');
+  }
 
-  var matchDetailLine = nextLine().match(patDetailLine); 
-  if (!matchDetailLine) throw new Error('could not find DetailLine ');
+  var detailLine = nextLine();
+  var matchDetailLine = detailLine.match(patDetailLine); 
+  var matchDetailLineCommon = detailLine.match(patDetailLineCom); 
+  if ((!matchDetailLine) && (!matchDetailLineCommon)) return  mkErr('could not find DetailLine ');
 
   var matchCommission = nextLine().match(patCommission); 
-  if (!matchCommission) throw new Error('could not find Commission ');
+  if (!matchCommission) mkErr('could not find Commission ');
 
   // ok, now we need to loop through fees..
   
@@ -160,43 +201,50 @@ function stateNew(remLines, fillStack) {
       var matchNetAmt = nextItem.match(patNetAmt);
       if (matchNetAmt) {
         givenNetAmt = Number(matchNetAmt[1]);
-      } else { throw new Error('unexpected string: ' + nextItem);}
+      } else { mkErr('unexpected string: ' + nextItem);}
     }
   }
   iterateOverGenericFees();
 
   var fillDate = new Date(matchTradeDate[1]);
   // set openings in the morning, closings in the afternoon (so we get the ordering right)
-  var fillIsOpen = matchOpenClose[1] === "OPENING" ;
+  var fillIsOpen = (matchOpenClose ? matchOpenClose[1] === "OPENING" : null) ;
   (fillIsOpen ? fillDate.setHours(10) : fillDate.setHours(15));
   var nextFill = 
-    { date:   fillDate
-    , qty:    (matchTradeDate[3] === 'Bought' ? 1 : -1) * Number(matchDetailLine[7])
-    , avgPx:  Number(matchDetailLine[8])
-    , fees:   -1 * (totalGenericFees + Number(matchCommission[1]))
-    , symbol: 'ts:'+ matchDetailLine[1] + ' '  
-                   + matchDetailLine[2]
-                   + matchDetailLine[3]
-                   + matchDetailLine[4]
-                   + matchDetailLine[5]
-                   + matchDetailLine[6]
-    , isOpen: fillIsOpen
-    }
+    ( matchDetailLine ?  
+      { date:   fillDate
+      , qty:    (matchTradeDate[3] === 'Bought' ? 1 : -1) * Number(matchDetailLine[7])
+      , avgPx:  Number(matchDetailLine[8])
+      , fees:   -1 * (totalGenericFees + Number(matchCommission[1]))
+      , symbol: 'ts:'+ matchDetailLine[1] + ' '  
+                     + matchDetailLine[2]
+                     + matchDetailLine[3]
+                     + matchDetailLine[4]
+                     + matchDetailLine[5]
+                     + matchDetailLine[6]
+      , isOpen: fillIsOpen }
+    : { date:   fillDate
+      , qty:    Number(matchDetailLineCommon[2]) * (matchTradeDate[3] === 'Bought' ? 1 : -1)
+                
+      , avgPx:  Number(matchDetailLineCommon[3])
+      , fees:   -1 * (totalGenericFees + Number(matchCommission[1]))
+      , symbol: 'ts:'+ matchDetailLineCommon[1]
+      , isOpen: fillIsOpen } );
                   
   var calcedPrin = (-1 * nextFill.qty * nextFill.avgPx * 100) + nextFill.fees;
   
   if (givenNetAmt - Math.abs(calcedPrin) > 0.0001) { 
-    console.log('fill: ' + util.inspect(nextFill));  // _DEBUG
-    console.log('calced: ' + calcedPrin);  // _DEBUG
-    console.log('given: ' + givenNetAmt);  // _DEBUG
+    console.log('fill: ' + util.inspect(nextFill));  
+    console.log('calced: ' + calcedPrin);  
+    console.log('given: ' + givenNetAmt);  
     throw new Error("principal sanity check failed");
   }
   fillStack.push(nextFill)
-  return stateNew(remLines, fillStack);
+  return stateNew(remLines, fillStack, lineIdx);
 }
 
 exports.parseTradeStationExtractedText = function(lines) {
-  return stateNew(lines,[]);  
+  return stateNew(lines,[], 0);  
 }; 
 
 

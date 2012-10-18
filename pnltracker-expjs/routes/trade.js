@@ -79,8 +79,8 @@ exports.show = function(req, res) {
 };
 
 exports.getUpload = function(req, res) {
-  if (!req.user) {res.send(403, "authentication required");}
-  if (!req.params.uploadId) { res.send(400, "upload id required");}
+  if (!req.user) {return res.send(403, "authentication required");}
+  if (!req.params.uploadId) {return  res.send(400, "upload id required");}
   Models.BrokerReport.findOne({_id: req.params.uploadId}, function(err, upload) {
     if (err) throw err;
     if (upload) {
@@ -99,7 +99,6 @@ exports.setReportText = function(req, res) {
     if (uploadedReport) {
       uploadedReport.extractedText = req.body.pdfText;
       uploadedReport.save(function(err, savedUpload) {
-        console.log('saved report, going to process');  // _DEBUG
         return BrokerReportManager.processUpload(savedUpload, function(err) {
           if (err) {
             if (err === BrokerReportManager.DuplicateUpload) {
@@ -124,7 +123,7 @@ exports.reportUpload = function(req, res) {
   AppUtil.blockCache(res);
   if (req.files) {
     var resObjs = [];
-    return async.forEach(req.files, saveSingleFile, sendCombinedResp ) ; 
+    return async.forEach([req.files.file], saveSingleFile, sendCombinedResp ) ; 
     // _.each(req.files, function(file) {
     function sendCombinedResp(err) {
       if (err) {
@@ -148,6 +147,7 @@ exports.reportUpload = function(req, res) {
         console.log(' created at path: ' + file.path);  // _DEBUG
         if (err) throw err;
         if (file.mime.length - file.mime.toLowerCase().indexOf('/pdf') != 4) {
+          console.log(' rep is NOT pdf: ' + file.name);  // _DEBUG
           BrokerReportManager.processUpload(report, function(err) {
             if (err) {
               console.log('Error processing file: ' + e + ' repid: ' + report._id);  // _DEBUG
