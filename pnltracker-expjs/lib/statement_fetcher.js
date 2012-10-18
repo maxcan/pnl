@@ -86,10 +86,18 @@ exports.checkMail = function( ) {
         throw err;
       }
       if (results.length != 0) { 
-        var fetch = imap.fetch(results
-          , { request: { headers: false, body: 'full'} 
-            , markSeen: true 
-          });
+        var fetch ;
+        try {
+          fetch = imap.fetch(results
+            , { request: { headers: false, body: 'full'} 
+              , markSeen: true 
+            });
+        } catch (e) {
+          console.log('IMAP error: ' + e);  // _DEBUG
+          imap.logout();
+          imapIsConnected = false;
+          return ; 
+        }
         fetch.on('message', function(msg) {
           var parser = new mailparser.MailParser({streamAttachments: false}) ; 
           parser.on("end", function(mail){
