@@ -3,7 +3,9 @@
 function ChartCtrl($scope, $rootScope) {
   $scope.initialized = false;
   $scope.groupUndl = true;
+  var forcedUngroup  = false ; // if we automicatlly ungrouped
   $scope.toggleGroupUndl = function() {
+    forcedUngroup = false;
     updateCharts();
   }
   function getSym(t) {
@@ -17,6 +19,29 @@ function ChartCtrl($scope, $rootScope) {
       updateChartData(); 
     } else {
       console.log(' updating charts'); 
+      // check if we're down to a single symbol
+      if ($scope.groupUndl) {
+        var symMap = {};
+        _.each(closedTrades(), function(t) { symMap[getSym(t)] = 1;});
+        // only one symbol.  We should auto-ungroup
+        if (_.keys(symMap).length === 1) {
+          $scope.groupUndl = false;
+          forcedUngroup = true;
+        }
+      } else {
+        // they aren't grouped. if we ungrouped them, regoup them
+        if (forcedUngroup) {
+          var symMap = {};
+          _.each(closedTrades(), function(t) { symMap[t.underlyingSecurity.symbol] = 1;});
+          // only one symbol.  We should auto-ungroup
+          if (_.keys(symMap).length != 1) {
+            $scope.groupUndl = true;
+            forcedUngroup = false;
+          }
+
+        } 
+
+      }
       _.each(lineCharts, function(o) { buildLineChart(o.wrapper, o.fxn); });
       buildPieChart('#profit_share_pie_chart'
                    , function() { return calculateProfitShareByUnderlying(true);});
@@ -28,11 +53,11 @@ function ChartCtrl($scope, $rootScope) {
   $rootScope.$on('loadedTrades', updateCharts);
 
   // utility functions
-  function closedTrades (trds) {return _.filter(trds, function(t){return !t.isOpen;}); }
+  function closedTrades () {return $scope.filteredClosedTrades;  }
   function calculateProfitShareByUnderlying(isProfit) {
     var comps = {};
     var losses = {};
-    var trades = closedTrades($scope.trades);
+    var trades = closedTrades();
     _.each(trades, function(t) {    
       if ((t.netCash > 0 && isProfit) || (t.netCash <= 0 && !isProfit)) {
         if (!comps[getSym(t)])
@@ -56,7 +81,7 @@ function ChartCtrl($scope, $rootScope) {
   function calculatePnlSeriesByUnderlying() {
     var overall     = []; // [ { x : date, y : double} ]
     var underlyings = {} ; // { sym:[ { x : date, y : double} ] } 
-    var sortedTrades = _.sortBy(closedTrades($scope.trades), 'closeDate');
+    var sortedTrades = _.sortBy(closedTrades(), 'closeDate');
     _.each(sortedTrades, function(trade) {
       var sym = getSym(trade); 
       if (! underlyings[sym] ) {underlyings[sym] = []; }

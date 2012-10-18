@@ -55,7 +55,8 @@
             </li>
             <li><a scroll-to="#top"><i class="icon-chevron-right"></i>Top</a></li>
             <li><a scroll-to="#ts_upload"><i class="icon-chevron-right"></i>TradeStation PDF Upload</a></li>
-            <li><a scroll-to="#pnl_charts"><i class="icon-chevron-right"></i>Charts</a></li>
+            <li><a scroll-to="#cumulative_pnl_chart"><i class="icon-chevron-right"></i>PnL Over Time</a></li>
+            <li><a scroll-to="#profit_share_pie_chart"><i class="icon-chevron-right"></i>Profit and Loss by Underlying</a></li>
             <li><a scroll-to="#pnl_by_underlying"><i class="icon-chevron-right"></i> PnL by Underlying </a></li>
             <li><a scroll-to="#pnl_by_duration"><i class="icon-chevron-right"></i> PnL by Duration </a></li>
             <li><a scroll-to="#trade_breakdown"><i class="icon-chevron-right"></i> Trade Breakdown </a></li>
@@ -173,34 +174,34 @@
           </div>
         </div>
 
-        <div id="pnl_charts" class="row-fluid">
-          <div class="span12" ng-controller="ChartCtrl">
-            <div class="row-fluid">
-              <div id="cumulative_pnl_chart" class="span6">
-                <h4>Cumulative PnL <em>click on the symbols in the legends!</em></h4>
-                <svg class="chart" id="test_chart"></svg>
-              </div>
-              <div id="profit_share_pie_chart" class="span3">
-                <h4>Profit Share</h4>
-                <svg class="chart" ></svg>
-              </div>
-              <div id="loss_share_pie_chart" class="span3">
-                <h4>Loss Share</h4>
-                <svg class="chart" ></svg>
-              </div>
-            </div>
-            <div class="row-fluid">
-              <div class="span12">
-                <form class="form-horizontal">
-                  <div class="control-group">
+        <div ng-controller="ChartCtrl">
+          <div class="row-fluid">
+            <div class="span12">
+              <form class="form-horizontal">
+                <div class="control-group">
                   <div class="control">
                     <label for="toggleUndlCheckbox">
                       <input type="checkbox" ng-change="toggleGroupUndl()" ng-model="groupUndl" id="toggleUndlCheckbox">
                       Group Charts by Underlying </label>
                   </div>
-                  </div>
-                </form>
-              </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="row-fluid">
+            <div id="cumulative_pnl_chart"  class="span12">
+              <h4>Cumulative PnL <em>click on the symbols in the legends!</em></h4>
+              <svg class="chart" id="test_chart"></svg>
+            </div>
+          </div>
+          <div class="row-fluid">
+            <div id="profit_share_pie_chart" class="span6">
+              <h4>Profit Share</h4>
+              <svg class="chart" ></svg>
+            </div>
+            <div id="loss_share_pie_chart" class="span6">
+              <h4>Loss Share</h4>
+              <svg class="chart" ></svg>
             </div>
           </div>
         </div>
