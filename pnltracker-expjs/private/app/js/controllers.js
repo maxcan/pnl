@@ -193,8 +193,6 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
     if (toggleAsc) $scope.trades.reverse();
     toggleAsc = !toggleAsc;
   }
-  $scope.setTradeFilter = function(s) {
-    $scope.tradeFilter = s; 
-    //$scope.$apply();
-  } 
+  $scope.refreshTrades = function(s) { $rootScope.$broadcast('refreshTrades'); }  ; 
+  $scope.setTradeFilter = function(s) { $scope.tradeFilter = s; }  ; 
 }
