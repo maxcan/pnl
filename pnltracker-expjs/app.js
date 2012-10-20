@@ -11,6 +11,7 @@ var adminRoutes = require('./routes/admin');
 var http = require('http');
 var less = require('less');
 var fs = require('fs');
+var log = require('./log.js')
 var util = require('util');
 var everyauth = require('everyauth');
 var path = require('path');
@@ -46,7 +47,7 @@ everyauth.google
     if (usr) {
       newUserCb(null, usr);
     } else {
-      console.log('new user, will create');  // _DEBUG
+      log.info('new user, will create');  // _DEBUG
       Models.User.create(Models.newUser( { email: googleUserMetadata.email}), newUserCb);
     }
   });
@@ -74,7 +75,7 @@ everyauth.facebook
   // view notifying the user that their authentication failed and why.
 // })
 .findOrCreateUser( function (session, accessToken, accessTokExtra, fbUserMetadata) {
-  console.log('fb meta: ' +  JSON.stringify(fbUserMetadata));  // _DEBUG
+  log.info('fb meta: ' +  JSON.stringify(fbUserMetadata));  // _DEBUG
   var promise = this.Promise();
   var newUserCb = function(err,newUsr) {
     if (err) throw err;
@@ -85,7 +86,7 @@ everyauth.facebook
     if (usr) {
       newUserCb(null, usr);
     } else {
-      console.log('new user, will create');  // _DEBUG
+      log.info('new user, will create');  // _DEBUG
       Models.User.create(Models.newUser({ email: fbUserMetadata.email}), newUserCb);
     }
   });
@@ -111,7 +112,7 @@ var bodyParserWithFiles = new express.bodyParser({ keepExtensions: true, uploadD
 
 var annoyingProxyTrackerShit = function (req, res, next) {
     if (req.path.indexOf('/proxy') === 0) {
-        console.log('Annoying proxy shit.  IP = ' + req.ip);
+        log.info('Annoying proxy shit.  IP = ' + req.ip);
         return res.send(410, 'go away');
     }
     return next();
@@ -136,29 +137,29 @@ var requireRole = function (pat, role) {
   };
 } ; 
 
-console.log('about to generate less files');  // _DEBUG
+log.info('about to generate less files');  // _DEBUG
 try {
   fs.readFile(__dirname + '/assets/less/application.less',function(error,data){
     if (error) {
-      console.log('error rendering css: ' + error);  
+      log.info('error rendering css: ' + error);  
       throw error;
     } else { 
       data = data.toString();
-      console.log('read in data, about to generate the css');  // _DEBUG
+      log.info('read in data, about to generate the css');  // _DEBUG
       less.render(data, function (e, css) {
         fs.writeFile(__dirname + '/public/gen/application.css', css, function(err){
           if (err) {
-            console.log('error saving css: ' + err);
+            log.info('error saving css: ' + err);
           }
-          console.log('RENDERED less');
+          log.info('RENDERED less');
         });
       });
     }
   });
 } catch (e) {
-  console.log('error generating less : ' + e );
+  log.info('error generating less : ' + e );
 }
-console.log('generated less files');  // _DEBUG
+log.info('generated less files');  // _DEBUG
 
 
 app.configure(function(){
@@ -229,7 +230,7 @@ var secureStatic = express.static(__dirname+'/private');
 app.get('/secure/*', function(req, res) {
   req.url = req.url.replace(/^\/secure/,'');
   if (!req.user) {
-    console.log('authenticated user required for secure routes');  // _DEBUG
+    log.info('authenticated user required for secure routes');  // _DEBUG
     res.redirect('/');
   } else {
     secureStatic(req, res, function(){res.send(404);});
@@ -239,17 +240,17 @@ app.get('/secure/*', function(req, res) {
 var listenPort = (conf.listenPort ? conf.listenPort : app.get('port'));
 
 http.createServer(app).listen(listenPort, function(){
-  console.log("Express server listening on port " + listenPort);
-  console.log("     However, app port is :" + app.get('port'));
+  log.info("Express server listening on port " + listenPort);
+  log.info("     However, app port is :" + app.get('port'));
   var mailInterval = 1000 * 10; // 30 sec
   function wrapCheckMail() {
     try {
-    console.log('about to fetch mail');  // _DEBUG
+    log.info('about to fetch mail');  // _DEBUG
       fetcher.checkMail();
     } catch (e) {
-      console.log('ERROR COULD NOT CHECK MAIL: ' + e); // _TODO email an admin here
+      log.info('ERROR COULD NOT CHECK MAIL: ' + e); // _TODO email an admin here
     }
   }
-  //  console.log('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
+  //  log.info('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
   setInterval(wrapCheckMail, mailInterval);
 });

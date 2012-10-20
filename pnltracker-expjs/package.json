@@ -6,6 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "winston": "*" ,
     "express": "3.0.0rc4",
     "async": "*",
     "less-middleware": "0.1.6",

@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var log = require('../log.js')
 var util = require('util');
 var TradeStation = require("../lib/parsers/ts.js");
 var Models = require("../models.js");
@@ -12,7 +13,7 @@ exports.processUpload = function (report, callback) {
                                , processed: true }
                              , function(err, dupedReport) {
     if (dupedReport) {
-      console.log('DUPED report.  ids = ' + report._id + ' and ' + dupedReport._id);
+      log.info('DUPED report.  ids = ' + report._id + ' and ' + dupedReport._id);
       return callback(exports.DuplicateUpload);
     }
     return processUploadDupeChecked(report, callback);
@@ -39,13 +40,13 @@ function processUploadDupeChecked(report, callback) {
     }
     ModelsTrade.mkTradesAndSave(report.owner, trades, function(err) {
       if (err) {
-        console.log('Error on mktrades and save: ' + err);  
+        log.info('Error on mktrades and save: ' + err);  
         return callback(err);
       }
       report.processed = true;
       report.save(function(err) {
         if (err) {
-          console.log('Error on mktrades and save: ' + err);  
+          log.info('Error on mktrades and save: ' + err);  
           return callback(err);
         }
         callback();
@@ -54,8 +55,8 @@ function processUploadDupeChecked(report, callback) {
   }
 }
 function processUploadedTsReport(uploadedReport, callback) {
-  console.log('About to process report: ' + uploadedReport._id);  
-  console.log('            filename   : ' + uploadedReport.fileName);  
+  log.info('About to process report: ' + uploadedReport._id);  
+  log.info('            filename   : ' + uploadedReport.fileName);  
   try { 
     var trades = TradeStation.parseTradeStationExtractedText(uploadedReport.extractedText);
     _.each(trades, function(t){
@@ -63,8 +64,8 @@ function processUploadedTsReport(uploadedReport, callback) {
     });
     return callback(null, trades);
   } catch (e) {
-    console.log(' error proceesing rep: ' + uploadedReport._id);  
-    console.log(' error:  ' + e);
+    log.info(' error proceesing rep: ' + uploadedReport._id);  
+    log.info(' error:  ' + e);
     return callback('failed on ' + uploadedReport.fileName);
 
   }
@@ -84,7 +85,7 @@ function processEmailUpload(report, callback) {
       }
     });
   } else {
-    console.log('unexpected sujbect: ' + mailMsg.subject);  
+    log.info('unexpected sujbect: ' + mailMsg.subject);  
     return callback('mismatched subject: ' + mailMsg.subject);
   }
 } 
