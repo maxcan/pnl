@@ -88,8 +88,7 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   function updateTrades(t) {
     lastRefresh = new Date();
     $scope.trades = t; 
-    $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
-    $rootScope.$broadcast('loadedTrades');
+    $scope.filterChanged();
   }
   Trades.get(updateTrades);
   $rootScope.$on('refreshTrades', function() {
@@ -108,15 +107,6 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
       $('#authCodeEntryModal').modal();
     }
   });
-  $scope.filterChanged = function() {
-    $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
-    $rootScope.$broadcast('loadedTrades');
-  };
-  $scope.tradeFilter = '';
-  $scope.clearTradeFilter = function () {
-    $scope.tradeFilter = ''; 
-    $rootScope.$broadcast('loadedTrades');
-  } ;
   var toggleAsc = true;
   $scope.isAdmin = function() {
     if ($scope.user && $scope.user.roles) 
@@ -142,4 +132,40 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   }
   $scope.refreshTrades = function(s) { $rootScope.$broadcast('refreshTrades'); }  ; 
   $scope.setTradeFilter = function(s) { $scope.tradeFilter = s; }  ; 
+  $scope.curSymFilter = '';
+  $scope.otherFilters = [];
+  $scope.filterChanged = function() {
+    $scope.filteredTrades = [];
+    function isSubstr(a,s) {
+      if (a === null || s === null) return false;
+      return a.toUpperCase().indexOf(s.toUpperCase()) != -1 ; 
+    }
+    _.each($scope.trades, function(t) {
+      var shouldInclude = false;
+      if ($scope.curSymFilter != '' || $scope.otherFilters.length === 0) { 
+        if (isSubstr(t.security.symbol, $scope.curSymFilter)) shouldInclude = true;
+        if (isSubstr(t.underlyingSecurity.symbol, $scope.curSymFilter))
+          shouldInclude = true;
+      }
+      _.each($scope.otherFilters, function (f) {
+        if (isSubstr(t.symbol, f.symbol)) shouldInclude = true;
+        if (isSubstr(t.underlyingSecurity.symbol, f.symbol)) shouldInclude = true;
+      });
+      if (shouldInclude) $scope.filteredTrades.push(t);
+    });
+    $scope.filteredClosedTrades = closedTrades($scope.filteredTrades);
+      //$filter('filter')($scope.trades, $scope.tradeFilter);
+    $rootScope.$broadcast('loadedTrades');
+
+  };
+  $scope.addSymFilter = function(s) {
+    if (s.trim().length === 0) return ; 
+    $scope.otherFilters.push({symbol: s});
+    $scope.filterChanged();
+  }
+  $scope.clearTradeFilter = function () {
+    $scope.curSymFilter = ''; 
+    $scope.otherFilters = [];
+    $scope.filterChanged();
+  } ;
 }

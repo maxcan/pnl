@@ -35,3 +35,39 @@ pnlModule.directive('scrollTo', function(){
       }
     }
   });
+
+
+
+
+// override the default input to update on blur
+pnlApp.directive('tagBox', function() { 
+  return { restrict: 'C'
+  , link: function(scope, elm, attr, ngModelCtrl) {
+      if (attr.type === 'radio' || attr.type === 'checkbox') return;
+      elm.unbind('input').unbind('keydown').unbind('change');
+      elm.bind("input", function(event) {
+        console.log('changed');  // _DEBUG
+          scope.curSymFilter = elm.val();
+          scope.filterChanged();
+          scope.$digest();
+      });
+      elm.bind("keypress", function(event) {
+        console.log('key press: ' + event.which);  // _DEBUG
+        if (event.which === 13) {
+            scope.curSymFilter = ''; 
+            scope.addSymFilter(elm.val());
+            elm.val('');
+          scope.$digest();
+          // ngModelCtrl.$setViewValue(elm.val());
+        } 
+      });
+
+      elm.bind('blur', function() {
+        scope.curSymFilter = ''; 
+        scope.addSymFilter(elm.val());
+        elm.val('');
+          scope.$digest();
+      });
+    }
+  };
+});

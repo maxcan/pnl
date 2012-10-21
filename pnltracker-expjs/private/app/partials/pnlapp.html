@@ -48,9 +48,12 @@
             <li>
               <a>
                 <div class="input-append">
-                  <input  class="input input-small" type="text"  placeholder="Filter Trades" ng-model="tradeFilter" ng-change="filterChanged()">
-                  <button class="btn" ng-click="clearTradeFilter()">Clear Filter</button>
+                  <input  class="tag-box input input-small" type="text"  placeholder="Filter Trades" >
+                  <button ng-model="curSymFilter" class="btn" ng-click="clearTradeFilter()">Clear Filter</button>
                 </div>
+                <ul>
+                  <li ng-repeat="f in otherFilters">{{f.symbol}}</li>
+                </ul>
               </a>
             </li>
             <li><a scroll-to="#top"><i class="icon-chevron-right"></i>Top</a></li>

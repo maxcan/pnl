@@ -14,7 +14,7 @@ function ChartCtrl($scope, $rootScope) {
   var lineCharts =
     [ { wrapper: '#cumulative_pnl_chart', fxn: calculatePnlSeriesByUnderlying }
     ] ;
-  function updateChartsInner() {
+  function updateCharts() {
     if (false && $scope.initialized) { 
       updateChartData(); 
     } else {
@@ -49,13 +49,10 @@ function ChartCtrl($scope, $rootScope) {
     }
 
   }
-  function updateCharts() { setTimeout(function() {
-    console.log(' about to call update charts');  // _DEBUG
-    updateChartsInner();}, 1) ; }
   $rootScope.$on('loadedTrades', updateCharts);
 
   // utility functions
-  function closedTrades () {return $scope.filteredClosedTrades;  }
+  function closedTrades () {return $scope.$parent.filteredClosedTrades;  }
   function calculateProfitShareByUnderlying(isProfit) {
     var comps = {};
     var losses = {};
