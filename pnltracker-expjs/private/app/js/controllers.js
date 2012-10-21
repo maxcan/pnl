@@ -5,6 +5,21 @@ function closedTrades (trades) {
   return _.filter(trades, function(t){return !t.isOpen;});
 }
 
+function AuthCodeCtrl($rootScope, $scope, $http) { 
+  $scope.submitAuthCode = function() {
+    $http.post('../../api/user/authcode', {authcode: $scope.authcode})
+         .success(function() {
+           $('#authCodeEntryModal').modal('hide');
+           $rootScope.$broadcast('refreshTrades');
+           alert('Successfully Authorized');
+         })
+         .error(function(d, s) {
+           console.log('error setting code: ' + d + ': status = ' + s);
+           alert('failed to authorize');
+         });
+  };
+
+}
 function mkGenericGroup(trades, groupingFunction) {
   var groupedTrades = _.groupBy(closedTrades(trades), groupingFunction);
   var buckets = [];
@@ -70,11 +85,15 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   var lastRefresh = new Date();
   var nextRefresh = new Date();
   var minRefreshPeriod = 5000;
+  function updateTrades(t) {
+    lastRefresh = new Date();
+    $scope.trades = t; 
+    $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
+    $rootScope.$broadcast('loadedTrades');
+  }
+  Trades.get(updateTrades);
   $rootScope.$on('refreshTrades', function() {
     var curDate = new Date();
-    console.log('next refresh: ' + nextRefresh);  // _DEBUG
-    console.log('last refresh: ' + lastRefresh);  // _DEBUG
-    console.log('curRef req:   ' + curDate);  // _DEBUG
     if (nextRefresh > curDate) return;  // already have a "future" request queued
     if ((curDate - lastRefresh) < minRefreshPeriod) {
       nextRefresh = curDate + minRefreshPeriod;
@@ -82,34 +101,12 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
       return;
     }
     User.get(function(u){$scope.user  = u ; });
-    Trades.get(function(t) {
-      lastRefresh = curDate;
-      $scope.trades = t; 
-      $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
-      $rootScope.$broadcast('loadedTrades');
-      } ) ; 
+    Trades.get(updateTrades); 
   });
   $scope.user = User.get(function(user) {
     if ((!user.roles) || user.roles.indexOf('basic') === -1) {
       $('#authCodeEntryModal').modal();
     }
-  });
-  $scope.submitAuthCode = function() {
-    $http.post('../../api/user/authcode', {authcode: $scope.authcode})
-         .success(function() {
-           $('#authCodeEntryModal').modal('hide');
-           $rootScope.$broadcast('refreshTrades');
-           alert('Successfully Authorized');
-         })
-         .error(function(d, s) {
-           console.log('error setting code: ' + d + ': status = ' + s);
-           alert('failed to authorize');
-         });
-  };
-  $scope.trades = Trades.get(function(t) {
-    $scope.trades = t; 
-    $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);
-    $rootScope.$broadcast('loadedTrades');
   });
   $scope.filterChanged = function() {
     $scope.filteredClosedTrades = $filter('filter')($scope.trades, $scope.tradeFilter);

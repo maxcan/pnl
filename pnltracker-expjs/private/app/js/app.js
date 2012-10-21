@@ -1,4 +1,3 @@
-'use strict';
 
 angular.module('pnlApp', ['pnlApp.filters', 'pnlApp.services', 'pnlApp.directives']).
   config(['$routeProvider', function($routeProvider) {

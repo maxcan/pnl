@@ -129,7 +129,7 @@
             <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
           </div>
         </div>
-        <div id="authCodeEntryModal" class="modal hide fade" data-keyboard='false' data-backdrop="static">
+        <div id="authCodeEntryModal" class="modal hide fade" data-keyboard='false' data-backdrop="static" ng-controller="AuthCodeCtrl">
           <div class="modal-header">
             <h3>Authorization Code Required:</h3>
           </div>
@@ -251,7 +251,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr ng-repeat="trade in filteredClosedTrades = (trades | filter: tradeFilter | filter: {isOpen:false} )">
+                <tr ng-repeat="trade in filteredClosedTrades ">
                   <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
                   <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
                   <td>{{trade.netCash  | currency}}</td>
