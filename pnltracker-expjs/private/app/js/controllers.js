@@ -133,7 +133,9 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   $scope.refreshTrades = function(s) { $rootScope.$broadcast('refreshTrades'); }  ; 
   $scope.setTradeFilter = function(s) { $scope.tradeFilter = s; }  ; 
   $scope.curSymFilter = '';
-  $scope.otherFilters = [];
+  $scope.otherSymFilters = [];
+  $scope.minDateFilter = null;
+  $scope.maxDateFilter = null;
   $scope.filterChanged = function() {
     $scope.filteredTrades = [];
     function isSubstr(a,s) {
@@ -147,15 +149,22 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
     // user expectations
     _.each($scope.trades, function(t) {
       var shouldInclude = false;
-      if ($scope.curSymFilter != '' || $scope.otherFilters.length === 0) { 
+      if ($scope.curSymFilter != '' || $scope.otherSymFilters.length === 0) { 
         if (isSubstr(t.security.symbol, $scope.curSymFilter)) shouldInclude = true;
         if (isSubstr(t.underlyingSecurity.symbol, $scope.curSymFilter))
           shouldInclude = true;
       }
-      _.each($scope.otherFilters, function (f) {
-        if (isSubstr(t.symbol, f.symbol)) shouldInclude = true;
-        if (isSubstr(t.underlyingSecurity.symbol, f.symbol)) shouldInclude = true;
+      _.each($scope.otherSymFilters, function (f) {
+        if (isSubstr(t.symbol, f)) shouldInclude = true;
+        if (isSubstr(t.underlyingSecurity.symbol, f)) shouldInclude = true;
       });
+      // if we have a minDate and were before it, exclude the trade
+      debugger;
+      if ($scope.minDateFilter && (new Date(t.openDate) < $scope.minDateFilter) ) { 
+        shouldInclude = false;
+      } else if ($scope.maxDateFilter && new Date(t.openDate) > $scope.maxDateFilter) {
+        shouldInclude = false;
+      }
       if (shouldInclude) $scope.filteredTrades.push(t);
     });
     $scope.filteredClosedTrades = closedTrades($scope.filteredTrades);
@@ -163,14 +172,29 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
     $rootScope.$broadcast('loadedTrades');
 
   };
+  // set the min date for n days back
+  $scope.setMinDate = function(n) {
+    var diff = 1000 * 24 * 60 * 60 * n;
+    $scope.minDateFilter  = new Date(new Date() - diff);
+    console.log('setting date: ' + $scope.minDateFilter);  // _DEBUG
+    $scope.filterChanged();
+  } 
   $scope.addSymFilter = function(s) {
     if (s.trim().length === 0) return ; 
-    $scope.otherFilters.push({symbol: s});
-    $scope.filterChanged();
+    var unq = true;
+    _.each($scope.otherSymFilters, function(i) {
+      if (i.toUpperCase() === s.toUpperCase()) { unq = false;  }
+    });
+    if (unq){ 
+      $scope.otherSymFilters.push(s);
+      $scope.filterChanged();
+    }
   }
   $scope.clearTradeFilter = function () {
     $scope.curSymFilter = ''; 
-    $scope.otherFilters = [];
+    $scope.otherSymFilters = [];
+    $scope.minDateFilter =  null;
+    $scope.maxDateFilter =  null;
     $scope.filterChanged();
   } ;
 }
