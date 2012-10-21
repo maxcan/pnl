@@ -219,8 +219,13 @@ var mailArchiveSchema = new mongoose.Schema(
     , subject       : String
     , raw           : String
     , receivedDate  : Date
-    , msgId         : String
+    , mailDate      : Date
+    , seqno         : Number
+    , uid           : Number
     , attachments   : [{type: Types.ObjectId, ref: 'BrokerReport'}]
+    , dupedAttachements       : [{type: Types.ObjectId, ref: 'BrokerReport'}]
+    , unprocessedAttachments  : [{type: Types.ObjectId, ref: 'BrokerReport'}]
+    , hasError      : {type: Boolean, default: false}
     });
 
 var authCodeSchema = new mongoose.Schema(

@@ -85,7 +85,7 @@ function processEmailUpload(report, callback) {
       }
     });
   } else {
-    log.info('unexpected sujbect: ' + mailMsg.subject);  
-    return callback('mismatched subject: ' + mailMsg.subject);
+    var s = 'Ignoring message with subject: ' + mailMsg.subject;
+    log.info(s); return callback(s);
   }
 } 

@@ -34,7 +34,7 @@ function show(obj) {
 }
 
 function closeConnection() {
-  try { imap.logout(); }  catch (e) {log.info('ERRRO ' + e);}  // _DEBUG
+  try { imap.logout(); }  catch (e) {log.error('Error closing IMAP connection: ' + e);}  // _DEBUG
   imapIsConnected = false;
 }
 
@@ -47,7 +47,7 @@ function openInbox(cb) {
   if (imapIsConnected) {
     imap.openBox('INBOX', false, cb);
   } else { 
-    log.info('About to connect to mail');  // _DEBUG
+    // log.info('About to connect to mail');  // _DEBUG
     imap.connect(function(err) {
       if (err) {
         log.info('ERROR erorr in imap ocnnection: ' + err);  // _DEBUG
@@ -81,6 +81,65 @@ function mostRecentMessage(cb) {
                    .exec(mostRecentMessageCallback);
 };
 
+// This funciton is used a callback to save the attachment IDs for a message.
+// It got kind of long so pulling it out as a separate function
+function saveAttachmentIdsForMail(mailArchive) {
+  return function processReportIds(err, resMap) {
+    if (err) {
+      log.error('processReportIds: failed to save reports: error: ', err);  // _DEBUG
+      mailArchive.hasError = true;
+    }
+    _.each(resMap, function(r) {
+      var arrName = null;
+      switch(r.repStatus) {
+        case 'p': arrName = 'attachments' ; break;
+        case 'u': arrName = 'unprocessedAttachments' ; break;
+        case 'd': arrName = 'dupedAttachements' ; break;
+        default: break;
+      }
+      if (arrName) {
+        if (!mailArchive[arrName]) {
+          mailArchive[arrName] = [r.repId];
+        } else {
+          mailArchive[arrName].push(r.repId);
+        }
+      }
+    });
+    mailArchive.save(function(err) {
+      if (err) {
+        log.error('Could Not Save attachments for email: ' + mailArchive._id + ' with error: ' + err);
+        log.error('              mailArchive:        ' + util.inspect(mailArchive, false, null, true));
+      }
+    });
+  }
+}
+
+function extractReport(mailArchive) {
+  return function saveAttachment(attachment, asyncCallback) {
+    Models.BrokerReport.create(
+      { uploadMethod  : 'email'
+      , mimeType      : attachment.contentType
+      , fileName      : attachment.fileName
+      , content       : attachment.content
+      , extractedText : [attachment.content.toString()]
+      , mailRef       : mailArchive._id
+      , processed     : false
+      }
+      , function(err, report) {
+        if (err) return asyncCallback(err);
+        report.mailObj = mailArchive;
+        return BrokerReportManager.processUpload(report, function chkDupeCallBack(err) {
+          if (err) {
+            if (err === BrokerReportManager.DuplicateUpload) {
+              return asyncCallback(null, { repId: report._id, repStatus: 'd'} );
+            }
+            return asyncCallback(null, { repId: report._id, repStatus: 'u' } );
+          }
+          return asyncCallback(null, { repId: report._id, repStatus: 'p'});
+        });
+      });
+  }
+}
 
 exports.checkMail = function( ) {
   openInbox(function(err, mailbox) {
@@ -89,76 +148,42 @@ exports.checkMail = function( ) {
       imap.search([ 'UNSEEN'], searchCallback);
     } catch (e) {
       log.info('IMAP error: ' + e);  // _DEBUG
-      closeConnection() ; 
-      return ; 
+      return closeConnection() ; 
     }
 
     function searchCallback(err, results) {
       if (err)  {
-        log.info(' error in check mail: ' + err); 
-        throw err;
+        log.error(' error in check mail: ' + err); 
+        return closeConnection(); 
       }
       if (results.length != 0) { 
         var fetch ;
         try {
           fetch = imap.fetch(results
-            , { request: { headers: false, body: 'full'} 
-              , markSeen: true 
-            });
+            , { request: { headers: false, body: 'full'} , markSeen: true });
         } catch (e) {
           log.info('IMAP error: ' + e);  // _DEBUG
-          closeConnection();
-          return ; 
+          return closeConnection();
         }
         fetch.on('message', function(msg) {
           var parser = new mailparser.MailParser({streamAttachments: false}) ; 
           parser.on("end", function(mail){
             if (mail.attachments.length != 0) {
-              var reportIds = [];
               var mailObj = { to      : _.pluck(mail.to, 'address')
                             , from    : mail.from[0].address
+                            , seqno   : msg.seqno
+                            , uid     : msg.uid
+                            , mailDate: new Date(msg.date)
                             , subject : mail.subject 
                             , receivedDate  : new Date()
                             , }
+              // log.info('About to save mail:', mailObj);
               Models.MailArchive.create(mailObj, function(err, mailArchive) {
-                if (err) { throw err; }
-                // exports.processMailArchive(err, mailArchive);
-                async.forEach(mail.attachments, saveAttachment, processReportIds) ;
-                function processReportIds(err) {
-                  if (err) {
-                    log.info('ERROR in processReportIds: '+ err);  // _DEBUG
-                    throw err;
-                  }
-                  mailArchive.attachments = reportIds;
-                  mailArchive.save(function(err) {
-                    if (err) {
-                      log.info('ERROR in processReportIds: '+ err);  // _DEBUG
-                      throw err;
-                    }
-                  });
+                if (err) {
+                  log.error('Could not create mail archive.', {imapSeqno: mail.seqno, imapUid: mail.uid});
+                  return ; 
                 }
-                function saveAttachment(attachment, asyncCallback) {
-                  Models.BrokerReport.create(
-                    { uploadMethod  : 'email'
-                    , mimeType      : attachment.contentType
-                    , fileName      : attachment.fileName
-                    , content       : attachment.content
-                    , extractedText : [attachment.content.toString()]
-                    , mailRef       : mailArchive._id
-                    , processed     : false
-                    }, function(err, report) {
-                      if (err) return asyncCallback(err);
-                      reportIds.push(report._id);
-                      report.mailObj = mailArchive;
-                      function chkDupeCallBack(err) {
-                        if (err && err === BrokerReportManager.DuplicateUpload) {
-                          return asyncCallback();
-                        }
-                        return asyncCallback(err);
-                      }
-                      return BrokerReportManager.processUpload(report, chkDupeCallBack);
-                    });
-                }
+                async.map(mail.attachments, extractReport(mailArchive), saveAttachmentIdsForMail(mailArchive)) ;
               });
             }
           });
