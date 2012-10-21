@@ -186,8 +186,10 @@ tradeSchema.virtual('vwapSell').get(function() {
 
 
 tradeSchema.virtual('maxPrin').get(function() {
-  return (this.fills[0].qty > 0 ? this.totalBuy  * this.vwapBuy
-                                : Math.abs(this.totalSell * this.vwapSell ));
+  var mult = (this.symbol.length > 7 ? 100 : 1)
+  return mult * (this.fills[0].qty > 0 
+                ? this.totalBuy  * this.vwapBuy
+                : Math.abs(this.totalSell * this.vwapSell ));
 });
 
 var brokerReportSchema = new mongoose.Schema(
