@@ -237,6 +237,8 @@ app.get('/secure/*', function(req, res) {
   }
   });
 
+// when behind a reverse proxy, we will often want to use a different port
+// for URL generation from what we are actually listening on
 var listenPort = (conf.listenPort ? conf.listenPort : app.get('port'));
 
 http.createServer(app).listen(listenPort, function(){
@@ -245,7 +247,6 @@ http.createServer(app).listen(listenPort, function(){
   var mailInterval = 1000 * 10; // 30 sec
   function wrapCheckMail() {
     try {
-    log.info('about to fetch mail');  // _DEBUG
       fetcher.checkMail();
     } catch (e) {
       log.info('ERROR COULD NOT CHECK MAIL: ' + e); // _TODO email an admin here
