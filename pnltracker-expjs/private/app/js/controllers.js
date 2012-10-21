@@ -1,10 +1,5 @@
 'use strict';
 
-function TradeDtlCtrl($scope, User, Trades) {
-  $scope.user = User.get();
-  $scope.trades = Trades.get();
-}
-
 // utility functions
 function closedTrades (trades) {
   return _.filter(trades, function(t){return !t.isOpen;});
