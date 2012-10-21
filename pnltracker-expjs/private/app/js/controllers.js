@@ -140,6 +140,11 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
       if (a === null || s === null) return false;
       return a.toUpperCase().indexOf(s.toUpperCase()) != -1 ; 
     }
+    // Here we are checking each trade if it matches our symbol
+    // criteria.  Note that for symbols, the checking is additive or OR
+    // based.  however, for things like the trade date, it will be AND-based
+    // its a bit inelegant but I believe actually is a better match for
+    // user expectations
     _.each($scope.trades, function(t) {
       var shouldInclude = false;
       if ($scope.curSymFilter != '' || $scope.otherFilters.length === 0) { 
