@@ -39,12 +39,13 @@ function ChartCtrl($scope, $rootScope) {
 
       }
       // pnl timeseries chart:
-      buildStackedChart('#stacked_pnl_chart', calculatePnlSeriesByUnderlying);
-      buildLineChart('#time_series_pnl_chart', calculatePnlSeriesByUnderlying);
+      buildStackedChart('#stacked_pnl_chart', calcPnlSeriesByUnderlying);
+      buildScatterChart('#time_duration_scatter_chart', calcDurationScatter);
+      buildLineChart('#time_series_pnl_chart', calcPnlSeriesByUnderlying);
       buildPieChart('#profit_share_pie_chart'
-                   , function() { return calculateProfitShareByUnderlying(true);});
+                   , function() { return calcProfitShareByUnderlying(true);});
       buildPieChart('#loss_share_pie_chart'
-                   , function() { return calculateProfitShareByUnderlying(false);});
+                   , function() { return calcProfitShareByUnderlying(false);});
     }
 
   }
@@ -52,7 +53,7 @@ function ChartCtrl($scope, $rootScope) {
 
   // utility functions
   function closedTrades () {return $scope.$parent.filteredClosedTrades;  }
-  function calculateProfitShareByUnderlying(isProfit) {
+  function calcProfitShareByUnderlying(isProfit) {
     var comps = {};
     var losses = {};
     var trades = closedTrades();
@@ -76,6 +77,19 @@ function ChartCtrl($scope, $rootScope) {
 
     return ret;
   }
+
+  function calcDurationScatter() {
+    var trades = closedTrades();
+    var ret = {};
+    _.each(trades, function(trade) {
+      if (!ret[getSym(trade)]) ret[getSym(trade)] = [];
+      ret[getSym(trade)].push({x: trade.duration, y: trade.netCash, z: trade.maxPrin});
+    });
+    var retArr = [];
+    _.each(ret, function(ar, sy) { retArr.push({key: sy, values: ar});});
+    return retArr;
+  }
+
 
   // if we get a sparse array of type: 
   //     [ { key: String, values: [{ x: DateInNumeric, y: Val} ] } ]
@@ -124,7 +138,7 @@ function ChartCtrl($scope, $rootScope) {
 
   // Returns an array of objects: [ { key: String, values: [{ x: DateInNumeric, y: Val} ] } ]
   // Note that this function is cumulative.. 
-  function calculatePnlSeriesByUnderlying(excludeOverall) {
+  function calcPnlSeriesByUnderlying(excludeOverall) {
     var overall     = []; // [ { x : date, y : double} ]
     var underlyings = {} ; // { sym:[ { x : date, y : double} ] } 
     var sortedTrades = _.sortBy(closedTrades(), 'closeDate');
@@ -175,6 +189,44 @@ function ChartCtrl($scope, $rootScope) {
         .call(chart);
 
       return chart;
+    });
+  }
+
+  function buildScatterChart(wrapperId, dataFunction) {
+    var svgId = wrapperId + ' svg';
+    nv.addGraph({
+      generate: function() {
+        var width = $(wrapperId).width();
+        var height =  width;
+        console.log(' using w: ' + width + ' and h: ' + height);  // _DEBUG
+        var chart = nv.models.scatterChart().width(width).height(height) 
+                // .x(function(d) { return d[0] })
+                // .y(function(d) { return d[1] })
+                .showDistX(true).showDistY(true)
+                .x(function(d) { return d.x })
+                .showLegend(false)
+                .y(function(d) { return d.y })
+                .size(function(d) { return d.z })
+      ;
+        chart.yAxis.tickFormat(d3.format('.02f')).axisLabel('Cumulative PnL');
+        chart.xAxis.tickFormat(function(d){return '';});
+        // chart.xAxis.tickFormat(function(d){return d3.time.format('%x')(new Date(d))}).axisLabel('Date');
+        d3.select(svgId)
+          .attr('width', width).attr('height', height)
+          .datum(dataFunction(true))
+          .call(chart);
+        return chart;
+      },
+      callback: function(graph) {
+        window.onresize = function() {
+          var width = $(wrapperId).width();
+          var height = width * 0.65;
+          // if (width < margin.left + margin.right + 20) width = margin.left + margin.right + 20;
+          // if (height < margin.top + margin.bottom + 20) height = margin.top + margin.bottom + 20;
+          graph.width(width).height(height);
+          d3.select(svgId).attr('width', width).attr('height', height).call(graph);
+        };
+      }
     });
   }
 
