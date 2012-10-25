@@ -159,7 +159,6 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
         if (isSubstr(t.underlyingSecurity.symbol, f)) shouldInclude = true;
       });
       // if we have a minDate and were before it, exclude the trade
-      debugger;
       if ($scope.minDateFilter && (new Date(t.openDate) < $scope.minDateFilter) ) { 
         shouldInclude = false;
       } else if ($scope.maxDateFilter && new Date(t.openDate) > $scope.maxDateFilter) {

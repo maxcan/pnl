@@ -12,6 +12,11 @@
           transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
           }
 
+div.spaced-rows div.row-fluid 
+  { padding-bottom: 4em
+  ; margin-bottom: 4em
+  ; border-bottom: 1.0em solid @baseHighlight
+  ; } 
 div.btn-group.extra-margin { margin-bottom: 10px ; } 
 * { font-family: "proxima-nova",sans-serif
   ; color: @flatBody
@@ -19,16 +24,13 @@ div.btn-group.extra-margin { margin-bottom: 10px ; }
 div.file-list-wrapper
   { max-height: 9em; overflow: scroll ; }
 div.chart-wrapper 
-  { width: 100% ;
-
-  svg.chart 
-    { width: auto
-    ; height: auto
-    ; }
+  { width: 100% 
+  ;
+  svg.chart { width: auto ; height: auto ; }
 }
 .navbar {
   a { font-size: 1.2em
-; font-weight: 700
+  ; font-weight: 700
   }
   a.brand 
     { font-weight: 800

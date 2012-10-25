@@ -11,9 +11,6 @@ function ChartCtrl($scope, $rootScope) {
   function getSym(t) {
     return ($scope.groupUndl ? t.underlyingSecurity.symbol : t.securityDesc);
   }
-  var lineCharts =
-    [ { wrapper: '#cumulative_pnl_chart', fxn: calculatePnlSeriesByUnderlying }
-    ] ;
   function updateCharts() {
     if (false && $scope.initialized) { 
       updateChartData(); 
@@ -41,7 +38,9 @@ function ChartCtrl($scope, $rootScope) {
         } 
 
       }
-      _.each(lineCharts, function(o) { buildLineChart(o.wrapper, o.fxn); });
+      // pnl timeseries chart:
+      buildStackedChart('#stacked_pnl_chart', calculatePnlSeriesByUnderlying);
+      buildLineChart('#time_series_pnl_chart', calculatePnlSeriesByUnderlying);
       buildPieChart('#profit_share_pie_chart'
                    , function() { return calculateProfitShareByUnderlying(true);});
       buildPieChart('#loss_share_pie_chart'
@@ -77,7 +76,55 @@ function ChartCtrl($scope, $rootScope) {
 
     return ret;
   }
-  function calculatePnlSeriesByUnderlying() {
+
+  // if we get a sparse array of type: 
+  //     [ { key: String, values: [{ x: DateInNumeric, y: Val} ] } ]
+  // this will will in the missing dates so we can use a stacked chart..
+  // Assumes that the values are sorted..
+  function populateSparseDates(inputArrRaw) {
+    //check for an null values..
+    var inputArr = _.filter(inputArrRaw, function (o) { return o.values.length > 0 ; });
+    var minDateNum = _.min(_.map(inputArr, function(o) { return o.values[0].x}));
+    var maxDateNum = _.max(_.map(inputArr, function(o) { return o.values[o.values.length - 1].x}));
+    var minDate = new Date(minDateNum.valueOf());
+    var maxDate = new Date(maxDateNum.valueOf() + (1000 * 24 * 60 * 60));
+    function toDayEnd(d) { d.setHours(23); d.setMinutes(59); d.setSeconds(59); } 
+    function incDate(d) { var dd = new Date(d); dd.setDate(dd.getDate() + 1); return dd;}
+    var curDate = minDate;
+    var dateArr = [curDate];
+    toDayEnd(minDate); toDayEnd(maxDate);
+    while (curDate < maxDate) { curDate = incDate(curDate); dateArr.push(curDate); } 
+    var retObjects = [];
+    _.each(inputArr, function(curKeyValPair) { 
+      var vals = curKeyValPair.values;
+      var newVals = [];
+      var nextValIdx = 0;
+      var curValAmt = 0;
+      _.each(dateArr, function(curDate) {
+        // for each full date,  get the most recent value
+        if (nextValIdx >= vals.length) {
+
+          // curDate is greater than the last date in vals.  keep using the last amount.
+          newVals.push( { x : curDate.valueOf(), y : curValAmt} );
+        } else if (curDate.valueOf() <= vals[nextValIdx].x) {
+          // use the previous amount since there's still a more data ahead
+          newVals.push( { x : curDate.valueOf(), y : curValAmt} );
+        } else {
+          // ok, now use the next element in values
+          curValAmt = vals[nextValIdx].y;
+          nextValIdx++;
+          newVals.push( { x : curDate.valueOf(), y : curValAmt} );
+        }
+
+      });
+      retObjects.push({key: curKeyValPair.key, values: newVals});
+    });
+    return retObjects;
+  }
+
+  // Returns an array of objects: [ { key: String, values: [{ x: DateInNumeric, y: Val} ] } ]
+  // Note that this function is cumulative.. 
+  function calculatePnlSeriesByUnderlying(excludeOverall) {
     var overall     = []; // [ { x : date, y : double} ]
     var underlyings = {} ; // { sym:[ { x : date, y : double} ] } 
     var sortedTrades = _.sortBy(closedTrades(), 'closeDate');
@@ -86,15 +133,15 @@ function ChartCtrl($scope, $rootScope) {
       if (! underlyings[sym] ) {underlyings[sym] = []; }
       var dt = new Number(new Date(trade.closeDate));
       underlyings[sym].push({x: dt, y: trade.netCash});
-      overall.push({x: dt, y: trade.netCash});
+      excludeOverall || overall.push({x: dt, y: trade.netCash});
     });
 
     var tmpSum = 0;
-    var newOveralls = _.map(overall, function(o) {
+    var newOveralls = excludeOverall || _.map(overall, function(o) {
       tmpSum += o.y;
       return {x : o.x, y: tmpSum} ;
     });
-    var ret = [ { values: newOveralls, key: 'All Symbols' } ];
+    var ret = ( excludeOverall ? [] : [{ values: newOveralls, key: 'All Symbols' }]);
     _.each(underlyings, function(vals, undlSym) {
       tmpSum = 0;
       var newVals = _.map(vals, function(o) {
@@ -129,9 +176,45 @@ function ChartCtrl($scope, $rootScope) {
 
       return chart;
     });
-
-
   }
+
+  function buildStackedChart(wrapperId, dataFunction) {
+    var svgId = wrapperId + ' svg';
+    nv.addGraph({
+      generate: function() {
+        var width = $(wrapperId).width();
+        var height = width * 0.5;
+        var chart = nv.models.stackedAreaChart().width(width).height(height) 
+                // .x(function(d) { return d[0] })
+                // .y(function(d) { return d[1] })
+                .x(function(d) { return d.x })
+                .y(function(d) { return d.y })
+      ;
+        chart.yAxis.tickFormat(d3.format('.02f'))
+                   .axisLabel('Cumulative PnL');
+
+        chart.xAxis.tickFormat(function(d){return d3.time.format('%x')(new Date(d))})
+                   .axisLabel('Date');
+        d3.select(svgId)
+          .attr('width', width)
+          .attr('height', height)
+          .datum(populateSparseDates(dataFunction(true)))
+          .call(chart);
+        return chart;
+      },
+      callback: function(graph) {
+        window.onresize = function() {
+          var width = $(wrapperId).width();
+          var height = width * 0.65;
+          // if (width < margin.left + margin.right + 20) width = margin.left + margin.right + 20;
+          // if (height < margin.top + margin.bottom + 20) height = margin.top + margin.bottom + 20;
+          graph.width(width).height(height);
+          d3.select(svgId).attr('width', width).attr('height', height).call(graph);
+        };
+      }
+    });
+  }
+
   function buildLineChart(wrapperId, dataFunction) {
     // var wrapperId = '#cumulative_pnl_chart';
     var svgId = wrapperId + ' svg';
@@ -153,23 +236,13 @@ function ChartCtrl($scope, $rootScope) {
         return chart;
       },
       callback: function(graph) {
-        return;
         window.onresize = function() {
           var width = $(wrapperId).width();
           var height = width * 0.65;
-          // var margin = graph.margin();
-
-          if (width < margin.left + margin.right + 20)
-            width = margin.left + margin.right + 20;
-
-          if (height < margin.top + margin.bottom + 20)
-            height = margin.top + margin.bottom + 20;
-
+          // if (width < margin.left + margin.right + 20) width = margin.left + margin.right + 20;
+          // if (height < margin.top + margin.bottom + 20) height = margin.top + margin.bottom + 20;
           graph.width(width).height(height);
-          d3.select(svgId)
-            .attr('width', width)
-            .attr('height', height)
-            .call(graph);
+          d3.select(svgId).attr('width', width).attr('height', height).call(graph);
         };
       }
     });

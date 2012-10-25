@@ -66,14 +66,17 @@
             </li>
             <li><a scroll-to="#top"><i class="icon-chevron-right"></i>Top</a></li>
             <li><a scroll-to="#ts_upload"><i class="icon-chevron-right"></i>TradeStation PDF Upload</a></li>
-            <li><a scroll-to="#cumulative_pnl_chart">
+            <li><a scroll-to="#stacked_pnl_chart">
               <i class="icon-picture"></i>
-              <i class="icon-chevron-right"></i>PnL Over Time</a></li>
+              <i class="icon-chevron-right"></i>PnL Over Time (Stacked)</a></li>
+            <li><a scroll-to="#time_series_pnl_chart">
+              <i class="icon-picture"></i>
+              <i class="icon-chevron-right"></i>PnL Over Time (Series)</a></li>
             <li><a scroll-to="#profit_share_pie_chart">
               <i class="icon-adjust"></i>
               <i class="icon-chevron-right"></i>PnL by Underlying Chart</a></li>
             <li><a scroll-to="#pnl_by_underlying"><i class="icon-chevron-right"></i> PnL by Underlying </a></li>
-            <li><a scroll-to="#pnl_by_duration"><i class="icon-chevron-right"></i> PnL by Duration </a></li>
+            <li><a scroll-to="#pnl_by_duration"><i class="icon-chevron-right"></i> PnL by Time Duration </a></li>
             <li><a scroll-to="#trades_closed">
               <i class="icon-chevron-right"></i>
               Closed Trades ({{filteredClosedTrades | count}})
@@ -189,13 +192,12 @@
             <code>
               <a href="mailto:{{user.reportDropboxAddr[0]}}">{{user.reportDropboxAddr[0]}}</a>
             </code>
-            <hr>
             <h4 id="ts_upload">If you have TradeStation PDFs, you can upload here:</h4>
             <div app-upload></div>
           </div>
         </div>
 
-        <div ng-controller="ChartCtrl">
+        <div ng-controller="ChartCtrl" class="spaced-rows">
           <div class="row-fluid">
             <div class="span12">
               <form class="form-horizontal">
@@ -210,7 +212,13 @@
             </div>
           </div>
           <div class="row-fluid">
-            <div id="cumulative_pnl_chart"  class="span12">
+            <div id="stacked_pnl_chart"  class="span12">
+              <h4>Cumulative PnL <em>click on the symbols in the legends!</em></h4>
+              <svg class="chart" id="test_chart"></svg>
+            </div>
+          </div>
+          <div class="row-fluid">
+            <div id="time_series_pnl_chart"  class="span12">
               <h4>Cumulative PnL <em>click on the symbols in the legends!</em></h4>
               <svg class="chart" id="test_chart"></svg>
             </div>
@@ -241,7 +249,6 @@
         </div>
         <div id="trade_breakdown" class="row-fluid">
           <div class="span12">
-            <hr>
             <h3 id="trades_closed">Closed Trades </h3>
             <h4> 
               Total PnL:  <span ng-bind="filteredClosedTrades  | pluck:'netCash' | sum | currency"/>
