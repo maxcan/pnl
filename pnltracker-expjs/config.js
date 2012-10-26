@@ -1,6 +1,5 @@
 var _ = require('underscore');
 
-
 var baseSettings = 
   { host: 'dev.pnltracker.com'
   , port: 3000
@@ -18,20 +17,27 @@ var baseSettings =
   , mongoDbUri: 'mongodb://localhost/test'
 
   // statement fetching:
-  , statementAddressHost: 'pnltracker.com'
-  , imapFetchUsername: 'dropdev'
-  , imapFetchPassword: 'xsdf9smh2kv0'
+  , statementAddressHost: 'tradejitsu.com'
+  , imapFetchUsername: 'u_dev'
+  , imapFetchPassword: 'bjhekd2343'
   , imapFetchHost: 'imap.gmail.com'
   , imapFetchPort: 993
   } ;
 
-var prdSettings = {};
-var stgSettings = _.extend(_.clone(baseSettings), 
-      { host: 'staging.pnltracker.com'
+var prdSettings = _.extend(_.clone(baseSettings), 
+      {host: 'staging.tradejitsu.com'
       , port: 80
       , listenPort: 3000
-      , imapFetchPassword: 'j3sdf4tlkjdsk'
-      , imapFetchUsername: 'dropstg'
+      , imapFetchPassword: 'h09823e49bje9'
+      , imapFetchUsername: 'u'
+      }) ;
+  
+var stgSettings = _.extend(_.clone(baseSettings), 
+      { host: 'staging.tradejitsu.com'
+      , port: 80
+      , listenPort: 3000
+      , imapFetchPassword: 'xcmnvbvg234rhkj'
+      , imapFetchUsername: 'u_stg'
       , mongoDbName: 'pnltracker_stg'
       , mongoDbUri: 'mongodb://localhost/pnltracker_stg'
 
