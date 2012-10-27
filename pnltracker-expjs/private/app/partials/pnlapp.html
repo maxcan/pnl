@@ -83,7 +83,7 @@
             </a></li>
             <li><a scroll-to="#trades_open">
               <i class="icon-chevron-right"></i>
-              Open Trades ({{trades | filter: tradeFilter | filter: {isOpen:true} | count}})
+              Open Trades ({{filteredTrades | filter: {isOpen:true} | count}})
             </a></li>
           </ul>
         </div>
@@ -275,7 +275,7 @@
                 <tbody>
                   <tr ng-repeat="trade in filteredClosedTrades ">
                     <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
-                    <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
+                    <td><a ng-click="addSymFilter(trade.symbol)">{{trade.symbol}}</a></td>
                     <td>{{trade.netCash  | currency}}</td>
                     <td>{{trade.totalBuy}}</td>
                     <td>{{trade.maxPrin  | currency}}</td>
@@ -303,9 +303,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="trade in trades | filter: tradeFilter | filter: {isOpen:true}">
+                  <tr ng-repeat="trade in filteredTrades | filter: {isOpen:true}">
                     <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
-                    <td><a ng-click="setTradeFilter(trade.symbol)">{{trade.symbol}}</a></td>
+                    <td><a ng-click="addSymFilter(trade.symbol)">{{trade.symbol}}</a></td>
                     <td>{{trade.totalBuy}}</td>
                     <td>{{trade.totalSell}}</td>
                     <td>{{trade.openDate | date:'medium'}}</td>

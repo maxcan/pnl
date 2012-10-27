@@ -1,7 +1,7 @@
 var _ = require('underscore');
 
 var baseSettings = 
-  { host: 'dev.pnltracker.com'
+  { host: 'dev.tradejitsu.com'
   , port: 3000
   , allowNonSsl: false
   , isDev: false
