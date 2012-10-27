@@ -168,7 +168,7 @@ exports.checkMail = function( ) {
         fetch.on('message', function(msg) {
           var parser = new mailparser.MailParser({streamAttachments: false}) ; 
           parser.on("end", function(mail){
-            if (mail.attachments.length != 0) {
+            if (mail.attachments && mail.attachments.length != 0) {
               var mailObj = { to      : _.pluck(mail.to, 'address')
                             , from    : mail.from[0].address
                             , seqno   : msg.seqno
