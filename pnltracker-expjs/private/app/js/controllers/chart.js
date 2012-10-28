@@ -39,7 +39,8 @@ function ChartCtrl($scope, $rootScope) {
 
       }
       // pnl timeseries chart:
-      buildStackedChart('#stacked_pnl_chart', calcPnlSeriesByUnderlying);
+      buildStackedLineChart('#stacked_pnl_chart', calcPnlSeriesByUnderlying);
+      buildStackedBarChart('#stacked_pnl_bar_chart', calcNetCashPerSymbol);
       buildScatterChart('#time_duration_scatter_chart', calcDurationScatter);
       buildLineChart('#time_series_pnl_chart', calcPnlSeriesByUnderlying);
       buildPieChart('#profit_share_pie_chart'
@@ -76,6 +77,48 @@ function ChartCtrl($scope, $rootScope) {
     var ret = [ { key: label, values: retVals }];
 
     return ret;
+  }
+
+  function calcNetCashPerSymbol(maxRows) {
+    if (!maxRows) maxRows = 10;
+    var trades = closedTrades();
+    var loserCashSum = {};
+    var winnerCashSum = {};
+    var overallCashSum = {};
+    _.each(trades, function(trade) {
+      var sym = getSym(trade);
+      var netCash = Number(trade.netCash);
+      if (netCash < 0) {
+        if (!loserCashSum[sym]) loserCashSum[sym] = 0;
+        loserCashSum[sym] = loserCashSum[sym] + netCash;
+      } else {
+        if (!winnerCashSum[sym]) winnerCashSum[sym] = 0;
+        winnerCashSum[sym] = winnerCashSum[sym] + netCash;
+      }
+      if (!overallCashSum[sym]) overallCashSum[sym] = 0;
+      overallCashSum[sym] = overallCashSum[sym] + Math.abs(netCash);
+    });
+
+    var sortedOveralls =  _.sortBy(_.pairs(overallCashSum), function(a) { return -1 * a[1];});
+    var topSyms = _.first(sortedOveralls, maxRows);
+    var restOfSyms = _.rest(sortedOveralls, maxRows);
+    var winners = { key: 'Winners', color: '#22ff22', values: [] } ;
+    var losers  = { key: 'Losers', color: '#ff2222', values: [] } ;
+    _.each(topSyms, function (pair) {
+      winners.values.push({label: pair[0], value: (winnerCashSum[pair[0]] || 0)});
+      losers.values.push({label: pair[0], value: (loserCashSum[pair[0]] || 0)});
+    });
+    if (restOfSyms.length > 0) {
+      var restWin = 0;
+      var restLose = 0;
+      _.each(restOfSyms, function(pair) {
+        restWin += (winnerCashSum[pair[0]] || 0);
+        restLose += (loserCashSum[pair[0]] || 0);
+      });
+      winners.values.push({label: 'other', value: restWin});
+      losers.values.push({label: 'other', value: restLose});
+    }
+    return [winners, losers];
   }
 
   function calcDurationScatter() {
@@ -230,7 +273,7 @@ function ChartCtrl($scope, $rootScope) {
     });
   }
 
-  function buildStackedChart(wrapperId, dataFunction) {
+  function buildStackedLineChart(wrapperId, dataFunction) {
     var svgId = wrapperId + ' svg';
     nv.addGraph({
       generate: function() {
@@ -267,13 +310,48 @@ function ChartCtrl($scope, $rootScope) {
     });
   }
 
+  function buildStackedBarChart(wrapperId, dataFunction) {
+    // var wrapperId = '#cumulative_pnl_chart';
+    var width = $(wrapperId).width();
+    var height = width * 0.8;
+    var svgId = wrapperId + ' svg';
+
+    nv.addGraph({
+      generate: function() {
+        var chart = nv.models.multiBarHorizontalChart().width(width).height(height)  ;
+        chart.x(function(d) { return d.label })
+             .y(function(d) { return d.value })
+             .showValues(true).showControls(false);
+        //chart.yAxis.tickFormat(d3.format('.02f'))
+        //           .axisLabel('Cumulative PnL');
+
+        d3.select(svgId)
+          .attr('width', width)
+          .attr('height', height)
+          .datum(dataFunction())
+          .call(chart);
+        return chart;
+      },
+      callback: function(graph) {
+        window.onresize = function() {
+          width = $(wrapperId).width();
+          height = width * 0.65;
+          graph.width(width).height(height);
+          d3.select(svgId).attr('width', width).attr('height', height).call(graph);
+        };
+      }
+    });
+  }
+
+  
+
   function buildLineChart(wrapperId, dataFunction) {
     // var wrapperId = '#cumulative_pnl_chart';
+    var width = $(wrapperId).width();
+    var height = width * 0.5;
     var svgId = wrapperId + ' svg';
     nv.addGraph({
       generate: function() {
-        var width = $(wrapperId).width();
-        var height = width * 0.5;
         var chart = nv.models.lineChart().width(width).height(height)  ;
         chart.yAxis.tickFormat(d3.format('.02f'))
                    .axisLabel('Cumulative PnL');
@@ -289,16 +367,12 @@ function ChartCtrl($scope, $rootScope) {
       },
       callback: function(graph) {
         window.onresize = function() {
-          var width = $(wrapperId).width();
-          var height = width * 0.65;
-          // if (width < margin.left + margin.right + 20) width = margin.left + margin.right + 20;
-          // if (height < margin.top + margin.bottom + 20) height = margin.top + margin.bottom + 20;
+          width = $(wrapperId).width();
+          height = width * 0.65;
           graph.width(width).height(height);
           d3.select(svgId).attr('width', width).attr('height', height).call(graph);
         };
       }
     });
-
   }
-
 }
