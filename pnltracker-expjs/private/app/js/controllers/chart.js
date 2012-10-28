@@ -118,7 +118,7 @@ function ChartCtrl($scope, $rootScope) {
       winners.values.push({label: 'other', value: restWin});
       losers.values.push({label: 'other', value: restLose});
     }
-    return [winners, losers];
+    return [losers,winners];
   }
 
   function calcDurationScatter() {
@@ -320,11 +320,13 @@ function ChartCtrl($scope, $rootScope) {
       generate: function() {
         var chart = nv.models.multiBarHorizontalChart().width(width).height(height)  ;
         chart.x(function(d) { return d.label })
+            
              .y(function(d) { return d.value })
              .showValues(true).showControls(false);
         //chart.yAxis.tickFormat(d3.format('.02f'))
         //           .axisLabel('Cumulative PnL');
 
+    // chart.multibar.valuePadding(0)
         d3.select(svgId)
           .attr('width', width)
           .attr('height', height)
@@ -352,11 +354,12 @@ function ChartCtrl($scope, $rootScope) {
     var svgId = wrapperId + ' svg';
     nv.addGraph({
       generate: function() {
-        var chart = nv.models.lineChart().width(width).height(height)  ;
-        chart.yAxis.tickFormat(d3.format('.02f'))
-                   .axisLabel('Cumulative PnL');
+        var chart = nv.models.lineWithFocusChart().width(width).height(height)  ;
+        chart.yAxis.tickFormat(d3.format('.02f')).axisLabel('Cumulative PnL');
+        chart.y2Axis.tickFormat(d3.format('.02f'));
 
-        chart.xAxis.tickFormat(function(d){return d3.time.format('%x')(new Date(d))})
+        chart.xAxis.tickFormat(function(d){return d3.time.format('%x')(new Date(d))}); 
+        chart.x2Axis.tickFormat(function(d){return d3.time.format('%x')(new Date(d))})
                    .axisLabel('Date');
         d3.select(svgId)
           .attr('width', width)

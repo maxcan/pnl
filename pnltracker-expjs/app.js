@@ -249,7 +249,7 @@ http.createServer(app).listen(listenPort, function(){
     try {
       fetcher.checkMail();
     } catch (e) {
-      log.info('ERROR COULD NOT CHECK MAIL: ' + e); // _TODO email an admin here
+      log.info('ERROR COULD NOT CHECK MAIL: ' + e.stack); // _TODO email an admin here
     }
   }
   //  log.info('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
