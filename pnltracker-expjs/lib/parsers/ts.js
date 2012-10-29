@@ -244,4 +244,50 @@ exports.parseTradeStationExtractedText = function(lines) {
   return stateNew(lines,[], 0);  
 }; 
 
+exports.parseTradeStationCopiedText = function(lines) {
+  function has(arr, ele) { return arr.indexOf(ele) != -1; } 
+  var hdr = { timeDate: "Filled/Canceled"
+            , sym:      "Symbol"
+            , buySell:  "Type"
+            , qty:      "Qty Filled"
+            , avgPx:    "Filled Price"
+            , orderId:  "Order#"
+            , acctId:   "Account"
+            , comms:    "Commission"
+  }; 
+  function isHdrLine(l) { return _.all(_.map(_.values(hdr), function(h) {return has(l,h);}));}
+  var hdrLine = null;
+  while (!hdrLine) {
+    var curLine = lines.shift();
+    if (!curLine) throw new Error('Invalid data, could not find all required headers');
+    var lineArr = curLine.split(/\t/);
+    if (isHdrLine(lineArr)) hdrLine = lineArr;
+  }
+  var indices = {};
+  _.each(hdr, function(str, fld) { indices[fld] = hdrLine.indexOf(str); });
+  var trades = [];
+  var curLine;
+  var maxIdx = _.max(_.values(indices));
+  console.log('indices: ' + util.inspect(indices, false, null, true));  // _DEBUG
+  while (curLine = lines.shift()) {
+    var lineArr = curLine.split(/\t/);
+    function getNum(idx) { 
+      if (!lineArr[idx]) 
+        throw new Error ('Could not get index: ' + idx + ' in lineArr');
+      return Number(lineArr[idx].replace(/[$,']*/g,'')); 
+    }
+    if (lineArr.length > maxIdx) { 
+      console.log('line: ' + util.inspect(lineArr, false, null, true));  // _DEBUG
+      trades.push({ date:     new Date(lineArr[indices.timeDate])
+                  , symbol:   'ts:' + lineArr[indices.sym]
+                  , qty:      (lineArr[indices.buySell] === 'Buy' ? 1 : -1) * 
+                              getNum(indices.qty)
+                  , avgPx:    getNum(indices.avgPx)
+                  , fees:     -1 * Math.abs(getNum(indices.comms))
+                  , acctId:   lineArr[indices.acctId]
+      });
+    }
+  }
+  return trades;
 
+}

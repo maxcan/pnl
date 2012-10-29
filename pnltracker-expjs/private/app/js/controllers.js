@@ -5,6 +5,29 @@ function closedTrades (trades) {
   return _.filter(trades, function(t){return !t.isOpen;});
 }
 
+function ReportTextPasteCtrl($rootScope, $scope, $http) {
+  $scope.runReportTextModal = function() {
+    $('#report_text_paste_modal').modal();
+    $('#report_text_textarea').focus();
+  }
+  $scope.saveTradeData = function() {
+    console.log(' save trade data');  // _DEBUG
+    $http.post('../../api/report/upload', {reportText: $scope.reportText})
+         .success(function() {
+           $rootScope.$broadcast('refreshTrades');
+           $('#report_text_paste_modal').modal('hide');
+           $('#report_text_textarea').val('');
+         })
+         .error(function(data, status, headers,config) {
+          console.log('error rdata:' + data);  // _DEBUG
+          console.log('error rstatus:' + status);  // _DEBUG
+           $('#report_text_paste_modal').modal('hide');
+         });
+
+  }
+  
+}
+
 function AuthCodeCtrl($rootScope, $scope, $http) { 
   $scope.submitAuthCode = function() {
     $http.post('../../api/user/authcode', {authcode: $scope.authcode})

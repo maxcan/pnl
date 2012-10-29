@@ -31,6 +31,8 @@ function processUploadDupeChecked(report, callback) {
         return processEmailUpload(report, processTradesCB);
       });
     }
+  } else if (report.uploadMethod === 'uploadText') {
+    return processUploadedTextReport(report, processTradesCB)
   } else if (report.uploadMethod === 'upload') {
     return processUploadedTsReport(report, processTradesCB)
   } else { return callback('unsupported report type'); }
@@ -54,6 +56,24 @@ function processUploadDupeChecked(report, callback) {
     });
   }
 }
+
+function processUploadedTextReport(uploadedReport, callback) {
+  log.info('About to process report: ' + uploadedReport._id);  
+  log.info('            filename   : ' + uploadedReport.fileName);  
+  try { 
+    var trades = TradeStation.parseTradeStationCopiedText(uploadedReport.extractedText);
+    _.each(trades, function(t){
+      _.extend(t,{owner: uploadedReport.owner, reportRef: uploadedReport._id})
+    });
+    return callback(null, trades);
+  } catch (e) {
+    log.info(' error proceesing rep: ' + uploadedReport._id);  
+    log.info(' error:  ' + e.stack);
+    return callback('failed on ' + uploadedReport.fileName);
+  }
+
+}
+
 function processUploadedTsReport(uploadedReport, callback) {
   log.info('About to process report: ' + uploadedReport._id);  
   log.info('            filename   : ' + uploadedReport.fileName);  
@@ -67,7 +87,6 @@ function processUploadedTsReport(uploadedReport, callback) {
     log.info(' error proceesing rep: ' + uploadedReport._id);  
     log.info(' error:  ' + e);
     return callback('failed on ' + uploadedReport.fileName);
-
   }
 }
 function processEmailUpload(report, callback) {

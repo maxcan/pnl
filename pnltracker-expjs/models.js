@@ -194,7 +194,7 @@ tradeSchema.virtual('maxPrin').get(function() {
 
 var brokerReportSchema = new mongoose.Schema(
     { owner         : {type: Types.ObjectId, ref: 'User'}
-    , uploadMethod  : {type: String, enum: ['email','upload']}
+    , uploadMethod  : {type: String, enum: ['email','uploadText','upload']}
     , fileName      : String
     , processed     : Boolean
     , mimeType      : String
@@ -209,7 +209,11 @@ var brokerReportSchema = new mongoose.Schema(
 brokerReportSchema.pre('save', function(next) {
   var report = this;
   var md5sum = crypto.createHash('md5');
-  md5sum.update(report.content);
+  if (report.content) { 
+    md5sum.update(report.content);
+  } else {
+    md5sum.update(report.extractedText.join('\n'));
+  }
   report.md5Hash = md5sum.digest('base64');
   return next();
 });

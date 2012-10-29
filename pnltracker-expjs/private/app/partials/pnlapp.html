@@ -52,7 +52,7 @@
                   <button ng-click="setMinDate(31)" class="btn-small btn">Last 31 Days</button>
                 </div>
                 <div ng-show="minDateFilter">
-                  Showing Trades from {{minDateFilter | date:'shortDate'}}
+                  Showing Trades from {{minDateFilter | date:'yyyy-MM-dd'}}
                 </div>
                 <div class="input-append">
                   <input  class="tag-box input input-small" type="text"  placeholder="Filter Trades" >
@@ -136,8 +136,8 @@
                   <td> {{fill.qty}}</td>
                   <td> @ </td>
                   <td>{{fill.avgPx}}</td> 
-                  <td>{{fill.date | date:'shortDate'}}</td>
-                  <td>{{fill.date | date:'shortTime'}}</td>
+                  <td>{{fill.date | date:'yyyy-MM-dd'}}</td>
+                  <td>{{fill.date | date:'mediumTime'}}</td>
                 </tr>
               </tbody>
             </table>
@@ -162,9 +162,21 @@
           </form>
         </div>
 
+        <div id="report_text_paste_modal" class="modal hide fade" ng-controller="ReportTextPasteCtrl">
+          <div class="modal-header">
+            <h3>Copy TradeStation Trade Data Below</h3>
+            <em>Click in the Box and Enter Control-V</em>
+          </div>
+          <div class="modal-body row-fluid">
+            <textarea class="span10" id="report_text_textarea" cols="120" rows="8" ng-model="reportText"></textarea>
+          </div>
+          <div class="modal-footer"><button class="btn" ng-click="saveTradeData()">Submit</button></div>
+        </div>
+
         <div class="container-fluid spaced-rows">
           <div class='ng-show: isAdmin()'>
             <a href='#admin' class='btn'>Admin Page</a>
+            <br>
           </div>
 
           <!-- <h1> name = {{user.name}} </h1> --> 
@@ -189,6 +201,9 @@
             </div>
             <div class="span4">
               <p><a class="btn btn-success" ng-click="refreshTrades()">Refresh Trades</a>
+              </p>
+              <p ng-controller="ReportTextPasteCtrl">
+                <a ng-click="runReportTextModal()" class="btn btn-info">Save TradeStation Trades</a>
               </p>
               <p>
                 <em>Your report dropbox address is: </em>

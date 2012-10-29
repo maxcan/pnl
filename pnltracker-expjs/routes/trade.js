@@ -122,50 +122,70 @@ exports.setReportText = function(req, res) {
 exports.reportUpload = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
   AppUtil.blockCache(res);
-  if (req.files) {
-    var resObjs = [];
-    return async.forEach([req.files.file], saveSingleFile, sendCombinedResp ) ; 
-    // _.each(req.files, function(file) {
-    function sendCombinedResp(err) {
+  if (req.body.reportText) {
+    console.log('found report text: ' + req.body.reportText);  // _DEBUG
+    var uploadObj = { owner: req.user._id
+                    , uploadMethod: 'uploadText'
+                    , receivedDate: new Date()
+                    , processed: false
+                    , senderId: req.ip
+                    , extractedText: req.body.reportText.split(/\n/)
+                    }; 
+    return Models.BrokerReport.create(uploadObj, function(err,report) {
       if (err) {
-        console.log('ERROR in processing upload.. ');  // _DEBUG
-        return res.send(500, err);
+        console.log('error creating broker report for text: '+  err);  // _DEBUG
+        res.send(500, 'Could not save your trades');
       }
-      return res.send(200, resObjs);
-    }
-    function saveSingleFile(file, asyncCallback) { 
-      var content = fs.readFileSync(file.path) ;
-      var uploadObj = { owner: req.user._id
-                      , content: content
-                      , uploadMethod: 'upload'
-                      , mimeType: file.mime
-                      , receivedDate: new Date()
-                      , processed: false
-                      , senderId: req.ip
-                      , fileName: file.name
-                      }
-      Models.BrokerReport.create(uploadObj, function(err,report) {
-        console.log(' created at path: ' + file.path);  // _DEBUG
-        if (err) throw err;
-        if (file.mime.length - file.mime.toLowerCase().indexOf('/pdf') != 4) {
-          console.log(' rep is NOT pdf: ' + file.name);  // _DEBUG
-          BrokerReportManager.processUpload(report, function(err) {
-            if (err) {
-              console.log('Error processing file: ' + e + ' repid: ' + report._id);  // _DEBUG
-              return asyncCallback('could not process your file.  contact support');
-              // return res.send(500,'could not process your file.  contact support');
-            }
-            return asyncCallback(null); // no further processing necessary
-          });
-        } else {
-          // its a PDF.  we need to extract the text client side..
-          resObjs.push({ pdfUrl: '/api/report/get/' + report._id
-                       , setTextUrl:  '/api/report/setText/' + report._id });
-          return asyncCallback(null);
+      BrokerReportManager.processUpload(report, function(err) {
+        if (err) {
+          console.log('Error processing file: ' + err + ' repid: ' + report._id);  // _DEBUG
+          return res.send(500,'could not process your file.  contact support');
         }
+        return res.send(200, 'Uploaded');
       });
-    };
-  } else {
-    return res.send(401, "no files");
+    });
   }
+  if (!req.files) return res.send(401, "no files");
+  var resObjs = [];
+  return async.forEach([req.files.file], saveSingleFile, sendCombinedResp ) ; 
+  // _.each(req.files, function(file) {
+  function sendCombinedResp(err) {
+    if (err) {
+      console.log('ERROR in processing upload.. ');  // _DEBUG
+      return res.send(500, err);
+    }
+    return res.send(200, resObjs);
+  }
+  function saveSingleFile(file, asyncCallback) { 
+    var content = fs.readFileSync(file.path) ;
+    var uploadObj = { owner: req.user._id
+                    , content: content
+                    , uploadMethod: 'upload'
+                    , mimeType: file.mime
+                    , receivedDate: new Date()
+                    , processed: false
+                    , senderId: req.ip
+                    , fileName: file.name
+                    }
+    Models.BrokerReport.create(uploadObj, function(err,report) {
+      console.log(' created at path: ' + file.path);  // _DEBUG
+      if (err) throw err;
+      if (file.mime.length - file.mime.toLowerCase().indexOf('/pdf') != 4) {
+        console.log(' rep is NOT pdf: ' + file.name);  // _DEBUG
+        BrokerReportManager.processUpload(report, function(err) {
+          if (err) {
+            console.log('Error processing file: ' + e + ' repid: ' + report._id);  // _DEBUG
+            return asyncCallback('could not process your file.  contact support');
+            // return res.send(500,'could not process your file.  contact support');
+          }
+          return asyncCallback(null); // no further processing necessary
+        });
+      } else {
+        // its a PDF.  we need to extract the text client side..
+        resObjs.push({ pdfUrl: '/api/report/get/' + report._id
+                     , setTextUrl:  '/api/report/setText/' + report._id });
+        return asyncCallback(null);
+      }
+    });
+  };
 };
