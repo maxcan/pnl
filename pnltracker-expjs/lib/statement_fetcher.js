@@ -45,7 +45,12 @@ function die(err) {
 
 function openInbox(cb) {
   if (imapIsConnected) {
-    imap.openBox('INBOX', false, cb);
+    try { 
+      imap.openBox('INBOX', false, cb);
+    } catch (e) {
+      console.log('Could not open inbox: ' + e.stack);  // _DEBUG
+      closeConnection();
+    }
   } else { 
     // log.info('About to connect to mail');  // _DEBUG
     imap.connect(function(err) {
