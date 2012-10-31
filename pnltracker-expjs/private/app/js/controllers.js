@@ -153,6 +153,12 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   }
   $scope.showTradeDetails = function(trade) {
     $scope.detailTrade = trade;
+    $('#tradeDetailsModal').unbind('hide');
+    $('#tradeDetailsModal').on('hide', function() {
+      $http.post('../../api/report/setNotes/' + trade._id, {notes: trade.notes})
+           .error(function(e) { alert(e);})
+           .success(function() { console.log('saved trade notes');  });
+    })
     $('#tradeDetailsModal').modal();
   };
   $scope.setTradeSortUnderlying = function() {

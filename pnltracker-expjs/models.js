@@ -127,6 +127,7 @@ var tradeSchema = new mongoose.Schema(
     , mailRef   : {type: Types.ObjectId, ref: 'MailArchive'}
     , reportRef : {type: Types.ObjectId, ref: 'BrokerReport'} 
     , security  : {type: Types.ObjectId, ref: 'Security'}
+    , notes     : String
     });
 
 tradeSchema.virtual('netCash').get(function() {

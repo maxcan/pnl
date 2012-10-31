@@ -1,4 +1,5 @@
 var Models = require('../models') ;
+var log = require('../log.js')
 var async = require('async') ;
 var BrokerReportManager = require('../lib/broker_report_manager.js');
 var util = require('util');
@@ -16,7 +17,9 @@ var  mkApiFill = function(fill) {
 
 var mkApiTrade = function (t) { 
   var ret = {};
-  _.each( ['_id', 'owner','isOpen', 'openDate', 'duration' , 'security', 'underlyingSecurity']
+  _.each( ['_id', 'owner','isOpen', 'openDate', 'duration' 
+          , 'notes'
+          , 'security', 'underlyingSecurity']
         , function(k) { ret[k] = t[k];} );
   ret.netCash = t.netCash;
   ret.netQty = t.netQty;
@@ -119,11 +122,32 @@ exports.setReportText = function(req, res) {
   
 }; 
 
+exports.setNotes = function(req, res) {
+  if (!req.user) {return res.send(403, "authentication required");}
+  if (!req.params.tradeId) {return  res.send(403, 'tradeId required'); }
+  return Models.Trade.findOne({owner: req.user._id, _id: req.params.tradeId}, setNote);
+  function setNote(err, trade) {
+    if (err) {
+      log.error('Could fetch trade to set notes.  id: ' + req.params.tradeId + ' err: ' + err);
+      return res.send(403, 'unknown system error');
+    }
+    if (!trade) return res.send(403, 'no such trade id');
+    log.info('setting notes: ' + req.body.notes);
+    trade.notes = req.body.notes;
+    trade.save(function(err) {
+      if (err) {
+        log.error('Could not set notes for trade.  id: ' + req.params.tradeId + ' err: ' + err);
+        return res.send(403, 'unknown system error');
+      }
+      return res.send(200);
+    });
+  }
+}
+
 exports.reportUpload = function(req, res) {
   if (!req.user) {res.send(403, "authentication required");}
   AppUtil.blockCache(res);
   if (req.body.reportText) {
-    console.log('found report text: ' + req.body.reportText);  // _DEBUG
     var uploadObj = { owner: req.user._id
                     , uploadMethod: 'uploadText'
                     , receivedDate: new Date()
@@ -133,12 +157,12 @@ exports.reportUpload = function(req, res) {
                     }; 
     return Models.BrokerReport.create(uploadObj, function(err,report) {
       if (err) {
-        console.log('error creating broker report for text: '+  err);  // _DEBUG
+        log.info('error creating broker report for text: '+  err); 
         res.send(500, 'Could not save your trades');
       }
       BrokerReportManager.processUpload(report, function(err) {
         if (err) {
-          console.log('Error processing file: ' + err + ' repid: ' + report._id);  // _DEBUG
+          log.error('Error processing file: ' + err + ' repid: ' + report._id);  
           return res.send(500,'could not process your file.  contact support');
         }
         return res.send(200, 'Uploaded');
@@ -151,7 +175,7 @@ exports.reportUpload = function(req, res) {
   // _.each(req.files, function(file) {
   function sendCombinedResp(err) {
     if (err) {
-      console.log('ERROR in processing upload.. ');  // _DEBUG
+      log.error('ERROR in processing upload.. ');  
       return res.send(500, err);
     }
     return res.send(200, resObjs);
@@ -168,7 +192,6 @@ exports.reportUpload = function(req, res) {
                     , fileName: file.name
                     }
     Models.BrokerReport.create(uploadObj, function(err,report) {
-      console.log(' created at path: ' + file.path);  // _DEBUG
       if (err) throw err;
       if (file.mime.length - file.mime.toLowerCase().indexOf('/pdf') != 4) {
         console.log(' rep is NOT pdf: ' + file.name);  // _DEBUG

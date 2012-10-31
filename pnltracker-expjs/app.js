@@ -213,6 +213,7 @@ app.get('/api/mails',           mailRoutes.list);
 app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
 app.get('/api/report/get/:uploadId', tradeRoutes.getUpload);
 app.post('/api/report/setText/:uploadId', tradeRoutes.setReportText);
+app.post('/api/report/setNotes/:tradeId', tradeRoutes.setNotes);
 
 app.get('/api/admin/users',             adminRoutes.usersList);
 app.get('/api/admin/setuser/:userId',   adminRoutes.setUser);
