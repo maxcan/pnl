@@ -1,0 +1,8 @@
+10/26/12 10:46:26 AM
+																							
+	Entered	Filled/Canceled	Symbol	Spread	Type	Quantity	Qty Filled	Qty Left	Stop	Limit	Filled Price	Order Status	Route	Duration	Group Name	Triggered By	Advanced	Order#	Account	Originator	Commission	Contract Exp Date	
+	10/26/12 10:54:58 AM	10/26/12 10:54:58 AM	ZNGA		Sell	100	100	0		2.31	2.31	Filled	Intelligent	Day				3-3090-4509	17410162	2005044	$1.00	
+	10/26/12 10:54:52 AM	10/26/12 10:54:51 AM	ZNGA		Buy	100	100	0		2.32	2.32	Filled	Intelligent	Day				3-3090-4476	17410162	2005044	$1.00	
+	10/26/12 10:46:35 AM	10/26/12 10:46:35 AM	ZNGA		Sell	100	100	0		2.32	2.32	Filled	Intelligent	Day				3-3090-2404	17410162	2005044	$1.00	
+	10/26/12 10:46:26 AM	10/26/12 10:46:25 AM	ZNGA		Buy	100	100	0		2.33	2.33	Filled	Intelligent	Day				3-3090-2351	17410162	2005044	$1.00	
+
