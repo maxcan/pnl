@@ -323,15 +323,13 @@ function ChartCtrl($scope, $rootScope) {
             
              .y(function(d) { return d.value })
              .showValues(true).showControls(false);
-        //chart.yAxis.tickFormat(d3.format('.02f'))
-        //           .axisLabel('Cumulative PnL');
-
-    // chart.multibar.valuePadding(0)
         d3.select(svgId)
           .attr('width', width)
           .attr('height', height)
           .datum(dataFunction())
           .call(chart);
+        var b = true;
+        $('.nv-x.nv-axis line').each(function(_,ele) {$(ele).css({'opacity':0.4, 'stroke-width': (b ? '3em' : '0') }); b = !b; });
         return chart;
       },
       callback: function(graph) {
