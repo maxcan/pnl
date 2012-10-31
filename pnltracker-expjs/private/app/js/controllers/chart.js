@@ -329,7 +329,7 @@ function ChartCtrl($scope, $rootScope) {
           .datum(dataFunction())
           .call(chart);
         var b = true;
-        $('.nv-x.nv-axis line').each(function(_,ele) {$(ele).css({'opacity':0.4, 'stroke-width': (b ? '3em' : '0') }); b = !b; });
+        $('svg.thicken-x .nv-x.nv-axis line').each(function(_,ele) {$(ele).css({'opacity':0.4, 'stroke-width': (b ? '3em' : '0') }); b = !b; });
         return chart;
       },
       callback: function(graph) {
