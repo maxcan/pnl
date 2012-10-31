@@ -36,14 +36,16 @@ div.chart-wrapper
     { font-weight: 800
     ; color: @baseFlat
     ; font-size: 2.8em
-    ; margin-bottom: -0.25em /* hack for the beta thing */ 
+    ; margin: 0 0 -0.25em 0 /* hack for the beta thing */ 
+    ; padding: 0
     ; 
+    img { margin-top: 10px ; } 
     &:after 
       { content: "BETA"
       ; position: relative
       ; font-size: 0.5em
-      ; left: -1.3em
-      ; top: 0.3em
+      ; left: -1.0em
+      ; top: 0.6em
       ; margin-bottom: -3em
       ; background: fade(@baseContrast, 60%)
       ; .transform(20)
