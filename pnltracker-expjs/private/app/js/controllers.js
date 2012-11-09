@@ -136,12 +136,22 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
       setTimeout(function(){ $rootScope.$broadcast('refreshTrades'); }, minRefreshPeriod);
       return;
     }
-    User.get(function(u){$scope.user  = u ; });
+    User.get(function(u){
+      $scope.user  = u ;
+      if (!$scope.user.accountStatus || $scope.user.accountStatus !== 'paid') {
+        $scope.needPayment();
+      }
+    });
     Trades.get(updateTrades); 
   });
+  $scope.needPayment = function() {
+    setTimeout(function() {$rootScope.$broadcast('needPayment');},1) ; 
+  }
   $scope.user = User.get(function(user) {
-    if ((!user.roles) || user.roles.indexOf('basic') === -1) {
-      $('#authCodeEntryModal').modal();
+    $scope.user = user;
+    console.log('checking user');  // _DEBUG
+    if (!$scope.user.accountStatus || $scope.user.accountStatus !== 'paid') {
+        $scope.needPayment();
     }
   });
   var toggleReverseSort = true;

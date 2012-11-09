@@ -1,5 +1,10 @@
+require("coffee-script") ; 
+var log = require('../log')
+var StripeUtil = require('../lib/stripeUtil');
 var Models = require('../models') ; 
 var conf    = require('../config.js').genConf();
+var stripe  = require('stripe')(conf.stripeSecretKey);
+var _ = require('underscore');
 var util = require('util');
 var ModelsTrade = require('../models/trade') ; 
 var Ib = require("../lib/parsers/ib.js");
@@ -18,8 +23,13 @@ exports.list = function(req, res){
 
 exports.show = function(req, res) {
   if (!req.user) {return res.send(403, "authentication required");}
+  var ret = {};
+  _.each( ['_id', 'name','email', 'roles', 'accountStatus' 
+          , 'reportDropboxAddr' ] 
+        , function(k) { ret[k] = req.user[k];} );
+  ret['stripePublishableKey'] = conf.stripePublishableKey ; 
   AppUtil.blockCache(res);
-  return res.send(req.user);
+  return res.send(ret);
 };
 
 exports.setDummyUser = function(req,res) {
@@ -73,5 +83,44 @@ exports.setAuthCode = function(req, res) {
       });
 
     }) ; 
+  });
+};
+
+exports.checkCoupon = function(req, res) {
+  if (!req.user || !req.user._id) { return res.send(500, 'auth required');}
+  if (!req.body.redemptionCode) { return res.send(500, 'stripe token required');}
+  stripe.coupons.retrieve(req.body.redemptionCode, function(err, coupon) {
+    if (err) return res.send(500, "Invalid Coupon");
+    if (!coupon.percent_off) 
+      return res.send(500, "Corrupt Redemption Code, email support@tradejitsu.com");
+    return res.send(200, {'percent_off' : coupon.percent_off});
+  });
+  
+}
+
+exports.setStripeToken = function(req, res) {
+  if (!req.user || !req.user._id) { return res.send(500, 'auth required');}
+  if (!req.body.stripeToken) { return res.send(500, 'stripe token required');}
+  req.user.stripeToken = req.body.stripeToken;
+  return req.user.save(function(err) {
+    if (err) {
+      console.log('ERROR in save stripe token.  tell support! ' + err); 
+      return res.send(500, 'Could not store your payment token');
+    }
+    return StripeUtil.createAndSubscribeCustomer(req.user, req.body.redemptionCode, subCb);
+    function subCb(subErr, succ) {
+      if (subErr) {
+        log.error('Error in stripe subscription: ' + subErr);
+        return res.send(500, subErr);
+      }
+      req.user.accountStatus = 'paid';
+      return req.user.save(function(subSaveErr) {
+        if (subSaveErr) {
+          log.error('error saving user paid status: ' + subSaveErr);
+          return res.send(500, 'Error saving paid status.  Please contact support@tradejitsu.com');
+        }
+        return res.send(200, 'subscribed');
+      });
+    }
   });
 };

@@ -2,7 +2,8 @@
  * Module dependencies.
  */
 
-var express = require('express')
+require("coffee-script") ; 
+var express = require('express'); 
 var routes = require('./routes');
 var userRoutes = require('./routes/user');
 var mailRoutes = require('./routes/mail');
@@ -11,7 +12,7 @@ var adminRoutes = require('./routes/admin');
 var http = require('http');
 var less = require('less');
 var fs = require('fs');
-var log = require('./log.js')
+var log = require('./log')
 var util = require('util');
 var everyauth = require('everyauth');
 var path = require('path');
@@ -200,15 +201,17 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-app.get('/' ,                   routes.index);
-app.get('/ping',                function(req,res) { return res.send(200, 'pong'); });
-app.get('/users',               userRoutes.list);
-app.get('/test/admin/users/ld', userRoutes.loadDummyTrades);
-app.get('/test/users/set',      userRoutes.setDummyUser);
-app.get('/api/user',            userRoutes.show);
-app.post('/api/user/authcode',  userRoutes.setAuthCode);
-app.get('/api/trades',          tradeRoutes.list);
-app.get('/api/mails',           mailRoutes.list);
+app.get('/' ,                       routes.index);
+app.get('/ping',                    function(req,res) { return res.send(200, 'pong'); });
+app.get('/users',                   userRoutes.list);
+app.get('/test/admin/users/ld',     userRoutes.loadDummyTrades);
+app.get('/test/users/set',          userRoutes.setDummyUser);
+app.get('/api/user',                userRoutes.show);
+app.post('/api/user/authcode',      userRoutes.setAuthCode);
+app.post('/api/user/stripe-token',  userRoutes.setStripeToken);
+app.post('/api/user/check-coupon',  userRoutes.checkCoupon);
+app.get('/api/trades',              tradeRoutes.list);
+app.get('/api/mails',               mailRoutes.list);
 
 app.post('/api/report/upload', bodyParserWithFiles, tradeRoutes.reportUpload);
 app.get('/api/report/get/:uploadId', tradeRoutes.getUpload);

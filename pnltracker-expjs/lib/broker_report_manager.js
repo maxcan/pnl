@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var log = require('../log.js')
+var log = require('../log')
 var util = require('util');
 var TradeStation = require("../lib/parsers/ts.js");
 var Models = require("../models.js");

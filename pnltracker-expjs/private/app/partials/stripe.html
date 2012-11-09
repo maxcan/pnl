@@ -1,0 +1,45 @@
+<div id="stripe_modal" class="modal hide fade" data-keyboard='false' data-backdrop="static" ng-controller="StripeCtrl">
+  <form ng-submit='processStripe()'>
+    <div class="modal-header">
+      <h3>
+        Get Tradejitsu for 
+        <span ng-hide="discountedPrice">$88/mo </span>
+        <span ng-show="discountedPrice">
+          {{discountedPrice | currency}}/mo with Discount!
+        </span>
+      </h3>
+    </div>
+
+    <div class="modal-body">
+      <div  class="{{numberClass}} control-group">
+        <label>Card Number</label>
+        <input ng-change="validate()" ng-model="card.number" type="text" size="30" autocomplete="off" class="card-number"/>
+        <span class="help-inline">{{numberResult}}</span>
+      </div>
+      <div class="{{cvcClass}} control-group">
+        <label >CVC</label>
+        <input ng-change="validate()" ng-model="card.cvc" type="text" size="4" autocomplete="off" class="card-cvc"/>
+        <span class="help-inline">{{cvcResult}}</span>
+      </div>
+      <div class="{{expiryClass}} control-group">
+        <label class="control-label">Expiration (MM/YYYY)</label>
+        <input ng-change="validate()" ng-model="card.exp_month" type="text" size="2" class="card-expiry-month"/>
+        <span> / </span>
+        <input ng-change="validate()" ng-model="card.exp_year" type="text" size="4" class="card-expiry-year"/>
+        <span class="help-inline">{{expiryResult}}</span>
+      </div>
+      <div class="control-group {{redemptionResult}}">
+        <label class="control-label" >Redemption Code</label>
+        <input ng-change="checkRedemptionCode()" ng-model="card.redemption_code" type="text" size="8" autocomplete="off"/>
+        <span class="help-inline">{{redemptionInfo}}</span>
+      </div>
+      <div id="stripe_error" class="hidden"></div>
+      <div id="stripe_error" class="hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <a href='/logout' class='btn btn-danger'>Nevermind, Logout</a>
+      <input ng-disabled="!allowSubmit" ng-click="processCard()" type="submit" class="btn btn-info"/>
+    </div>
+  </form>
+</div>
+

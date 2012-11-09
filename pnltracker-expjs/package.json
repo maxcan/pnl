@@ -7,8 +7,10 @@
   },
   "dependencies": {
     "winston": "*" ,
+    "stripe": "*",
     "express": "3.0.0rc4",
     "async": "*",
+    "coffee-script": "*",
     "less-middleware": "0.1.6",
     "dateformat": "*",
     "less": "*",

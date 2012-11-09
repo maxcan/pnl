@@ -1,5 +1,5 @@
 var Models = require('../models') ;
-var log = require('../log.js')
+var log = require('../log')
 var async = require('async') ;
 var BrokerReportManager = require('../lib/broker_report_manager.js');
 var util = require('util');

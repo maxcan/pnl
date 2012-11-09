@@ -22,6 +22,10 @@ var baseSettings =
   , imapFetchPassword: 'bjhekd2343'
   , imapFetchHost: 'imap.gmail.com'
   , imapFetchPort: 993
+  // stripe
+  , stripeSecretKey: 'H7WIg3WsoWZSZLaRBQRkL3hSZVUMpzBr'
+  , stripePublishableKey: 'pk_IOA1hVJCHQwtyBoz53xeI9W4YHa8n'
+  , stripePlanId: 'tradejitsu_dev'
   } ;
 
 var prdSettings = _.extend(_.clone(baseSettings), 
@@ -30,6 +34,8 @@ var prdSettings = _.extend(_.clone(baseSettings),
       , listenPort: 3000
       , imapFetchPassword: 'h09823e49bje9'
       , imapFetchUsername: 'u'
+      , stripeSecretKey: '2ndHk8DBLiETnOM9MnpjymCdj1CTTUPf'
+      , stripePublishableKey: 'pk_XjdJwhY6TxzE8Box3BlfPWLmFFWBg'
       }) ;
   
 var stgSettings = _.extend(_.clone(baseSettings), 

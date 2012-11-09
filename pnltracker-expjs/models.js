@@ -11,13 +11,17 @@ var Types = mongoose.Schema.Types;
 
 exports.closeConnection = function() {db.disconnect();}
 var roleTypes = ['basic', 'admin'];
+var accountStatuses = ['paid', 'problem'];
 var userSchema = new mongoose.Schema(
     { name              : String 
     , email             : { type: String, required: true}
     , roles             : [ {type: String, enum: roleTypes} ] 
     , openId            : String
     , openIdProfile     : String
-    , reportDropboxAddr  : [String]
+    , reportDropboxAddr : [String]
+    , accountStatus     : { type: String, enum: accountStatuses}
+    , stripeToken       : String
+    , stripeCustomerId  : String
     });
 
 exports.randomString = function(len) {

@@ -29,9 +29,7 @@
   <div class="navbar navbar-fixed-top navbar-inverse">
     <div class="navbar-inner">
       <div class="container-fluid">
-        <a href='#' class="brand">
-          <img src="../../logo-45-white.png">
-        </a>
+        <a href='#' class="brand"><img src="../../logo-45-white.png"></a>
         <ul class="nav">
           <li><a>for: {{user.email}}</a></li>
         </ul>
@@ -94,6 +92,9 @@
         </div>
       </div>
       <div class="span9">
+        <div ng-controller="StripeCtrl">
+          <div ng-include src="'partials/stripe.html'"></div>
+        </div>
         <div id="tradeDetailsModal" class="modal hide fade" >
           <div class="modal-header">
             <h3>{{detailTrade.symbol}} </h3>
@@ -150,6 +151,7 @@
             <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
           </div>
         </div>
+
         <div id="authCodeEntryModal" class="modal hide fade" data-keyboard='false' data-backdrop="static" ng-controller="AuthCodeCtrl">
           <div class="modal-header">
             <h3>Authorization Code Required:</h3>
@@ -204,6 +206,9 @@
               </div>
             </div>
             <div class="span4">
+              <p ng-show="isAdmin()">
+                <a class="btn btn-success" ng-click="needPayment()">test stripe</a>
+              </p>
               <p><a class="btn btn-success" ng-click="refreshTrades()">Refresh Trades</a>
               </p>
               <p ng-controller="ReportTextPasteCtrl">
