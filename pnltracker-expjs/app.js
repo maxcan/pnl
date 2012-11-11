@@ -210,6 +210,9 @@ app.get('/api/user',                userRoutes.show);
 app.post('/api/user/authcode',      userRoutes.setAuthCode);
 app.post('/api/user/stripe-token',  userRoutes.setStripeToken);
 app.post('/api/user/check-coupon',  userRoutes.checkCoupon);
+app.post('/api/user/note',          userRoutes.setNote);
+app.get('/api/user/notes',           userRoutes.getNote);
+
 app.get('/api/trades',              tradeRoutes.list);
 app.get('/api/mails',               mailRoutes.list);
 

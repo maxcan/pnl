@@ -94,6 +94,72 @@ function DurationGroupCtrl($scope, Trades, $rootScope) {
   });
 }
 
+function mkTradeSummary(tradeArrRaw) {
+  var wins = 0;
+  var tradeArr = closedTrades(tradeArrRaw); 
+  _.each(tradeArr, function(s,t) {if (t.netCash > 0) wins++;});
+  return { trades: tradeArr
+         , losses: tradeArr.length - wins
+         , wins: wins
+         , netCash: _.reduce(tradeArr, function(s,t) {return s + t.netCash;}, 0)
+         } ; 
+}
+
+function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
+  $scope.toDtStr = function (dt)  { return $filter('date')(dt, 'yyyyMMdd');}
+  function toDtStrLong(dt)  { return $filter('date')(dt, 'mediumDate');}
+  $scope.tradesByDay = {};  // [ { str: <human readable date>,  trades: [trades] } ] 
+  $scope.toTop = function() { window.scrollTo(0,0); } 
+  $scope.changeDay = function(dt) {
+    var ele = '#' + (dt ? dt : $scope.daySelect);
+    var c = $(ele).position();
+    if (c) {window.scrollTo(c.left, c.top - 60);}
+    return false;
+
+  }; 
+  $scope.notes = {};
+  $scope.dirty = {};
+  $scope.clean = {};
+  $scope.setDirty = function(dt) { $scope.clean[dt] = false; $scope.dirty[dt] = true; }
+  $scope.saveNote = function(dt) {
+    var noteText = $('#' + dt + '_note').val();
+    console.log('saving: ' +  noteText);  // _DEBUG
+    $http.post('../../api/user/note', {key: dt, text: noteText})
+         .success(function() { 
+           $scope.clean[dt] = true;
+           $scope.dirty[dt] = false;  
+         })
+         .error(function(e) { alert('error: ' + e);})
+         ;
+  }
+  $http.get('../../api/user/notes').success(function(data) {
+    var notes = {};
+    console.log('notes: ' + JSON.stringify(data));  // _DEBUG
+    console.log('notes: ' + data);  // _DEBUG
+    _.each(data, function(singleNote) {
+      notes[singleNote.key] = singleNote.text;});
+    $scope.notes = notes;
+  });
+  Trades.get(function(t) {
+    var tradesByDay = {};  // [ { str: <human readable date>,  trades: [trades] } ] 
+    $scope.trades = closedTrades(t) ; 
+    _.each($scope.trades, function(t) {
+      var dt = $scope.toDtStr(t.openDate);
+      if (!tradesByDay[dt]) tradesByDay[dt] = {str: toDtStrLong(t.openDate), trades:[]};
+      tradesByDay[dt].trades.push(t);
+    });
+    _.each(tradesByDay, function(tbdObj, tbdDayStr) {
+      tbdObj.summary = mkTradeSummary(tbdObj.trades);
+    });
+    $scope.bestDay  = _.max(tradesByDay, function (tbd) { return tbd.summary.netCash ; });
+    $scope.worstDay = _.min(tradesByDay, function (tbd) { return tbd.summary.netCash ; });
+    $scope.tradesByDay = tradesByDay;
+    $scope.days = _.keys($scope.tradesByDay);
+    $scope.days.sort();
+    $scope.days.reverse();
+  });
+}
+
 function CompareCtrl($scope, $location, Trades, $rootScope) {
   $scope.left = {filter: {groupName: 'Group One'}} ; 
   $scope.right = {filter: {groupName: 'Group Two'}}; 
@@ -123,15 +189,7 @@ function CompareCtrl($scope, $location, Trades, $rootScope) {
       if (flt.side === 'short' && t.isLong) return false;
       return true;
     });
-    console.log('for group: ' + flt.groupName + ' found trades: ' + curTrades.length);  // _DEBUG
-    var wins = 0;
-    _.each(curTrades, function(s,t) {if (t.netCash > 0) wins++;});
-    curFilterGroup.data =
-      { trades: []
-      , losses: curTrades.length - wins
-      , wins: wins
-      , netCash: _.reduce(curTrades, function(s,t) {return s + t.netCash;}, 0)
-      } ; 
+    curFilterGroup.data = mkTradeSummary(curTrades);
   }
 }
 function UndlGroupCtrl($scope, $rootScope) {

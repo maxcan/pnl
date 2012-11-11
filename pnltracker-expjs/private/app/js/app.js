@@ -3,6 +3,7 @@ angular.module('pnlApp', ['ui', 'pnlApp.filters', 'pnlApp.services', 'pnlApp.dir
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/home',    { templateUrl: 'partials/pnlapp.html' });
     $routeProvider.when('/compare', { templateUrl: 'partials/compare.html' });
+    $routeProvider.when('/journal', { templateUrl: 'partials/journal.html' });
     $routeProvider.when('/upload',  { templateUrl: 'partials/tradeUpload.html' });
     // $routeProvider.when('/trades/:tradeId'
     //                    , {templateUrl: 'partials/tradeDtl.html'

@@ -104,6 +104,13 @@ securitySchema.pre('save', function(next) {
 //   return 'unsupported security type';
 // });
 
+var noteSchema = new mongoose.Schema(
+    { owner   : {type: Types.ObjectId, ref: 'User'}
+    , key     : {type: String, required: true}
+    , text    : String
+    });
+
+
 var fillSchema = new mongoose.Schema(
     { owner   : {type: Types.ObjectId, ref: 'User'}
     , date    : {type: Date, required: true}
@@ -250,6 +257,8 @@ var MailArchive  = db.model('User', mailArchiveSchema);
 exports.MailArchive = MailArchive;
 var Fill = db.model('Fill', fillSchema);
 exports.Fill = Fill;
+var Note = db.model('Note', noteSchema);
+exports.Note = Note;
 var Trade = db.model('Trade', tradeSchema);
 exports.Trade = Trade;
 var Security = db.model('Security', securitySchema);

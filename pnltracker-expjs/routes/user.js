@@ -51,6 +51,46 @@ exports.loadDummyTrades = function(req,res) {
   });
 }; 
 
+exports.getNote = function(req, res) {
+  if (!req.user || !req.user._id) { return res.send(500, 'auth required');}
+  return Models.Note.find({owner:req.user._id}, function(err, nt) {
+    if (err) {
+      log.error('erorr '  + err + ' loading note: ' + req.user._id + ' and note key: ' + req.body.key);
+      return res.send(500, 'uknown error');
+    }
+    return res.send(200, nt);  
+  });
+}; 
+
+exports.setNote = function(req, res) {
+  if (!req.user || !req.user._id) { return res.send(500, 'auth required');}
+  if (!req.body.key) { return res.send(400, 'key required');}
+  return Models.Note.findOne({owner:req.user._id, key: req.body.key}, function(err, nt) {
+    if (err) {
+      log.error('erorr '  + err + ' loading note: ' + req.user._id + ' and note key: ' + req.body.key);
+      return res.send(500, 'uknown error');
+    }
+    if (nt) {
+      nt.text = req.body.text;
+      nt.save(function(saveErr) {
+        if (saveErr) {
+          log.error('error ' + saveErr + '  saving note: ' + req.user._id + ' and note key: ' + req.body.key);
+          return res.send(500, 'uknown error');
+        }
+        res.send(200);
+      });
+    } else {
+      Models.Note.create({owner: req.user._id, key: req.body.key, text: req.body.text},function (createErr) {
+        if (createErr) {
+          log.error('error ' + createErr + '  saving note: ' + req.user._id + ' and note key: ' + req.body.key);
+          return res.send(500, 'uknown error');
+        }
+        res.send(200);
+      });
+    }
+  }); 
+};
+
 exports.setAuthCode = function(req, res) {
   if (!req.user || !req.user._id) { return res.redirect('/auth/facebook');}
   if (!req.body.authcode) { return res.send(500, 'authcode required');}
