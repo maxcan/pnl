@@ -1,0 +1,39 @@
+<div ng-controller="UploadCtrl" class="container-fluid">
+  <div class="row-fluid">
+
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="#upload_tab_ts" data-toggle="tab">TradeStation</a></li>
+      <li><a href="#upload_tab_ib" data-toggle="tab">Interactive Brokers</a></li>
+      <li><a href="#upload_tab_tos" data-toggle="tab">ThinkOrSwim</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane active" id="upload_tab_ts">
+        <h3>Copy TradeStation Trade Data Below</h3>
+        <em>Click in the Box and Enter Control-V</em>
+        <textarea class="span10" id="report_text_textarea" cols="120" rows="8" ng-model="reportText"></textarea>
+        <button class="btn" ng-click="saveTradeData()">Submit</button>
+      </div>
+
+      <div class="tab-pane" id="upload_tab_ib">
+
+        <p>
+        <em>Your report dropbox address is: </em>
+        </p>
+        <code>
+          <a href="mailto:{{user.reportDropboxAddr[0]}}">{{user.reportDropboxAddr[0]}}</a>
+        </code>
+        <h4 id="ts_upload">If you have TradeStation PDFs, you can upload here:</h4>
+        <div app-upload></div>
+
+      </div>
+      <div class="tab-pane" id="upload_tab_tos">
+        <h4>Coming Soon!</h4>
+      </div>
+      <div class="tab-pane" id="settings">...</div>
+    </div>
+
+
+
+  </div>
+</div>

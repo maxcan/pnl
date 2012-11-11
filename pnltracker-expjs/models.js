@@ -74,8 +74,6 @@ securitySchema.pre('save', function(next) {
           console.log('missing underling for symbol ' + security._id);
           return next('missing underlying for security: ' + security._id);
         }
-
-
         var dtStr = dateFormat(this.expDt, 'yyyy-mm-dd');
         security.desc = undl.symbol + ' ' + security.putCall +  security.strike + ' ' + dtStr;
         return next();

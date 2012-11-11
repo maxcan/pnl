@@ -42,7 +42,6 @@ function ChartCtrl($scope, $rootScope) {
       buildStackedLineChart('#stacked_pnl_chart', calcPnlSeriesByUnderlying);
       buildStackedBarChart('#stacked_pnl_bar_chart', calcNetCashPerSymbol);
       buildScatterChart('#time_duration_scatter_chart', calcDurationScatter);
-      buildLineChart('#time_series_pnl_chart', calcPnlSeriesByUnderlying);
       buildPieChart('#profit_share_pie_chart'
                    , function() { return calcProfitShareByUnderlying(true);});
       buildPieChart('#loss_share_pie_chart'

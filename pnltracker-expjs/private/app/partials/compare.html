@@ -1,0 +1,76 @@
+<script type='text/ng-template' id='tradeSelector'>
+  <h3>{{filterObj.groupName}}</h3>
+  <form class="form form-horizontal">
+    <div class="control-group">
+      <label class="control-label">Start Date</label>
+      <div class="controls">
+        <input ng-change='checkAllFilters()' ng-model="filterObj.startDate" ui-date>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">End Date</label>
+      <div class="controls">
+        <input ng-change='checkAllFilters()' ng-model="filterObj.endDate" ui-date>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Side</label>
+      <div class="controls">
+        <select ng-change='checkAllFilters()' ng-model="filterObj.side">
+          <option value="both">Long and Short</option>
+          <option value="long">Long Only</option>
+          <option value="short">Short Only</option>
+        </select>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Duration</label>
+      <div class="controls">
+        <select ng-change='checkAllFilters()' ng-model="filterObj.duration">
+          <option value="intraday" selected>Intraday</option>
+          <option value="interday">Multiple Days</option>
+        </select>
+      </div>
+    </div>
+  </form>
+</script>
+<script type='text/ng-template' id='tradeSummary'>
+  <dl class="dl-horizontal">
+    <dt>Total Trades:
+    <dd>{{data.trades.length}}
+    <dt>Net Cash:
+    <dd>{{data.netCash | currency}}
+    <dt>Win Percent
+    <dd>{{data.wins / data.trades.length | percent}}
+    <dt>Wins
+    <dd>{{data.wins}}
+    <dt>Losses
+    <dd>{{data.losses}}
+  </dl>
+</script>
+
+<div ng-controller="CompareCtrl">
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span5">
+        <ng-include ng-repeat="filterObj in [left.filter]" src="'tradeSelector'"></ng-include>
+      </div>
+      <div class="span2">
+      </div>
+      <div class="span5">
+        <ng-include ng-repeat="filterObj in [right.filter]" src="'tradeSelector'"></ng-include>
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span5">
+        <ng-include ng-repeat="data in [left.data]" src="'tradeSummary'"></ng-include>
+      </div>
+      <div class="span2">
+        <h3>Total Trades: {{trades | count }}  </h3>
+      </div>
+      <div class="span5">
+        <ng-include ng-repeat="data in [right.data]" src="'tradeSummary'"></ng-include>
+      </div>
+    </div>
+  </div>
+</div>

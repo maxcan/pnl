@@ -30,6 +30,7 @@ var mkApiTrade = function (t) {
   ret.maxPrin = t.maxPrin;
   ret.closeDate = t.closeDate;
   ret.symbol = t.symbol.substring(3);
+  ret.isLong = t.fills[0].qty > 0;
   ret.fills  = _.map(t.fills, mkApiFill);
   if (t.security) ret.securityDesc = t.security.desc;
   return ret;

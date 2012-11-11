@@ -26,19 +26,6 @@
 
 </script>
 <div id="top" ng-controller="HomeCtrl" data-spy="scroll" data-target=".bs-docs-sidebar">
-  <div class="navbar navbar-fixed-top navbar-inverse">
-    <div class="navbar-inner">
-      <div class="container-fluid">
-        <a href='#' class="brand"><img src="../../logo-45-white.png"></a>
-        <ul class="nav">
-          <li><a>for: {{user.email}}</a></li>
-        </ul>
-        <ul class="nav pull-right">
-          <li><a href="/logout">Logout</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
 
   <div class="container-fluid">
     <div class="row-fluid">
@@ -65,16 +52,12 @@
               </a>
             </li>
             <li><a scroll-to="#top"><i class="icon-chevron-right"></i>Top</a></li>
-            <li><a scroll-to="#ts_upload"><i class="icon-chevron-right"></i>TradeStation PDF Upload</a></li>
             <li><a scroll-to="#stacked_pnl_bar_chart">
               <i class="icon-picture"></i>
               <i class="icon-chevron-right"></i>Win/Loss By Symbol</a></li>
             <li><a scroll-to="#stacked_pnl_chart">
               <i class="icon-picture"></i>
               <i class="icon-chevron-right"></i>PnL Over Time (Stacked)</a></li>
-            <li><a scroll-to="#time_series_pnl_chart">
-              <i class="icon-picture"></i>
-              <i class="icon-chevron-right"></i>PnL Over Time (Series)</a></li>
             <li><a scroll-to="#profit_share_pie_chart">
               <i class="icon-adjust"></i>
               <i class="icon-chevron-right"></i>PnL by Underlying Chart</a></li>
@@ -168,16 +151,6 @@
           </form>
         </div>
 
-        <div id="report_text_paste_modal" class="modal hide fade" ng-controller="ReportTextPasteCtrl">
-          <div class="modal-header">
-            <h3>Copy TradeStation Trade Data Below</h3>
-            <em>Click in the Box and Enter Control-V</em>
-          </div>
-          <div class="modal-body row-fluid">
-            <textarea class="span10" id="report_text_textarea" cols="120" rows="8" ng-model="reportText"></textarea>
-          </div>
-          <div class="modal-footer"><button class="btn" ng-click="saveTradeData()">Submit</button></div>
-        </div>
 
         <div class="container-fluid spaced-rows">
           <div class='ng-show: isAdmin()'>
@@ -211,17 +184,6 @@
               </p>
               <p><a class="btn btn-success" ng-click="refreshTrades()">Refresh Trades</a>
               </p>
-              <p ng-controller="ReportTextPasteCtrl">
-                <a ng-click="runReportTextModal()" class="btn btn-info">Save TradeStation Trades</a>
-              </p>
-              <p>
-                <em>Your report dropbox address is: </em>
-              </p>
-              <code>
-                <a href="mailto:{{user.reportDropboxAddr[0]}}">{{user.reportDropboxAddr[0]}}</a>
-              </code>
-              <h4 id="ts_upload">If you have TradeStation PDFs, you can upload here:</h4>
-              <div app-upload></div>
             </div>
           </div>
 
@@ -247,12 +209,6 @@
             </div>
             <div class="row-fluid">
               <div id="stacked_pnl_chart"  class="span12">
-                <h4>Cumulative PnL <em>click on the symbols in the legends!</em></h4>
-                <svg class="chart" id="test_chart"></svg>
-              </div>
-            </div>
-            <div class="row-fluid">
-              <div id="time_series_pnl_chart"  class="span12">
                 <h4>Cumulative PnL <em>click on the symbols in the legends!</em></h4>
                 <svg class="chart" id="test_chart"></svg>
               </div>

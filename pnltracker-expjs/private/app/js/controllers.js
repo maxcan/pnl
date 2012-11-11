@@ -5,7 +5,7 @@ function closedTrades (trades) {
   return _.filter(trades, function(t){return !t.isOpen;});
 }
 
-function ReportTextPasteCtrl($rootScope, $scope, $http) {
+function UploadCtrl($rootScope, $scope, $http) {
   $scope.runReportTextModal = function() {
     $('#report_text_paste_modal').modal();
     $('#report_text_textarea').focus();
@@ -94,6 +94,46 @@ function DurationGroupCtrl($scope, Trades, $rootScope) {
   });
 }
 
+function CompareCtrl($scope, $location, Trades, $rootScope) {
+  $scope.left = {filter: {groupName: 'Group One'}} ; 
+  $scope.right = {filter: {groupName: 'Group Two'}}; 
+  Trades.get(function(t) {
+    $scope.trades = t;
+    chkFilter($scope.left);
+    chkFilter($scope.right);
+  });
+  function toStr(o) { 
+    console.log('toStr o: ' + o.groupName);
+    return angular.toJson(o);}
+  $scope.checkAllFilters = function() {
+    chkFilter($scope.left);
+    chkFilter($scope.right);
+  }; 
+  function chkFilter(curFilterGroup) {
+    var flt = curFilterGroup.filter;
+    var st = (flt.startDate ? new Date(flt.startDate) : null);
+    var end = (flt.endDate ? new Date(flt.endDate) : null);
+    var curTrades = _.filter($scope.trades, function(t) {
+      var td = new Date(t.openDate);
+      if (st && (td < st)) return false;
+      if (end && (td > end)) return false;
+      if (flt.duration === 'intraday' && t.duration > (24*60*60*1000)) return false;
+      if (flt.duration === 'interday' && t.duration < (24*60*60*1000)) return false;
+      if (flt.side === 'long' && !t.isLong) return false;
+      if (flt.side === 'short' && t.isLong) return false;
+      return true;
+    });
+    console.log('for group: ' + flt.groupName + ' found trades: ' + curTrades.length);  // _DEBUG
+    var wins = 0;
+    _.each(curTrades, function(s,t) {if (t.netCash > 0) wins++;});
+    curFilterGroup.data =
+      { trades: []
+      , losses: curTrades.length - wins
+      , wins: wins
+      , netCash: _.reduce(curTrades, function(s,t) {return s + t.netCash;}, 0)
+      } ; 
+  }
+}
 function UndlGroupCtrl($scope, $rootScope) {
   var toggleReverseSort  = true;
   var sortCol = null;
@@ -117,6 +157,10 @@ function UndlGroupCtrl($scope, $rootScope) {
     sortRows();
   });
 }
+function NavCtrl($scope, User, $rootScope, $location) {
+  $scope.$location = $location;
+}
+
 function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
   setInterval(function() { $rootScope.$broadcast('refreshTrades');}, 45000);
   var lastRefresh = new Date();
