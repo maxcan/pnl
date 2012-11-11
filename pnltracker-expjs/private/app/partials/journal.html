@@ -1,0 +1,66 @@
+<div ng-controller="JournalCtrl">
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span12">
+        <h1>Daily Trade Summary</h1>
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span12">
+        <form class="well form-inline">
+          <label class="control-label">Choose Day</label>
+          <select ng-change='changeDay()' ng-model="daySelect">
+            <option ng-repeat="dt in days" value="{{dt}}">{{tradesByDay[dt].str}}</option>
+          </select>
+
+          <button ng-click='changeDay(toDtStr(bestDay.trades[0].openDate))' class="btn btn-success">
+            Best Day: 
+            {{bestDay.trades[0].openDate | date:mediumDate}} 
+            {{bestDay.summary.netCash | currency}}
+          </select>
+          <button ng-click='changeDay(toDtStr(worstDay.trades[0].openDate))' class="btn btn-danger">
+            Worst Day: 
+            {{worstDay.trades[0].openDate | date:mediumDate}} 
+            {{worstDay.summary.netCash | currency}}
+          </select>
+        </form>
+      </div>
+    </div>
+    <div ng-repeat="dt in days" class="row-fluid">
+      <div class="span3" id="{{dt}}">
+        <h3>{{tradesByDay[dt].str}}</h3>
+        <a ng-click="toTop()">Top</a>
+          </div>
+          <div class="span3">
+            <dl class="dl-horizontal">
+              <dt>Total Trades:
+              <dd>{{tradesByDay[dt].summary.trades.length}}
+              <dt>Net Cash:
+              <dd>{{tradesByDay[dt].summary.netCash | currency}}
+              <dt>Win Percent
+              <dd>{{tradesByDay[dt].summary.wins / tradesByDay[dt].summary.trades.length | percent}}
+              <dt>Wins
+              <dd>{{tradesByDay[dt].summary.wins}}
+              <dt>Losses
+              <dd>{{tradesByDay[dt].summary.losses}}
+            </dl>
+
+          </div>
+          <div class="span6">
+            <form class="form">
+              <em>notes:</em>
+              <textarea ui-event="{blur: 'saveNote(dt)', focus: 'setDirty(dt)'}" class="span12" rows="3" id="{{dt}}_note">{{notes[dt]}}</textarea>
+              <p>
+                <button ng-click="saveNote(dt)" class="btn btn-primary btn-mini">Save </button>
+                <span ng-show="dirty[dt]">warning, unsaved</span>
+                <span ng-show="clean[dt]">Saved!</span>
+              </p>
+
+            </form>
+          </div>
+          <hr class="span12">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
