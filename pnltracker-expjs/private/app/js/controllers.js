@@ -154,14 +154,28 @@ function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
   });
 }
 
-function CompareCtrl($scope, $location, Trades, $rootScope) {
+function CompareCtrl($scope, $location, Trades, $rootScope, $http) {
   $scope.left = {filter: {groupName: 'Group One'}} ; 
   $scope.right = {filter: {groupName: 'Group Two'}}; 
   Trades.get(function(t) {
-    $scope.trades = t;
+    $scope.trades = closedTrades(t);
     chkFilter($scope.left);
     chkFilter($scope.right);
   });
+
+  $scope.showTradeDetails = function(trade) {
+  
+    $scope.detailTrade = trade;
+    $('#tradeDetailsModal').unbind('hide');
+    $('#tradeDetailsModal').on('hide', function() {
+      $http.post('../../api/report/setNotes/' + trade._id, {notes: trade.notes})
+           .error(function(e) { alert(e);})
+           .success(function() { console.log('saved trade notes');  });
+    })
+    $('#tradeDetailsModal').modal();
+  };
+
+
   function toStr(o) { 
     console.log('toStr o: ' + o.groupName);
     return angular.toJson(o);}
