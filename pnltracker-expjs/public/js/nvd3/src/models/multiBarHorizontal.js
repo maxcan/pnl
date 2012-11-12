@@ -8,6 +8,7 @@ nv.models.multiBarHorizontal = function() {
   var margin = {top: 0, right: 0, bottom: 0, left: 0}
     , width = 960
     , height = 500
+    , barHeight = 0
     , id = Math.floor(Math.random() * 10000) //Create semi-unique ID in case user doesn't select one
     , x = d3.scale.ordinal()
     , y = d3.scale.linear()
@@ -140,6 +141,8 @@ nv.models.multiBarHorizontal = function() {
       barsEnter.append('rect')
           .attr('width', 0)
           .attr('height', x.rangeBand() / (stacked ? 1 : data.length) )
+      barHeight =  x.rangeBand() / (stacked ? 1 : data.length) ;
+      console.log('barHeight: ' + barHeight);  // _DEBUG
 
       bars
           .on('mouseover', function(d,i) { //TODO: figure out why j works above, but not here
@@ -285,6 +288,7 @@ nv.models.multiBarHorizontal = function() {
     return chart;
   };
 
+  chart.barHeight = function(_) {return barHeight;  }
   chart.height = function(_) {
     if (!arguments.length) return height;
     height = _;
@@ -332,7 +336,6 @@ nv.models.multiBarHorizontal = function() {
     color = nv.utils.getColor(_);
     return chart;
   };
-
   chart.id = function(_) {
     if (!arguments.length) return id;
     id = _;
