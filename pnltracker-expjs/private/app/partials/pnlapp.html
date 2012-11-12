@@ -257,6 +257,8 @@
                     <th class="sortable" ng-click="setTradeSort('duration')">Duration</th>
                     <th class="sortable" ng-click="setTradeSort('vwapBuy')">vwapBuy</th>
                     <th class="sortable" ng-click="setTradeSort('vwapSell')">vwapSell</th>
+                    <th class="sortable" ng-click="setTradeSort('openDate')">Open Dt</th>
+                    <th class="sortable" ng-click="setTradeSort('closeDate')">Close Dt</th>
                     <th class="sortable" ng-click="setTradeSortUnderlying()">Underlying Symbol</th</th>
                     <th >Notes</th>
                   </tr>
@@ -271,10 +273,12 @@
                     <td>{{trade.duration | timespan}}</td>
                     <td>{{trade.vwapBuy  | currency}}</td>
                     <td>{{trade.vwapSell | currency}}</td>
+                    <td>{{trade.openDate  | date:'shortDate'}}</td>
+                    <td>{{trade.closeDate  | date:'shortDate'}}</td>
                     <td>{{trade.underlyingSecurity.symbol }}</td>
-                    <td>
-                      <span ng-click="showTradeDetails(trade)"> {{trade.notes }}</span>
-                      </td>
+                    <td ng-click="showTradeDetails(trade)">
+                      <span> {{trade.notes }}</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>

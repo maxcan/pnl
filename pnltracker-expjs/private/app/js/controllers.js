@@ -280,6 +280,7 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
            .success(function() { console.log('saved trade notes');  });
     })
     $('#tradeDetailsModal').modal();
+    setTimeout(function() {$('#detail_trade_notes').focus();}, 100);
   };
   $scope.setTradeSortUnderlying = function() {
     toggleReverseSort = !toggleReverseSort;
