@@ -113,7 +113,7 @@ function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
   $scope.changeDay = function(dt) {
     var ele = '#' + (dt ? dt : $scope.daySelect);
     var c = $(ele).position();
-    if (c) {window.scrollTo(c.left, c.top - 60);}
+    if (c) {window.scrollTo(0, c.top - 60);}
     return false;
 
   }; 
@@ -125,19 +125,13 @@ function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
     var noteText = $('#' + dt + '_note').val();
     console.log('saving: ' +  noteText);  // _DEBUG
     $http.post('../../api/user/note', {key: dt, text: noteText})
-         .success(function() { 
-           $scope.clean[dt] = true;
-           $scope.dirty[dt] = false;  
-         })
+         .success(function() { $scope.clean[dt] = true; $scope.dirty[dt] = false; })
          .error(function(e) { alert('error: ' + e);})
          ;
   }
   $http.get('../../api/user/notes').success(function(data) {
     var notes = {};
-    console.log('notes: ' + JSON.stringify(data));  // _DEBUG
-    console.log('notes: ' + data);  // _DEBUG
-    _.each(data, function(singleNote) {
-      notes[singleNote.key] = singleNote.text;});
+    _.each(data, function(singleNote) { notes[singleNote.key] = singleNote.text;});
     $scope.notes = notes;
   });
   Trades.get(function(t) {
