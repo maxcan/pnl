@@ -237,6 +237,7 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
     $scope.trades = t; 
     $scope.filterChanged();
   }
+  $scope.rowClass = function(v) {return (v > 0 ? "success" : "error");}
   Trades.get(updateTrades);
   $rootScope.$on('refreshTrades', function() {
     var curDate = new Date();

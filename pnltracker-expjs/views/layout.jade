@@ -16,6 +16,32 @@ html
     script(src="//www.vivocha.com/a/tradejitsu/api/vivocha.js")
 
   body
+    script
+      $(function() {
+        $('#login_dropdown').mouseover(function() { $('#login_dropdown').click();});
+      });
+    .navbar.navbar-fixed-top.navbar-inverse
+      .navbar-inner
+        .container-fluid
+          a.brand(href='/')
+            img(src="logo-45-white.png")
+          ul.nav.pull-right
+            li
+              a(href='mailto:info@tradejitsu.com') 
+                | Contact
+          ul.nav.pull-right
+            li.visible-ipad
+              a(href="/auth/facebook") Login With Facebook
+            li.visible-ipad
+              a(href="/auth/google") Login With Google
+            li.dropdown.hidden-ipad
+              a.dropdown-toggle#login_dropdown(href='#', data-toggle='dropdown')
+                | Login/Register
+              ul.dropdown-menu
+                li  
+                  a.btn(href="/auth/facebook") Login With Facebook
+                li  
+                  a.btn(href="/auth/google") Login With Google
     block content
     hr
     .container-fluid

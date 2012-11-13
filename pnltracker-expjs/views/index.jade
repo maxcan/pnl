@@ -1,76 +1,45 @@
 extends layout
 
 block content
-  script
-    $(function() {
-      $('#login_dropdown').mouseover(function() { $('#login_dropdown').click();});
-    });
-  .navbar.navbar-fixed-top.navbar-inverse
-      .navbar-inner
-        .container-fluid
-          a.brand(href='#')
-            img(src="logo-45-white.png")
-          ul.nav.pull-right
-            li
-              a(href='mailto:info@tradejitsu.com') 
-                | Contact
-          ul.nav.pull-right
-            li.visible-ipad
-              a(href="/auth/facebook") Login With Facebook
-            li.visible-ipad
-              a(href="/auth/google") Login With Google
-            if isDev 
-              li.divider.visible-ipad
-              li.visible-ipad
-                a(href="/test/users/set" ) dummy login
+  if isDev 
+    a.btn.btn-info(href="/test/users/set" ) dummy login
 
-            li.dropdown.hidden-ipad
-              a.dropdown-toggle#login_dropdown(href='#', data-toggle='dropdown')
-                | Login/Register
-              ul.dropdown-menu
-                li  
-                  a.btn(href="/auth/facebook") Login With Facebook
-                li  
-                  a.btn(href="/auth/google") Login With Google
-                if isDev 
-                  li.divider
-                  li
-                    a.btn(href="/test/users/set" ) dummy login
-    .container
-      .hero-unit
+  
+  .container
+    .hero-unit
+      div
+        h1 UNLEASH YOUR TRADING POWER
+        p  The cloud based solution to manage daytrading profitability
+        p
+          br
+        p
+          i
+            | NOTE: TradeJitsu IS A PRERELEASE PRODUCT AND WE ACCEPT ZERO LIABILITY
+            | FOR ANY TRADING LOSSES GENERATED AS A RESULT OF THIS PLATFORM OR ANYTHING
+            | OF THE SORT.
+            
+    .row
+      .span4
         div
-          h1 UNLEASH YOUR TRADING POWER
-          p  The cloud based solution to manage daytrading profitability
+          h2
+            | Simple Simple Integration
           p
-            br
+            | TradeJitsu parses trade reports from InteractiveBrokers and
+            | TradeStation.  Just email your reports to a special dropbox
+            | address and take advantage of all the analysis capabilities of TradeJitsu.
+      .span4
+        div
+          h2
+            | Save Time in Excel
           p
-            i
-              | NOTE: TradeJitsu IS A PRERELEASE PRODUCT AND WE ACCEPT ZERO LIABILITY
-              | FOR ANY TRADING LOSSES GENERATED AS A RESULT OF THIS PLATFORM OR ANYTHING
-              | OF THE SORT.
-              
-      .row
-        .span4
-          div
-            h2
-              | Simple Simple Integration
-            p
-              | TradeJitsu parses trade reports from InteractiveBrokers and
-              | TradeStation.  Just email your reports to a special dropbox
-              | address and take advantage of all the analysis capabilities of TradeJitsu.
-        .span4
-          div
-            h2
-              | Save Time in Excel
-            p
-              | TradeJitsu gives you powerful analysis to optimize your 
-              | trading strategies. Learn what works and what does not while
-              | avoiding time-consuming, tedious work in Excel.  
-        .span4
-          div
-            h2
-              | We're here to help!
-            p
-              | Want a new feature, just tell us and we'll get right on it!
-              | Your feedback is critical to us and at this stage, adding new
-              | analytics is simple.  
+            | TradeJitsu gives you powerful analysis to optimize your 
+            | trading strategies. Learn what works and what does not while
+            | avoiding time-consuming, tedious work in Excel.  
+      .span4
+        div
+          h2
+            | We're here to help!
+          p
+            | Want a new feature, just tell us and we'll get right on it!
+            | Your feedback is critical to us and at this stage, adding new
+            | analytics is simple.  

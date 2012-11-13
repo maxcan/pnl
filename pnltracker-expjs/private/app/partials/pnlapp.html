@@ -12,7 +12,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="pnlGroup in groups">
+          <tr class="{{rowClass(pnlGroup.netCash)}}" ng-repeat="pnlGroup in groups">
             <td>{{pnlGroup.group }}</td>
             <td>{{pnlGroup.netCash | currency}}</td>
             <td>{{pnlGroup.cntTotal }}</td>
@@ -145,7 +145,7 @@
               <input ng-model="authcode">
             </div>
             <div class="modal-footer">
-              <a href='/logout' class='btn btn-danger'>Nevermind, Logout</a>
+              <button href='/logout' class='btn btn-danger'>Nevermind, Logout</button>
               <input type="submit" class="btn btn-primary"/>
             </div>
           </form>
@@ -154,7 +154,7 @@
 
         <div class="container-fluid spaced-rows">
           <div class='ng-show: isAdmin()'>
-            <a href='#admin' class='btn'>Admin Page</a>
+            <button href='#admin' class='btn'>Admin Page</button>
             <br>
           </div>
 
@@ -180,9 +180,9 @@
             </div>
             <div class="span4">
               <p ng-show="isAdmin()">
-                <a class="btn btn-success" ng-click="needPayment()">test stripe</a>
+                <button class="btn btn-success" ng-click="needPayment()">test stripe</button>
               </p>
-              <p><a class="btn btn-success" ng-click="refreshTrades()">Refresh Trades</a>
+              <p><button class="btn btn-success" ng-click="refreshTrades()">Refresh Trades</button>
               </p>
             </div>
           </div>
@@ -264,7 +264,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="trade in filteredClosedTrades ">
+                  <tr class="{{rowClass(trade.netCash)}}" ng-repeat="trade in filteredClosedTrades ">
                     <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
                     <td><a ng-click="addSymFilter(trade.symbol)">{{trade.symbol}}</a></td>
                     <td>{{trade.netCash  | currency}}</td>
