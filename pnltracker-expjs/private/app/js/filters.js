@@ -23,7 +23,7 @@ pnlApp.filter('maxLen', function() {
 
 pnlApp.filter('percent', function() {
   return function(num) { 
-    if (Number.isNaN(num)) return '';
+    if (isNaN(num)) return '';
     return(Math.round(num * 100)+ ' %'); 
   }  
 });

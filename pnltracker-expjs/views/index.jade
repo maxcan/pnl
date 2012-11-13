@@ -15,7 +15,16 @@ block content
               a(href='mailto:info@tradejitsu.com') 
                 | Contact
           ul.nav.pull-right
-            li.dropdown
+            li.visible-ipad
+              a(href="/auth/facebook") Login With Facebook
+            li.visible-ipad
+              a(href="/auth/google") Login With Google
+            if isDev 
+              li.divider.visible-ipad
+              li.visible-ipad
+                a(href="/test/users/set" ) dummy login
+
+            li.dropdown.hidden-ipad
               a.dropdown-toggle#login_dropdown(href='#', data-toggle='dropdown')
                 | Login/Register
               ul.dropdown-menu

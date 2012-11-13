@@ -1,6 +1,6 @@
 @import "assets/bootstrap/less/bootstrap.less";
 @import "assets/bootstrap/less/responsive.less";
-
+@import "assets/bootstrap/less/media.less";
 @import "assets/less/variables.less";
 
 /* Mixin */
@@ -11,6 +11,16 @@
       -ms-transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
           transform: rotate(@rotate) scale(@scale) skew(@skew) translate(@translate);
           }
+
+@media (min-width: 768px) and (max-width: 1025px) 
+  { .visible-ipad { display: inherit !important}
+  .hidden-ipad { display: none !important}
+  }
+
+@media (min-width: 1026px) 
+  { .hidden-ipad { display: inherit !important}
+  .visible-ipad { display: none !important}
+  }
 
 div.spaced-rows div.row-fluid 
   { padding-bottom: 4em
