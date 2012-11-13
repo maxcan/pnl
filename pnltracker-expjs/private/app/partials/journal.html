@@ -1,4 +1,5 @@
 <div ng-controller="JournalCtrl">
+  <div ng-include src="'partials/modals.html'"></div>
   <div class="container-fluid">
     <div class="well">
       <div class="row-fluid">
@@ -39,6 +40,7 @@
       <div class="span3" id="{{dt}}">
         <h3>{{tradesByDay[dt].str}}</h3>
         <a class="btn btn-small btn-info" ng-click="toTop()">Top</a>
+        <a class="btn btn-small btn-info" ng-click="showTradeMiniList(dt)">Show All Trades</a>
       </div>
       <div class="span3">
         <dl class="dl-horizontal">
@@ -60,7 +62,7 @@
           <em>notes:</em>
           <textarea ui-event="{blur: 'saveNote(dt)', focus: 'setDirty(dt)'}" class="span12" rows="3" id="{{dt}}_note">{{notes[dt]}}</textarea>
           <p>
-          <button ng-click="saveNote(dt)" class="btn btn-primary btn-mini">Save </button>
+          <button ng-click="saveNote(dt)" class="btn btn-primary btn-mini">Save</button>
           <em><span class="text-error" ng-show="dirty[dt]">warning, unsaved</span></em>
           <span ng-show="clean[dt]">Saved!</span>
           </p>

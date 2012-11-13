@@ -261,6 +261,7 @@ http.createServer(app).listen(listenPort, function(){
       log.info('ERROR COULD NOT CHECK MAIL: ' + e.stack); // _TODO email an admin here
     }
   }
+  log.warn('NOT checking mail');
   //  log.info('Starting mail fetcher with interval: ' + mailInterval);  // _DEBUG
-  setInterval(wrapCheckMail, mailInterval);
+ //  setInterval(wrapCheckMail, mailInterval);
 });

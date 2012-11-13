@@ -1,0 +1,33 @@
+<dl class="dl-horizontal">
+  <dt>Total Trades:
+  <dd>{{data.trades.length}}
+  <dt>Net Cash:
+  <dd>{{data.netCash | currency}}
+  <dt>Win Percent
+  <dd>{{data.wins / data.trades.length | percent}}
+  <dt>Wins
+  <dd>{{data.wins}}
+  <dt>Losses
+  <dd>{{data.losses}}
+</dl>
+<table class="table table-condensed table-striped table-bordered">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Symbol</th>
+      <th>Net Cash</th>
+      <th>Open Date</th>
+      <th>Close Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="trade in data.trades">
+      <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
+      <td>{{trade.symbol}}</td>
+      <td>{{trade.netCash  | currency}}</td>
+      <td>{{trade.openDate | date:'shortDate'}}</td>
+      <td>{{trade.closeDate | date:'shortDate'}}</td>
+    </tr>
+  </tbody>
+</table>
+

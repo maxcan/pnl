@@ -4,6 +4,16 @@
 function closedTrades (trades) {
   return _.filter(trades, function(t){return !t.isOpen;});
 }
+function showTradeDetails ($scope, $http, trade) {
+  $scope.detailTrade = trade;
+  $('#tradeDetailsModal').unbind('hide');
+  $('#tradeDetailsModal').on('hide', function() {
+    $http.post('../../api/report/setNotes/' + trade._id, {notes: trade.notes})
+    .error(function(e) { alert(e);})
+    .success(function() { console.log('saved trade notes');  });
+  })
+  $('#tradeDetailsModal').modal();
+}
 
 function UploadCtrl($rootScope, $scope, $http) {
   $scope.runReportTextModal = function() {
@@ -106,10 +116,21 @@ function mkTradeSummary(tradeArrRaw) {
 }
 
 function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
-  $scope.toDtStr = function (dt)  { return $filter('date')(dt, 'yyyyMMdd');}
+  $scope.rowClass = function(v) {return (v > 0 ? "success" : "error");} ; 
+  $scope.toDtStr = function (dt)  { return $filter('date')(dt, 'yyyyMMdd');} ; 
   function toDtStrLong(dt)  { return $filter('date')(dt, 'mediumDate');}
   $scope.tradesByDay = {};  // [ { str: <human readable date>,  trades: [trades] } ] 
-  $scope.toTop = function() { window.scrollTo(0,0); } 
+  $scope.toTop = function() { window.scrollTo(0,0); } ; 
+  $scope.showTradeMiniList = function(dt) {
+    console.log('dt: ' + dt);  // _DEBUG
+    $scope.tradeList = 
+      {name: "Trades for: " + $scope.tradesByDay[dt].str, trades: $scope.tradesByDay[dt].trades};
+    $('#tradeListModal').modal();
+    
+  };  
+  $scope.showTradeDetails = function(t) {
+    $('#tradeListModal').modal('hide');
+    showTradeDetails($scope, $http, t);};
   $scope.changeDay = function(dt) {
     var ele = '#' + (dt ? dt : $scope.daySelect);
     var c = $(ele).position();
@@ -120,7 +141,7 @@ function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
   $scope.notes = {};
   $scope.dirty = {};
   $scope.clean = {};
-  $scope.setDirty = function(dt) { $scope.clean[dt] = false; $scope.dirty[dt] = true; }
+  $scope.setDirty = function(dt) { $scope.clean[dt] = false; $scope.dirty[dt] = true; } ;
   $scope.saveNote = function(dt) {
     var noteText = $('#' + dt + '_note').val();
     console.log('saving: ' +  noteText);  // _DEBUG
@@ -128,7 +149,7 @@ function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
          .success(function() { $scope.clean[dt] = true; $scope.dirty[dt] = false; })
          .error(function(e) { alert('error: ' + e);})
          ;
-  }
+  } ; 
   $http.get('../../api/user/notes').success(function(data) {
     var notes = {};
     _.each(data, function(singleNote) { notes[singleNote.key] = singleNote.text;});
@@ -155,6 +176,7 @@ function JournalCtrl($scope, $http, Trades, $rootScope, $filter) {
 }
 
 function CompareCtrl($scope, $location, Trades, $rootScope, $http) {
+  $scope.detailTrade = {};
   $scope.left = {filter: {groupName: 'Group One'}} ; 
   $scope.right = {filter: {groupName: 'Group Two'}}; 
   Trades.get(function(t) {
@@ -163,19 +185,7 @@ function CompareCtrl($scope, $location, Trades, $rootScope, $http) {
     chkFilter($scope.right);
   });
 
-  $scope.showTradeDetails = function(trade) {
-  
-    $scope.detailTrade = trade;
-    $('#tradeDetailsModal').unbind('hide');
-    $('#tradeDetailsModal').on('hide', function() {
-      $http.post('../../api/report/setNotes/' + trade._id, {notes: trade.notes})
-           .error(function(e) { alert(e);})
-           .success(function() { console.log('saved trade notes');  });
-    })
-    $('#tradeDetailsModal').modal();
-  };
-
-
+  $scope.showTradeDetails = function(t) {showTradeDetails($scope, $http, t);};
   function toStr(o) { 
     console.log('toStr o: ' + o.groupName);
     return angular.toJson(o);}
@@ -272,17 +282,7 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
       return $scope.user.roles.indexOf('admin') != -1;
     return false;
   }
-  $scope.showTradeDetails = function(trade) {
-    $scope.detailTrade = trade;
-    $('#tradeDetailsModal').unbind('hide');
-    $('#tradeDetailsModal').on('hide', function() {
-      $http.post('../../api/report/setNotes/' + trade._id, {notes: trade.notes})
-           .error(function(e) { alert(e);})
-           .success(function() { console.log('saved trade notes');  });
-    })
-    $('#tradeDetailsModal').modal();
-    setTimeout(function() {$('#detail_trade_notes').focus();}, 100);
-  };
+  $scope.showTradeDetails = function(t) {showTradeDetails($scope, $http, t);};
   $scope.setTradeSortUnderlying = function() {
     toggleReverseSort = !toggleReverseSort;
     tradeSortFunction =  function(o){
