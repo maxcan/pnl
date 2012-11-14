@@ -1,10 +1,11 @@
 winston = require('winston')
+conf    = require('./config.js').genConf()
 
 
 logger = new (winston.Logger)({
   transports:
     [ new (winston.transports.Console)()
-    , new (winston.transports.File)({ filename: '/tmp/pnl.log' })
+    , new (winston.transports.File)({ filename: conf.logPath })
     ]
   })
 

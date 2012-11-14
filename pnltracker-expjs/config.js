@@ -5,6 +5,7 @@ var baseSettings =
   , port: 3000
   , allowNonSsl: false
   , isDev: false
+  , logPath: '/tmp/pnl.dev.log'
   // oauth stuff
   , oauthGoogleAppId : '903799978070.apps.googleusercontent.com'
   , oauthGoogleAppSecret : 'aUfnPV75qEtNjrhEaczfJu__'
@@ -33,6 +34,7 @@ var prdSettings = _.extend(_.clone(baseSettings),
       , port: 80
       , listenPort: 2000
       , imapFetchPassword: 'h09823e49bje9'
+      , logPath: '/home/prd/pnl.log'
       , imapFetchUsername: 'u'
       , mongoDbName: 'pnltracker_prd'
       , mongoDbUri: 'mongodb://localhost/pnltracker_prd'
@@ -46,6 +48,7 @@ var stgSettings = _.extend(_.clone(baseSettings),
       , listenPort: 3000
       , imapFetchPassword: 'xcmnvbvg234rhkj'
       , imapFetchUsername: 'u_stg'
+      , logPath: '/home/stg/pnl.log'
       , mongoDbName: 'pnltracker_stg'
       , mongoDbUri: 'mongodb://localhost/pnltracker_stg'
 
