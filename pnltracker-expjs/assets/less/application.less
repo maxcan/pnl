@@ -72,6 +72,21 @@ div.pad-day-selector-below { margin-top: 9em;  }
 body { padding-top: @navbarHeight * 1.2; } 
 .hscroll {overflow-x: scroll; max-height: 20em;  } 
 .modal { form { margin: 0 !important;} }
+
+
+body .modal {
+  width: 60%; /* desired relative width */
+  .modal-body { max-height: 700px}  
+  max-height: 700px;
+  top: 20%; 
+  left: 20%; /* (100%-width)/2 */
+  margin: auto auto auto auto; /* place center */
+}
+div.vert-scroll { max-height: 20em; overflow-y: auto } 
+body .modal.fade.in {
+  top: auto; /* fade in to correct spot */
+}
+
 ul#upload_container_filelist
   { height: 5em
   ; 

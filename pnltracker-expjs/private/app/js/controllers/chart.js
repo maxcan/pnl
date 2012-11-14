@@ -42,10 +42,8 @@ function ChartCtrl($scope, $rootScope) {
       // buildStackedLineChart('#stacked_pnl_chart', calcPnlSeriesByUnderlying);
       buildStackedBarChart('#stacked_pnl_bar_chart', calcNetCashPerSymbol);
       buildScatterChart('#time_duration_scatter_chart', calcDurationScatter);
-      buildPieChart('#profit_share_pie_chart'
-                   , function() { return calcProfitShareByUnderlying(true);});
-      buildPieChart('#loss_share_pie_chart'
-                   , function() { return calcProfitShareByUnderlying(false);});
+      buildPieCharts('#profit_share_pie_chart' , '#loss_share_pie_chart'
+                   , function() { return calcProfitShareByUnderlying();});
     }
 
   }
@@ -53,33 +51,47 @@ function ChartCtrl($scope, $rootScope) {
 
   // utility functions
   function closedTrades () {return $scope.$parent.filteredClosedTrades;  }
-  function calcProfitShareByUnderlying(isProfit) {
-    var comps = {};
+  function calcProfitShareByUnderlying() {
+    var wins = {};
     var losses = {};
     var trades = closedTrades();
     _.each(trades, function(t) {    
-      if ((t.netCash > 0 && isProfit) || (t.netCash <= 0 && !isProfit)) {
-        if (!comps[getSym(t)])
-          comps[getSym(t)] = 0;
-        comps[getSym(t)] += t.netCash;
+      if (t.netCash > 0) {
+        if (!wins[getSym(t)]) wins[getSym(t)] = 0;
+        wins[getSym(t)] += t.netCash;
       } else {
-        if (!losses[getSym(t)])
-          losses[getSym(t)] = 0;
-        losses[getSym(t)] += t.netCash;
+        if (!losses[getSym(t)]) losses[getSym(t)] = 0;
+        losses[getSym(t)] += Math.abs(t.netCash);
       }
     });
-    var retVals = [];
-    _.each(comps,function(ttl, undlSym) {
-      retVals.push({label: undlSym, value: ttl});
+    var lossesArr = [] ;
+    _.each(losses, function(v, k) { lossesArr.push({s:k,amt:v});});
+    lossesArr = _.first(_.sortBy(lossesArr, 'amt'), 10);
+    lossesArr.reverse();
+    var winsArr = [] ;
+    _.each(wins, function(v, k) { winsArr.push({s:k,amt:v});});
+    winsArr = _.first(_.sortBy(winsArr, 'amt'), 10);
+    winsArr.reverse();
+    var symsToReport = _.uniq(_.pluck(lossesArr.concat(winsArr), 's'))
+    var retVals = {winData: [], lossData: []};
+    _.each(symsToReport, function(sym) {
+      var winAmt = wins[sym] || 0;
+      var lossAmt = losses[sym] || 0;
+      retVals.winData.push({label: sym, value: winAmt});
+      retVals.lossData.push({label: sym, value: lossAmt});
     });
-    var label = (isProfit ? 'Profit Share' : 'Loss Share');
-    var ret = [ { key: label, values: retVals }];
-
-    return ret;
+    var otherWinAmt = 0;
+    _.each(wins, function(v,k) { if (symsToReport.indexOf(k) != -1) otherWinAmt += v });
+    var otherLossAmt = 0;
+    _.each(losses, function(v,k) { if (symsToReport.indexOf(k) != -1) otherLossAmt += Math.abs(v) });
+    retVals.winData.push({label: '_other', value: otherWinAmt});
+    retVals.lossData.push({label: '_other', value: otherLossAmt});
+    return  { winData: [{key: 'Profit Share', values: retVals.winData}]
+            , lossData:  [{key: 'Loss Share', values: retVals.lossData}]};
   }
 
   function calcNetCashPerSymbol(maxRows) {
-    if (!maxRows) maxRows = 10;
+    if (!maxRows) maxRows = 15;
     var trades = closedTrades();
     var loserCashSum = {};
     var winnerCashSum = {};
@@ -208,22 +220,26 @@ function ChartCtrl($scope, $rootScope) {
     });
     return ret;
   }
-  function buildPieChart(wrapperId, dataFunction) {
-    var svgId = wrapperId + ' svg';
-    var width = $(wrapperId).width();
-    var height = width ;
-    var chartData = dataFunction();
-    nv.addGraph(function() {
-      var chart = nv.models.pieChart()
+  function buildPieCharts(winWrapperId, lossWrapperId, dataFunction) {
+    var allData = dataFunction();
+    buildPieChart(winWrapperId, allData.winData);
+    buildPieChart(lossWrapperId, allData.lossData);
+    function buildPieChart(wrapperId, data) { 
+      var svgId = wrapperId + ' svg';
+      var width = $(wrapperId).width();
+      var height = width ;
+      var chartData = dataFunction();
+      nv.addGraph(function() {
+        var chart = nv.models.pieChart()
         .x(function(d) { return d.label })
         .y(function(d) { return d.value })
         .showLabels(true)
-        .color(d3.scale.category10().range())
+        // .color(d3.scale.category10().range())
         .width(width)
         .height(height);
 
       d3.select(svgId)
-        .datum(chartData)
+        .datum(data)
         //.datum(testdata)
         .transition().duration(1200)
         .attr('width', width)
@@ -231,7 +247,8 @@ function ChartCtrl($scope, $rootScope) {
         .call(chart);
 
       return chart;
-    });
+      });
+    }
   }
 
   function buildScatterChart(wrapperId, dataFunction) {
