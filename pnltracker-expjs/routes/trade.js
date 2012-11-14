@@ -38,9 +38,9 @@ var mkApiTrade = function (t) {
 
 exports.list = function(req, res){
   if (!req.user) { return res.send(403, "authentication required");}
-  if (req.user.roles.indexOf('basic') === -1) {
-     return res.send(403, "user needs basic role");
-  }
+  // if (req.user.roles.indexOf('basic') === -1) {
+  //    return res.send(403, "user needs basic role");
+  // }
   AppUtil.blockCache(res);
   Models.Trade.find({owner: req.user._id})
               .populate('security')

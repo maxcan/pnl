@@ -16,7 +16,10 @@
           <div class="span4">
             <label class="control-label">Skip To Day: </label>
             <select ng-change='changeDay()' ng-model="daySelect">
-              <option ng-repeat="dt in days" value="{{dt}}">{{tradesByDay[dt].str}}</option>
+              <option ng-repeat="dt in days" value="{{dt}}">
+              {{tradesByDay[dt].str}}
+              {{tradesByDay[dt].summary.netCash | currency}}
+              </option>
             </select>
           </div>
           <div class="span4">
