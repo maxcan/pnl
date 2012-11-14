@@ -23,6 +23,8 @@ var _ = require('underscore');
 var MongoStore = require('connect-mongo')(express);
 var app = express();
 
+log.info('Using config: ' + util.inspect(conf, false, null, true));
+
 everyauth.google
 .appId(conf.oauthGoogleAppId)
 .appSecret(conf.oauthGoogleAppSecret)
