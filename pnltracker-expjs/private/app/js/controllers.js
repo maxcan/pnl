@@ -234,6 +234,7 @@ function UndlGroupCtrl($scope, $rootScope) {
   });
 }
 function NavCtrl($scope, User, $rootScope, $location) {
+  User.get(function(u) {  $scope.user = u; });
   $scope.$location = $location;
 }
 
@@ -259,21 +260,19 @@ function HomeCtrl($scope, User, Trades, $rootScope, $http, $filter) {
     }
     User.get(function(u){
       $scope.user  = u ;
-      if (!$scope.user.accountStatus || $scope.user.accountStatus !== 'paid') {
-        $scope.needPayment();
-      }
+      $scope.chkPayment(); 
     });
     Trades.get(updateTrades); 
   });
-  $scope.needPayment = function() {
-    setTimeout(function() {$rootScope.$broadcast('needPayment');},1) ; 
+  $scope.chkPayment = function() {
+    if ($scope.user.needsPayment) { 
+      setTimeout(function() {$rootScope.$broadcast('needPayment');},1) ; 
+    }
   }
   $scope.user = User.get(function(user) {
     $scope.user = user;
     console.log('checking user');  // _DEBUG
-    if (!$scope.user.accountStatus || $scope.user.accountStatus !== 'paid') {
-        $scope.needPayment();
-    }
+    $scope.chkPayment();
   });
   var toggleReverseSort = true;
   var tradeSortFunction = null;

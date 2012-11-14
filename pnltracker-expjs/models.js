@@ -11,7 +11,7 @@ var Types = mongoose.Schema.Types;
 
 exports.closeConnection = function() {db.disconnect();}
 var roleTypes = ['basic', 'admin'];
-var accountStatuses = ['paid', 'problem'];
+var accountStatuses = ['paid', 'trial', 'needspayment', 'problem'];
 var userSchema = new mongoose.Schema(
     { name              : String 
     , email             : { type: String, required: true}
@@ -19,7 +19,8 @@ var userSchema = new mongoose.Schema(
     , openId            : String
     , openIdProfile     : String
     , reportDropboxAddr : [String]
-    , accountStatus     : { type: String, enum: accountStatuses}
+    , accountStatus     : {type: String, default: 'trial', enum: accountStatuses}
+    , firstLogin        : {type: Date, default: Date.now}
     , stripeToken       : String
     , stripeCustomerId  : String
     });

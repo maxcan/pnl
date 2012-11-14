@@ -18,6 +18,9 @@
           <ul class="nav pull-right">
             <li><a href="/logout">Logout</a></li>
           </ul>
+          <ul ng-show="user.trialDaysRemaining" class="nav pull-right">
+            <li><a>Just {{user.trialDaysRemaining}} Free Trial Days Left</a></li>
+          </ul>
         </div>
       </div>
     </div>

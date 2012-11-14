@@ -3,6 +3,7 @@ var _ = require('underscore');
 var baseSettings = 
   { host: 'dev.tradejitsu.com'
   , port: 3000
+  , trialPeriodDays: 21
   , allowNonSsl: false
   , isDev: false
   , logPath: '/tmp/pnl.dev.log'
@@ -40,6 +41,10 @@ var prdSettings = _.extend(_.clone(baseSettings),
       , mongoDbUri: 'mongodb://localhost/pnltracker_prd'
       , stripeSecretKey: '2ndHk8DBLiETnOM9MnpjymCdj1CTTUPf'
       , stripePublishableKey: 'pk_XjdJwhY6TxzE8Box3BlfPWLmFFWBg'
+      , oauthFacebookAppId  : '370329279725161'
+      , oauthFacebookAppSecret : '61e81563bf4299f417ea89cd2d1cba4f'
+      , oauthGoogleAppId : '745594005809.apps.googleusercontent.com'
+      , oauthGoogleAppSecret : '9uxt8UxAU4tzOUAuGtAjA7Y0'
       }) ;
   
 var stgSettings = _.extend(_.clone(baseSettings), 

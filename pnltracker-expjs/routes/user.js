@@ -28,6 +28,16 @@ exports.show = function(req, res) {
           , 'reportDropboxAddr' ] 
         , function(k) { ret[k] = req.user[k];} );
   ret['stripePublishableKey'] = conf.stripePublishableKey ; 
+  if (req.user.accountStatus === 'trial') {
+    var now = new Date();
+    diff = conf.trialPeriodDays -
+           Math.round(((new Date()) - req.user.firstLogin) / ( 1000*60*60*24));
+    ret['trialDaysRemaining'] = diff; 
+  }
+  ret['needsPayment'] = _.any([ req.user.accountStatus === null
+                              , req.user.accountStatus === ''
+                              , req.user.accountStatus === 'problem'
+                              , req.user.accountStatus === 'needsPayment' ] );
   AppUtil.blockCache(res);
   return res.send(ret);
 };
