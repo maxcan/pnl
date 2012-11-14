@@ -27,6 +27,18 @@ html
 
 
   body
+
+    div(id="fb-root")
+    script
+      (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=370329279725161";
+      fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+
+
     script
       $(function() {
         $('#login_dropdown').mouseover(function() { $('#login_dropdown').click();});
@@ -56,11 +68,20 @@ html
     block content
     hr
     .container-fluid
-      .span3
-        | © Max Cantor 2012
-      .span3 
-        a(href="/") Home
-      .span3 
-        a(href="/terms") Terms of Service
-      .span3 
-        a(href="/privacy") Privacy Policy
+      .row-fluid
+        .span6
+          a(href="https://twitter.com/tradejitsu", class="twitter-follow-button", data-show-count="false", data-size="large")
+            Follow @tradejitsu
+          script
+            !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
+          div(class="fb-like", data-href="https://tradejitsu.com", data-send="false", data-width="450", data-show-faces="true", data-action="recommend", data-font="tahoma")
+    .container-fluid
+      .row-fluid
+        .span3
+          | © Max Cantor 2012
+        .span3 
+          a(href="/") Home
+        .span3 
+          a(href="/terms") Terms of Service
+        .span3 
+          a(href="/privacy") Privacy Policy

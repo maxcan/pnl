@@ -7,21 +7,27 @@
     <link rel="stylesheet" href="../../gen/application.css"/>
   </head>
   <body>
-    <div ng-controller="NavCtrl" class="navbar navbar-fixed-top navbar-inverse">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <a href='#' class="brand"><img src="../../logo-45-white.png"></a>
-          <ul class="nav"><li><a href="#upload">Upload Trades</a></li></ul>
-          <ul class="nav"><li><a href="#home">Trade Overview</a></li></ul>
-          <ul class="nav"><li><a href="#journal">Daily Trade Journal</a></li></ul>
-          <ul class="nav"><li><a href="#compare">Side by Side</a></li></ul>
-          <ul class="nav pull-right">
-            <li><a href="/logout">Logout</a></li>
-          </ul>
-          <ul ng-show="user.trialDaysRemaining" class="nav pull-right">
-            <li><a>Just {{user.trialDaysRemaining}} Free Trial Days Left</a></li>
-          </ul>
+    <div ng-controller="NavCtrl">
+      <div class="navbar navbar-fixed-top navbar-inverse">
+        <div class="navbar-inner">
+          <div class="container-fluid">
+            <a href='#' class="brand"><img src="../../logo-45-white.png"></a>
+            <ul class="nav"><li><a href="#upload">Upload Trades</a></li></ul>
+            <ul class="nav"><li><a href="#home">Trade Overview</a></li></ul>
+            <ul class="nav"><li><a href="#journal">Daily Trade Journal</a></li></ul>
+            <ul class="nav"><li><a href="#compare">Side by Side</a></li></ul>
+            <ul class="nav pull-right hidden-ipad">
+              <li><a href="/logout">Logout</a></li>
+            </ul>
+          </div>
         </div>
+      </div>
+
+      <div class="container-fluid visible-ipad">
+        <a class="btn btn-danger" href="/logout">Logout</a>
+      </div>
+      <div class="container-fluid" ng-show="user.trialDaysRemaining" >
+        <em class="text-warning">Just {{user.trialDaysRemaining}} Free Trial Days Left</em>
       </div>
     </div>
     <div ng-view></div>
