@@ -29,11 +29,13 @@ var baseSettings =
   } ;
 
 var prdSettings = _.extend(_.clone(baseSettings), 
-      {host: 'staging.tradejitsu.com'
+      {host: 'tradejitsu.com'
       , port: 80
-      , listenPort: 3000
+      , listenPort: 2000
       , imapFetchPassword: 'h09823e49bje9'
       , imapFetchUsername: 'u'
+      , mongoDbName: 'pnltracker_prd'
+      , mongoDbUri: 'mongodb://localhost/pnltracker_prd'
       , stripeSecretKey: '2ndHk8DBLiETnOM9MnpjymCdj1CTTUPf'
       , stripePublishableKey: 'pk_XjdJwhY6TxzE8Box3BlfPWLmFFWBg'
       }) ;

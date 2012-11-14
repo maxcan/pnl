@@ -346,8 +346,9 @@ function ChartCtrl($scope, $rootScope) {
           .call(chart);
         var b = true;
         var bh = Math.round(chart.multibar.barHeight() * 2) + 'px'
-      console.log('bar hegiht:  ' + bh);  // _DEBUG
-        $('svg.thicken-x .nv-x.nv-axis line').each(function(_,ele) {$(ele).css({'opacity':0.4, 'stroke-width': (b ? bh : '0') }); b = !b; });
+        $('svg.thicken-x .nv-x.nv-axis line').each(function(_,ele) {
+          $(ele).css({'opacity':(b ? 0.4 : 0.2), 'stroke-width': bh }); b = !b; 
+        });
         return chart;
       },
       callback: function(graph) {
