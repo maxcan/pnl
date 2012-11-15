@@ -208,7 +208,7 @@ app.get('/ping',                    function(req,res) { return res.send(200, 'po
 app.get('/terms',                   function(req,res) { return res.render('terms', {title:'Tradejitsu Terms'}); });
 app.get('/privacy',                 function(req,res) { return res.render('privacy', {title:'Tradejitsu Privacy Statement'}); });
 app.get('/users',                   userRoutes.list);
-app.get('/test/admin/users/ld',     userRoutes.loadDummyTrades);
+app.get('/test/62580/users/ld',     userRoutes.loadDummyTrades);
 app.get('/test/users/set',          userRoutes.setDummyUser);
 app.get('/api/user',                userRoutes.show);
 app.post('/api/user/authcode',      userRoutes.setAuthCode);
