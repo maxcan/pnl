@@ -29,6 +29,9 @@
       <div class="container-fluid" ng-show="user.trialDaysRemaining" >
         <em class="text-warning">Just {{user.trialDaysRemaining}} Free Trial Days Left</em>
       </div>
+      <div class="container-fluid" ng-show="user.email" >
+        <em >Logged in as {{user.email}}</em>
+      </div>
     </div>
     <div ng-view></div>
 

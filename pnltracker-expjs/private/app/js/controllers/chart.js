@@ -278,6 +278,7 @@ function ChartCtrl($scope, $rootScope) {
       },
       callback: function(graph) {
         window.onresize = function() {
+          return; 
           var width = $(wrapperId).width();
           var height = width * 0.65;
           // if (width < margin.left + margin.right + 20) width = margin.left + margin.right + 20;
@@ -315,6 +316,7 @@ function ChartCtrl($scope, $rootScope) {
       },
       callback: function(graph) {
         window.onresize = function() {
+          return; 
           var width = $(wrapperId).width();
           var height = width * 0.65;
           // if (width < margin.left + margin.right + 20) width = margin.left + margin.right + 20;
@@ -353,6 +355,7 @@ function ChartCtrl($scope, $rootScope) {
       },
       callback: function(graph) {
         window.onresize = function() {
+          return; 
           width = $(wrapperId).width();
           height = width * 0.65;
           graph.width(width).height(height);
