@@ -14,19 +14,21 @@
   <thead>
     <tr>
       <th></th>
-      <th>Symbol</th>
-      <th>Net Cash</th>
-      <th>Open Date</th>
-      <th>Close Date</th>
+      <th  ng-click="predicate = 'symbol'; reverse=!reverse">Symbol</th>
+      <th  ng-click="predicate = 'netCash'; reverse=!reverse">Net Cash</th>
+      <th  ng-click="predicate = 'openDate'; reverse=!reverse">Open Date</th>
+      <th  ng-click="predicate = 'closeDate'; reverse=!reverse">Close Date</th>
+      <th  ng-click="predicate = 'notes'; reverse=!reverse">Notes</th>
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="trade in data.trades">
+    <tr ng-repeat="trade in data.trades | orderBy:predicate:reverse">
       <td><button ng-click="showTradeDetails(trade)" class="btn btn-small">Details</button></td>
       <td>{{trade.symbol}}</td>
       <td>{{trade.netCash  | currency}}</td>
       <td>{{trade.openDate | date:'shortDate'}}</td>
       <td>{{trade.closeDate | date:'shortDate'}}</td>
+      <td>{{trade.notes }}</td>
     </tr>
   </tbody>
 </table>
